@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RuleSet Name="Coding Conventions" ToolsVersion="16.0">
+  <Include Path="minimumrecommendedrules.ruleset" Action="Default" />
+  <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
+
+    <!-- SA1310FieldNamesMustNotContainUnderscore -->
+    <Rule Id="SA1310" Action="None" />
+
+    <!-- SA1502ElementMustNotBeOnSingleLine -->
+    <Rule Id="SA1502" Action="None" />
+    
+    <!--<Rule Id="SA1128" Action="None" />
+    <Rule Id="SA1309" Action="None" />
+    <Rule Id="SA1501" Action="None" />
+    <Rule Id="SA1633" Action="None" />-->
+  </Rules>
+</RuleSet>
