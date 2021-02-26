@@ -21,7 +21,7 @@ namespace FFmpeg.AutoGen
         /// <summary>
         /// To detect redundant Dispose calls.
         /// </summary>
-        private bool IsDisposed;
+        private bool isDisposed;
 
         /// <summary>
         /// Initialises a new instance of the <see cref="FFDictionary"/> class.
@@ -238,12 +238,12 @@ namespace FFmpeg.AutoGen
         /// <inheritdoc />
         public void Dispose()
         {
-            if (this.IsDisposed)
+            if (this.isDisposed)
             {
                 return;
             }
 
-            this.IsDisposed = true;
+            this.isDisposed = true;
             var reference = this.Pointer;
             ffmpeg.av_dict_free(&reference);
             this.localPointer = IntPtr.Zero;

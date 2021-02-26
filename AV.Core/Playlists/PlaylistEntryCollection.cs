@@ -18,10 +18,21 @@ namespace AV.Core.Playlists
     /// General guidelines taken from http://xmtvplayer.com/build-m3u-file.
     /// </summary>
     /// <typeparam name="T">The type of playlist items.</typeparam>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "StyleCop.CSharp.MaintainabilityRules",
+        "SA1402:File may only contain a single type",
+        Justification = "Generic and non-generic counterparts")]
     public class PlaylistEntryCollection<T> : ObservableCollection<T>
         where T : PlaylistEntry, new()
     {
+        /// <summary>
+        /// Header prefix.
+        /// </summary>
         internal const string HeaderPrefix = "#EXTM3U";
+
+        /// <summary>
+        /// Entry prefix.
+        /// </summary>
         internal const string EntryPrefix = "#EXTINF";
 
         private string localName;
@@ -255,5 +266,7 @@ namespace AV.Core.Playlists
     /// A standard Playlist class with regular <see cref="PlaylistEntry"/> items.
     /// </summary>
     /// <seealso cref="PlaylistEntryCollection{T}" />
-    public class PlaylistEntryCollection : PlaylistEntryCollection<PlaylistEntry> { }
+    public class PlaylistEntryCollection : PlaylistEntryCollection<PlaylistEntry>
+    {
+    }
 }

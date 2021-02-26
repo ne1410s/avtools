@@ -797,6 +797,15 @@
             <summary>
             Command manager.
             </summary>
+            <summary>
+            Command manager.
+            </summary>
+            <summary>
+            Command manager.
+            </summary>
+            <summary>
+            Command manager.
+            </summary>
         </member>
         <member name="M:AV.Core.Commands.CommandManager.#ctor(AV.Core.Engine.MediaEngine)">
             <summary>
@@ -1128,7 +1137,7 @@
         </member>
         <member name="P:AV.Core.Commands.CommandManager.ActiveSeekMode">
             <summary>
-            When actively seeking, provides the active seek mode.
+            Gets the active seek mode (when actively seeking).
             </summary>
         </member>
         <member name="P:AV.Core.Commands.CommandManager.PlayAfterSeek">
@@ -1340,9 +1349,10 @@
         </member>
         <member name="P:AV.Core.Common.DecoderOptions.EnableLowDelayDecoding">
             <summary>
-            Enables low_delay flag for no delay in frame decoding.
-            When frames are received by some codecs, they are delayed by 1 frame per active thread.
-            This flag is not of much use because the decoder pre-caches and pre-orders a set of decoded
+            Gets or sets a value indicating whether low_delay flag for no delay
+            in frame decoding. When frames are received by some codecs, they are
+            delayed by 1 frame per active thread. This flag is not of much use
+            because the decoder pre-caches and pre-orders a set of decoded
             frames internally.
             </summary>
         </member>
@@ -2008,7 +2018,7 @@
         </member>
         <member name="P:AV.Core.Common.MediaInfo.BitRate">
             <summary>
-            If available, returns a non-zero value as reported by the container format.
+            Gets a value as reported by the container format.
             </summary>
         </member>
         <member name="P:AV.Core.Common.MediaInfo.Chapters">
@@ -2028,7 +2038,7 @@
         </member>
         <member name="P:AV.Core.Common.MediaInfo.BestStreams">
             <summary>
-            Provides access to the best streams of each media type found in the container.
+            Gets access to the best streams of each media type found in the container.
             This uses some internal FFmpeg heuristics.
             </summary>
         </member>
@@ -3174,13 +3184,13 @@
             </summary>
             <seealso cref="T:AV.Core.Container.MediaComponent" />
         </member>
-        <member name="F:AV.Core.Container.AudioComponent.Scaler">
+        <member name="F:AV.Core.Container.AudioComponent.scaler">
             <summary>
             Holds a reference to the audio re-sampler
             This re-sampler gets disposed upon disposal of this object.
             </summary>
         </member>
-        <member name="F:AV.Core.Container.AudioComponent.LastSourceSpec">
+        <member name="F:AV.Core.Container.AudioComponent.lastSourceSpec">
             <summary>
             Used to determine if we have to reset the scaler parameters.
             </summary>
@@ -3209,7 +3219,7 @@
         </member>
         <member name="P:AV.Core.Container.AudioComponent.FilterString">
             <summary>
-            Provides access to the AudioFilter string of the container's MediaOptions.
+            Gets access to the AudioFilter string of the container's MediaOptions.
             </summary>
         </member>
         <member name="M:AV.Core.Container.AudioComponent.MaterializeFrame(AV.Core.Container.MediaFrame,AV.Core.Container.MediaBlock@,AV.Core.Container.MediaBlock)">
@@ -3589,17 +3599,17 @@
             This class is thread safe.
             </summary>
         </member>
-        <member name="F:AV.Core.Container.MediaBlockBuffer.PoolBlocks">
+        <member name="F:AV.Core.Container.MediaBlockBuffer.poolBlocks">
             <summary>
             The blocks that are available to be filled.
             </summary>
         </member>
-        <member name="F:AV.Core.Container.MediaBlockBuffer.PlaybackBlocks">
+        <member name="F:AV.Core.Container.MediaBlockBuffer.playbackBlocks">
             <summary>
             The blocks that are available for rendering.
             </summary>
         </member>
-        <member name="F:AV.Core.Container.MediaBlockBuffer.SyncLock">
+        <member name="F:AV.Core.Container.MediaBlockBuffer.syncLock">
             <summary>
             Controls multiple reads and exclusive writes.
             </summary>
@@ -3813,7 +3823,7 @@
         </member>
         <member name="M:AV.Core.Container.MediaBlockBuffer.UpdateCollectionProperties">
             <summary>
-            Updates the <see cref="F:AV.Core.Container.MediaBlockBuffer.PlaybackBlocks"/> collection properties.
+            Updates the <see cref="F:AV.Core.Container.MediaBlockBuffer.playbackBlocks"/> collection properties.
             This method must be called whenever the collection is modified.
             The reason this exists is to avoid computing and iterating over these values every time they are read.
             </summary>
@@ -3836,12 +3846,12 @@
             The logging handler.
             </summary>
         </member>
-        <member name="F:AV.Core.Container.MediaComponent.Packets">
+        <member name="F:AV.Core.Container.MediaComponent.packets">
             <summary>
             Contains the packets pending to be sent to the decoder.
             </summary>
         </member>
-        <member name="F:AV.Core.Container.MediaComponent.DecodePacketFunction">
+        <member name="F:AV.Core.Container.MediaComponent.decodePacketFunction">
             <summary>
             The decode packet function.
             </summary>
@@ -4335,64 +4345,64 @@
             The logging handler.
             </summary>
         </member>
-        <member name="F:AV.Core.Container.MediaContainer.ReadSyncRoot">
+        <member name="F:AV.Core.Container.MediaContainer.readSyncRoot">
             <summary>
             The read synchronize root.
             </summary>
         </member>
-        <member name="F:AV.Core.Container.MediaContainer.DecodeSyncRoot">
+        <member name="F:AV.Core.Container.MediaContainer.decodeSyncRoot">
             <summary>
             The decode synchronize root.
             </summary>
         </member>
-        <member name="F:AV.Core.Container.MediaContainer.ConvertSyncRoot">
+        <member name="F:AV.Core.Container.MediaContainer.convertSyncRoot">
             <summary>
             The convert synchronize root.
             </summary>
         </member>
-        <member name="F:AV.Core.Container.MediaContainer.StreamReadInterruptStartTime">
+        <member name="F:AV.Core.Container.MediaContainer.streamReadInterruptStartTime">
             <summary>
             The stream read interrupt start time.
             When a read operation is started, this is set to the ticks of UTC now.
             </summary>
         </member>
-        <member name="F:AV.Core.Container.MediaContainer.SignalAbortReadsRequested">
+        <member name="F:AV.Core.Container.MediaContainer.signalAbortReadsRequested">
             <summary>
             The signal to request the abortion of the following read operation.
             </summary>
         </member>
-        <member name="F:AV.Core.Container.MediaContainer.SignalAbortReadsAutoReset">
+        <member name="F:AV.Core.Container.MediaContainer.signalAbortReadsAutoReset">
             <summary>
             If set to true, it will reset the abort requested flag to false.
             </summary>
         </member>
-        <member name="F:AV.Core.Container.MediaContainer.StreamReadInterruptCallback">
+        <member name="F:AV.Core.Container.MediaContainer.streamReadInterruptCallback">
             <summary>
             The stream read interrupt callback.
             Used to detect read timeouts.
             </summary>
         </member>
-        <member name="F:AV.Core.Container.MediaContainer.CustomInputStream">
+        <member name="F:AV.Core.Container.MediaContainer.customInputStream">
             <summary>
             The custom media input stream.
             </summary>
         </member>
-        <member name="F:AV.Core.Container.MediaContainer.CustomInputStreamRead">
+        <member name="F:AV.Core.Container.MediaContainer.customInputStreamRead">
             <summary>
             The custom input stream read callback.
             </summary>
         </member>
-        <member name="F:AV.Core.Container.MediaContainer.CustomInputStreamSeek">
+        <member name="F:AV.Core.Container.MediaContainer.customInputStreamSeek">
             <summary>
             The custom input stream seek callback.
             </summary>
         </member>
-        <member name="F:AV.Core.Container.MediaContainer.CustomInputStreamContext">
+        <member name="F:AV.Core.Container.MediaContainer.customInputStreamContext">
             <summary>
             The custom input stream context.
             </summary>
         </member>
-        <member name="F:AV.Core.Container.MediaContainer.RequiresPictureAttachments">
+        <member name="F:AV.Core.Container.MediaContainer.requiresPictureAttachments">
             <summary>
             Hold the value for the internal property with the same name.
             Picture attachments are required when video streams support them
@@ -4422,7 +4432,7 @@
         </member>
         <member name="P:AV.Core.Container.MediaContainer.IsDisposed">
             <summary>
-            To detect redundant Dispose calls.
+            Gets a value indicating whether to detect redundant Dispose calls.
             </summary>
         </member>
         <member name="P:AV.Core.Container.MediaContainer.MediaSource">
@@ -4433,7 +4443,7 @@
         </member>
         <member name="P:AV.Core.Container.MediaContainer.Configuration">
             <summary>
-            The container and demuxer initialization and configuration options.
+            Gets the container and demuxer initialization and configuration options.
             Options are applied when creating an instance of the container.
             After container creation, changing the configuration options passed in
             the constructor has no effect.
@@ -4441,14 +4451,14 @@
         </member>
         <member name="P:AV.Core.Container.MediaContainer.MediaOptions">
             <summary>
-            Represents options that applied before initializing media components and their corresponding
+            Gets options that applied before initializing media components and their corresponding
             codecs. Once the container has created the media components, changing these options may produce unintended side effects
             and is not supported or recommended.
             </summary>
         </member>
         <member name="P:AV.Core.Container.MediaContainer.MediaInfo">
             <summary>
-            Provides stream, chapter and program info held by this container.
+            Gets stream, chapter and program info held by this container.
             This property is null if the the stream has not been opened.
             </summary>
         </member>
@@ -4464,7 +4474,7 @@
         </member>
         <member name="P:AV.Core.Container.MediaContainer.Metadata">
             <summary>
-            Holds the metadata of the media file when the stream is initialized.
+            Gets the metadata of the media file when the stream is initialized.
             </summary>
         </member>
         <member name="P:AV.Core.Container.MediaContainer.IsInitialized">
@@ -4479,7 +4489,7 @@
         </member>
         <member name="P:AV.Core.Container.MediaContainer.IsAtEndOfStream">
             <summary>
-            Will be set to true whenever an End Of File situation is reached.
+            Gets a value indicating whether End Of File situation is reached.
             </summary>
             <value>
               <c>true</c> if this instance is at end of stream; otherwise, <c>false</c>.
@@ -4533,15 +4543,16 @@
         </member>
         <member name="P:AV.Core.Container.MediaContainer.InputContext">
             <summary>
-            Holds a reference to the input context.
+            Gets a reference to the input context.
             </summary>
         </member>
         <member name="P:AV.Core.Container.MediaContainer.StateRequiresPictureAttachments">
             <summary>
-            Picture attachments are required when video streams support them
-            and these attached packets must be read before reading the first frame
-            of the stream and after seeking. This property is not part of the public API
-            and is meant more for internal purposes.
+            Gets or sets a value indicating whether picture attachments are
+            required when video streams support them and these attached packets
+            must be read before reading the first frame of the stream and after
+            seeking. This property is not part of the public API and is meant
+            more for internal purposes.
             </summary>
         </member>
         <member name="M:AV.Core.Container.MediaContainer.Initialize">
@@ -5191,51 +5202,51 @@
         </member>
         <member name="P:AV.Core.Container.VideoBlock.PixelAspectWidth">
             <summary>
-            Gets the pixel aspect width.
+            Gets or sets the pixel aspect width.
             This is NOT the display aspect width.
             </summary>
         </member>
         <member name="P:AV.Core.Container.VideoBlock.PixelAspectHeight">
             <summary>
-            Gets the pixel aspect height.
+            Gets or sets the pixel aspect height.
             This is NOT the display aspect height.
             </summary>
         </member>
         <member name="P:AV.Core.Container.VideoBlock.SmtpeTimeCode">
             <summary>
-            Gets the SMTPE time code.
+            Gets or sets the SMTPE time code.
             </summary>
         </member>
         <member name="P:AV.Core.Container.VideoBlock.IsHardwareFrame">
             <summary>
-            Gets a value indicating whether this frame was decoded in a hardware context.
+            Gets or sets a value indicating whether this frame was decoded in a hardware context.
             </summary>
         </member>
         <member name="P:AV.Core.Container.VideoBlock.HardwareAcceleratorName">
             <summary>
-            Gets the name of the hardware decoder if the frame was decoded in a hardware context.
+            Gets or sets the name of the hardware decoder if the frame was decoded in a hardware context.
             </summary>
         </member>
         <member name="P:AV.Core.Container.VideoBlock.DisplayPictureNumber">
             <summary>
-            Gets the display picture number (frame number).
+            Gets or sets the display picture number (frame number).
             If not set by the decoder, this attempts to obtain it by dividing the start time by the
             frame duration.
             </summary>
         </member>
         <member name="P:AV.Core.Container.VideoBlock.CodedPictureNumber">
             <summary>
-            Gets the coded picture number set by the decoder.
+            Gets or sets the coded picture number set by the decoder.
             </summary>
         </member>
         <member name="P:AV.Core.Container.VideoBlock.PictureType">
             <summary>
-            Gets the picture type.
+            Gets or sets the picture type.
             </summary>
         </member>
         <member name="P:AV.Core.Container.VideoBlock.ClosedCaptions">
             <summary>
-            Gets the closed caption packets for this video block.
+            Gets or sets the closed caption packets for this video block.
             </summary>
         </member>
         <member name="P:AV.Core.Container.VideoBlock.PictureBufferStride">
@@ -5854,7 +5865,7 @@
             The current reference counter instance.
             </summary>
         </member>
-        <member name="F:AV.Core.Diagnostics.RC.Instances">
+        <member name="F:AV.Core.Diagnostics.RC.instances">
             <summary>
             The instances.
             </summary>
@@ -6265,11 +6276,20 @@
         </member>
         <member name="T:AV.Core.Engine.MediaEngine">
             <summary>
+            Media engine.
+            </summary>
+            <summary>
+            Media engine.
+            </summary>
+            <summary>
             Represents a Media Engine that contains underlying streams of audio and/or video.
             It uses the fantastic FFmpeg library to perform reading and decoding of media streams.
             </summary>
             <seealso cref="T:AV.Core.Diagnostics.ILoggingHandler" />
             <seealso cref="T:System.IDisposable" />
+            <summary>
+            Media engine.
+            </summary>
         </member>
         <member name="M:AV.Core.Engine.MediaEngine.SendOnMessageLogged(AV.Core.Diagnostics.LoggingMessage)">
             <summary>
@@ -6356,12 +6376,12 @@
         </member>
         <member name="P:AV.Core.Engine.MediaEngine.Commands">
             <summary>
-            The command queue to be executed in the order they were sent.
+            Gets the command queue to be executed in the order they were sent.
             </summary>
         </member>
         <member name="P:AV.Core.Engine.MediaEngine.Container">
             <summary>
-            The underlying media container that provides access to
+            Gets or sets underlying media container that provides access to
             individual media component streams.
             </summary>
         </member>
@@ -6448,12 +6468,12 @@
         </member>
         <member name="P:AV.Core.Engine.MediaEngine.State">
             <summary>
-            Contains the Media Status.
+            Gets the Media Status.
             </summary>
         </member>
         <member name="P:AV.Core.Engine.MediaEngine.MediaInfo">
             <summary>
-            Provides stream, chapter and program info of the underlying media.
+            Gets stream, chapter and program info of the underlying media.
             Returns null when no media is loaded.
             </summary>
         </member>
@@ -6474,7 +6494,7 @@
         </member>
         <member name="P:AV.Core.Engine.MediaEngine.Timing">
             <summary>
-            Represents a real-time time clock controller.
+            Gets a real-time time clock controller.
             </summary>
         </member>
         <member name="P:AV.Core.Engine.MediaEngine.MediaOptions">
@@ -6508,27 +6528,27 @@
         </member>
         <member name="P:AV.Core.Engine.MediaEngine.Blocks">
             <summary>
-            Holds the materialized block cache for each media type.
+            Gets the materialized block cache for each media type.
             </summary>
         </member>
         <member name="P:AV.Core.Engine.MediaEngine.PreloadedSubtitles">
             <summary>
-            Gets the preloaded subtitle blocks.
+            Gets or sets the preloaded subtitle blocks.
             </summary>
         </member>
         <member name="P:AV.Core.Engine.MediaEngine.Workers">
             <summary>
-            Gets the worker collection.
+            Gets or sets the worker collection.
             </summary>
         </member>
         <member name="P:AV.Core.Engine.MediaEngine.Renderers">
             <summary>
-            Holds the block renderers.
+            Gets the block renderers.
             </summary>
         </member>
         <member name="P:AV.Core.Engine.MediaEngine.CurrentRenderStartTime">
             <summary>
-            Holds the last rendered StartTime for each of the media block types.
+            Gets the last rendered StartTime for each of the media block types.
             </summary>
         </member>
         <member name="P:AV.Core.Engine.MediaEngine.IsSyncBuffering">
@@ -7000,6 +7020,13 @@
             Implement packet reading worker logic.
             </summary>
             <seealso cref="T:AV.Core.Engine.IMediaWorker" />
+        </member>
+        <member name="M:AV.Core.Engine.PacketReadingWorker.#ctor(AV.Core.Engine.MediaEngine)">
+            <summary>
+            Initialises a new instance of the <see cref="T:AV.Core.Engine.PacketReadingWorker"/>
+            class.
+            </summary>
+            <param name="mediaCore">The media core.</param>
         </member>
         <member name="P:AV.Core.Engine.PacketReadingWorker.MediaCore">
             <inheritdoc />
@@ -7600,6 +7627,16 @@
             </summary>
             <typeparam name="T">The type of playlist items.</typeparam>
         </member>
+        <member name="F:AV.Core.Playlists.PlaylistEntryCollection`1.HeaderPrefix">
+            <summary>
+            Header prefix.
+            </summary>
+        </member>
+        <member name="F:AV.Core.Playlists.PlaylistEntryCollection`1.EntryPrefix">
+            <summary>
+            Entry prefix.
+            </summary>
+        </member>
         <member name="M:AV.Core.Playlists.PlaylistEntryCollection`1.#ctor">
             <summary>
             Initialises a new instance of the <see cref="T:AV.Core.Playlists.PlaylistEntryCollection`1"/> class.
@@ -8098,12 +8135,12 @@
             </summary>
             <seealso cref="T:System.IDisposable" />
         </member>
-        <member name="F:AV.Core.Primitives.CircularBuffer.SyncLock">
+        <member name="F:AV.Core.Primitives.CircularBuffer.syncLock">
             <summary>
             The locking object to perform synchronization.
             </summary>
         </member>
-        <member name="F:AV.Core.Primitives.CircularBuffer.Buffer">
+        <member name="F:AV.Core.Primitives.CircularBuffer.buffer">
             <summary>
             The unmanaged buffer.
             </summary>
@@ -8851,7 +8888,13 @@
         </member>
         <member name="T:AV.Core.Utilities">
             <summary>
+            Utilities.
+            </summary>
+            <summary>
             Provides various helpers and extension methods.
+            </summary>
+            <summary>
+            Utilities.
             </summary>
             <summary>
             Utilities.
@@ -9179,7 +9222,7 @@
             An AVDictionary management class.
             </summary>
         </member>
-        <member name="F:FFmpeg.AutoGen.FFDictionary.IsDisposed">
+        <member name="F:FFmpeg.AutoGen.FFDictionary.isDisposed">
             <summary>
             To detect redundant Dispose calls.
             </summary>
@@ -9590,22 +9633,22 @@
         </member>
         <member name="P:FFmpeg.AutoGen.FFmpegLoadMode.FullFeatures">
             <summary>
-            The full features. Tries to load everything.
+            Gets the full features. Tries to load everything.
             </summary>
         </member>
         <member name="P:FFmpeg.AutoGen.FFmpegLoadMode.MinimumFeatures">
             <summary>
-            Loads everything except for AVDevice and AVFilter.
+            Gets everything except for AVDevice and AVFilter.
             </summary>
         </member>
         <member name="P:FFmpeg.AutoGen.FFmpegLoadMode.AudioOnly">
             <summary>
-            Loads the minimum set for Audio-only programs.
+            Gets the minimum set for Audio-only programs.
             </summary>
         </member>
         <member name="P:FFmpeg.AutoGen.FFmpegLoadMode.VideoOnly">
             <summary>
-            Loads the minimum set for Video-only programs.
+            Gets the minimum set for Video-only programs.
             </summary>
         </member>
     </members>

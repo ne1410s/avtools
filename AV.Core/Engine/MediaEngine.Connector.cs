@@ -9,6 +9,9 @@ namespace AV.Core.Engine
     using AV.Core.Common;
     using AV.Core.Diagnostics;
 
+    /// <summary>
+    /// Media engine.
+    /// </summary>
     public partial class MediaEngine
     {
         /// <summary>

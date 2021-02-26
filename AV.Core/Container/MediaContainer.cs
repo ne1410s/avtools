@@ -40,59 +40,59 @@ namespace AV.Core.Container
         /// <summary>
         /// The read synchronize root.
         /// </summary>
-        private readonly object ReadSyncRoot = new ();
+        private readonly object readSyncRoot = new ();
 
         /// <summary>
         /// The decode synchronize root.
         /// </summary>
-        private readonly object DecodeSyncRoot = new ();
+        private readonly object decodeSyncRoot = new ();
 
         /// <summary>
         /// The convert synchronize root.
         /// </summary>
-        private readonly object ConvertSyncRoot = new ();
+        private readonly object convertSyncRoot = new ();
 
         /// <summary>
         /// The stream read interrupt start time.
         /// When a read operation is started, this is set to the ticks of UTC now.
         /// </summary>
-        private readonly AtomicDateTime StreamReadInterruptStartTime = new (default);
+        private readonly AtomicDateTime streamReadInterruptStartTime = new (default);
 
         /// <summary>
         /// The signal to request the abortion of the following read operation.
         /// </summary>
-        private readonly AtomicBoolean SignalAbortReadsRequested = new (false);
+        private readonly AtomicBoolean signalAbortReadsRequested = new (false);
 
         /// <summary>
         /// If set to true, it will reset the abort requested flag to false.
         /// </summary>
-        private readonly AtomicBoolean SignalAbortReadsAutoReset = new (false);
+        private readonly AtomicBoolean signalAbortReadsAutoReset = new (false);
 
         /// <summary>
         /// The stream read interrupt callback.
         /// Used to detect read timeouts.
         /// </summary>
-        private readonly AVIOInterruptCB_callback StreamReadInterruptCallback;
+        private readonly AVIOInterruptCB_callback streamReadInterruptCallback;
 
         /// <summary>
         /// The custom media input stream.
         /// </summary>
-        private IMediaInputStream CustomInputStream;
+        private IMediaInputStream customInputStream;
 
         /// <summary>
         /// The custom input stream read callback.
         /// </summary>
-        private avio_alloc_context_read_packet CustomInputStreamRead;
+        private avio_alloc_context_read_packet customInputStreamRead;
 
         /// <summary>
         /// The custom input stream seek callback.
         /// </summary>
-        private avio_alloc_context_seek CustomInputStreamSeek;
+        private avio_alloc_context_seek customInputStreamSeek;
 
         /// <summary>
         /// The custom input stream context.
         /// </summary>
-        private AVIOContext* CustomInputStreamContext;
+        private AVIOContext* customInputStreamContext;
 
         /// <summary>
         /// Hold the value for the internal property with the same name.
@@ -100,7 +100,7 @@ namespace AV.Core.Container
         /// and these attached packets must be read before reading the first frame
         /// of the stream and after seeking.
         /// </summary>
-        private bool RequiresPictureAttachments = true;
+        private bool requiresPictureAttachments = true;
 
         /// <summary>
         /// Initialises a new instance of the <see cref="MediaContainer"/> class.
@@ -124,7 +124,7 @@ namespace AV.Core.Container
             this.localLoggingHandler = loggingHandler;
             this.MediaSource = mediaSource;
             this.Configuration = config ?? new ContainerConfiguration();
-            this.StreamReadInterruptCallback = this.OnStreamReadInterrupt;
+            this.streamReadInterruptCallback = this.OnStreamReadInterrupt;
 
             // drop the protocol prefix if it is redundant
             var protocolPrefix = this.Configuration.ProtocolPrefix;
@@ -167,7 +167,7 @@ namespace AV.Core.Container
             // Create the options object
             this.localLoggingHandler = loggingHandler;
             this.MediaSource = mediaSpurceUrl;
-            this.CustomInputStream = inputStream;
+            this.customInputStream = inputStream;
             this.Configuration = config ?? new ContainerConfiguration();
         }
 
@@ -175,7 +175,7 @@ namespace AV.Core.Container
         ILoggingHandler ILoggingSource.LoggingHandler => this.localLoggingHandler;
 
         /// <summary>
-        /// To detect redundant Dispose calls.
+        /// Gets a value indicating whether to detect redundant Dispose calls.
         /// </summary>
         public bool IsDisposed { get; private set; }
 
@@ -186,7 +186,7 @@ namespace AV.Core.Container
         public string MediaSource { get; }
 
         /// <summary>
-        /// The container and demuxer initialization and configuration options.
+        /// Gets the container and demuxer initialization and configuration options.
         /// Options are applied when creating an instance of the container.
         /// After container creation, changing the configuration options passed in
         /// the constructor has no effect.
@@ -194,14 +194,14 @@ namespace AV.Core.Container
         public ContainerConfiguration Configuration { get; }
 
         /// <summary>
-        /// Represents options that applied before initializing media components and their corresponding
+        /// Gets options that applied before initializing media components and their corresponding
         /// codecs. Once the container has created the media components, changing these options may produce unintended side effects
         /// and is not supported or recommended.
         /// </summary>
         public MediaOptions MediaOptions { get; } = new MediaOptions();
 
         /// <summary>
-        /// Provides stream, chapter and program info held by this container.
+        /// Gets stream, chapter and program info held by this container.
         /// This property is null if the the stream has not been opened.
         /// </summary>
         public MediaInfo MediaInfo { get; private set; }
@@ -217,7 +217,7 @@ namespace AV.Core.Container
         public long MediaBitRate => this.MediaInfo?.BitRate ?? 0;
 
         /// <summary>
-        /// Holds the metadata of the media file when the stream is initialized.
+        /// Gets the metadata of the media file when the stream is initialized.
         /// </summary>
         public IReadOnlyDictionary<string, string> Metadata { get; private set; }
 
@@ -232,7 +232,7 @@ namespace AV.Core.Container
         public bool IsOpen => this.IsInitialized && this.Components.Count > 0;
 
         /// <summary>
-        /// Will be set to true whenever an End Of File situation is reached.
+        /// Gets a value indicating whether End Of File situation is reached.
         /// </summary>
         /// <value>
         ///   <c>true</c> if this instance is at end of stream; otherwise, <c>false</c>.
@@ -278,7 +278,7 @@ namespace AV.Core.Container
         /// <summary>
         /// Gets a value indicating whether the underlying media is seekable.
         /// </summary>
-        public bool IsStreamSeekable => this.CustomInputStream?.CanSeek ?? (this.Components?.Seekable?.Duration.Ticks ?? 0) > 0;
+        public bool IsStreamSeekable => this.customInputStream?.CanSeek ?? (this.Components?.Seekable?.Duration.Ticks ?? 0) > 0;
 
         /// <summary>
         /// Gets a value indicating whether this container represents live media.
@@ -306,18 +306,19 @@ namespace AV.Core.Container
         /// <summary>
         /// Gets a value indicating whether reads are in the aborted state.
         /// </summary>
-        public bool IsReadAborted => this.SignalAbortReadsRequested.Value;
+        public bool IsReadAborted => this.signalAbortReadsRequested.Value;
 
         /// <summary>
-        /// Holds a reference to the input context.
+        /// Gets a reference to the input context.
         /// </summary>
         internal AVFormatContext* InputContext { get; private set; } = null;
 
         /// <summary>
-        /// Picture attachments are required when video streams support them
-        /// and these attached packets must be read before reading the first frame
-        /// of the stream and after seeking. This property is not part of the public API
-        /// and is meant more for internal purposes.
+        /// Gets or sets a value indicating whether picture attachments are
+        /// required when video streams support them and these attached packets
+        /// must be read before reading the first frame of the stream and after
+        /// seeking. This property is not part of the public API and is meant
+        /// more for internal purposes.
         /// </summary>
         private bool StateRequiresPictureAttachments
         {
@@ -326,7 +327,7 @@ namespace AV.Core.Container
                 var canRequireAttachments = this.Components.HasVideo &&
                     this.Components.Video.IsStillPictures;
 
-                return canRequireAttachments && this.RequiresPictureAttachments;
+                return canRequireAttachments && this.requiresPictureAttachments;
             }
 
             set
@@ -334,7 +335,7 @@ namespace AV.Core.Container
                 var canRequireAttachments = this.Components.HasVideo &&
                     this.Components.Video.IsStillPictures;
 
-                this.RequiresPictureAttachments = canRequireAttachments && value;
+                this.requiresPictureAttachments = canRequireAttachments && value;
             }
         }
 
@@ -345,10 +346,10 @@ namespace AV.Core.Container
         /// </summary>
         public void Initialize()
         {
-            lock (this.ReadSyncRoot)
+            lock (this.readSyncRoot)
             {
                 // Initialize the Input Format Context and Input Stream Context
-                this.CustomInputStream?.OnInitializing?.Invoke(this.Configuration, this.MediaSource);
+                this.customInputStream?.OnInitializing?.Invoke(this.Configuration, this.MediaSource);
                 this.StreamInitialize();
             }
         }
@@ -359,7 +360,7 @@ namespace AV.Core.Container
         /// </summary>
         public void Open()
         {
-            lock (this.ReadSyncRoot)
+            lock (this.readSyncRoot)
             {
                 if (this.IsDisposed)
                 {
@@ -393,7 +394,7 @@ namespace AV.Core.Container
         /// <exception cref="InvalidOperationException">No input context initialized.</exception>
         public MediaFrame Seek(TimeSpan position)
         {
-            lock (this.ReadSyncRoot)
+            lock (this.readSyncRoot)
             {
                 if (this.IsDisposed)
                 {
@@ -423,7 +424,7 @@ namespace AV.Core.Container
         /// <exception cref="MediaContainerException">When a read error occurs.</exception>
         public MediaType Read()
         {
-            lock (this.ReadSyncRoot)
+            lock (this.readSyncRoot)
             {
                 if (this.IsDisposed)
                 {
@@ -453,7 +454,7 @@ namespace AV.Core.Container
         /// <returns>The list of media frames.</returns>
         public IList<MediaFrame> Decode()
         {
-            lock (this.DecodeSyncRoot)
+            lock (this.decodeSyncRoot)
             {
                 if (this.IsDisposed)
                 {
@@ -504,7 +505,7 @@ namespace AV.Core.Container
         /// input.</exception>
         public bool Convert(MediaFrame input, ref MediaBlock output, bool releaseInput, MediaBlock previousBlock)
         {
-            lock (this.ConvertSyncRoot)
+            lock (this.convertSyncRoot)
             {
                 if (this.IsDisposed)
                 {
@@ -559,8 +560,8 @@ namespace AV.Core.Container
                 return;
             }
 
-            this.SignalAbortReadsAutoReset.Value = reset;
-            this.SignalAbortReadsRequested.Value = true;
+            this.signalAbortReadsAutoReset.Value = reset;
+            this.signalAbortReadsRequested.Value = true;
         }
 
         /// <summary>
@@ -590,11 +591,11 @@ namespace AV.Core.Container
                 return Array.Empty<MediaType>();
             }
 
-            lock (this.ReadSyncRoot)
+            lock (this.readSyncRoot)
             {
-                lock (this.DecodeSyncRoot)
+                lock (this.decodeSyncRoot)
                 {
-                    lock (this.ConvertSyncRoot)
+                    lock (this.convertSyncRoot)
                     {
                         // Open the suitable streams as components.
                         // Throw if no audio and/or video streams are found
@@ -616,11 +617,11 @@ namespace AV.Core.Container
         /// <inheritdoc />
         public void Dispose()
         {
-            lock (this.ReadSyncRoot)
+            lock (this.readSyncRoot)
             {
-                lock (this.DecodeSyncRoot)
+                lock (this.decodeSyncRoot)
                 {
-                    lock (this.ConvertSyncRoot)
+                    lock (this.convertSyncRoot)
                     {
                         if (this.IsDisposed)
                         {
@@ -635,22 +636,22 @@ namespace AV.Core.Container
                             ffmpeg.avformat_close_input(&inputContextPtr);
 
                             // Handle freeing of Custom Stream Context
-                            if (this.CustomInputStreamContext != null)
+                            if (this.customInputStreamContext != null)
                             {
                                 // free the allocated buffer
-                                ffmpeg.av_freep(&CustomInputStreamContext->buffer);
+                                ffmpeg.av_freep(&customInputStreamContext->buffer);
 
                                 // free the stream context
-                                var customInputContext = this.CustomInputStreamContext;
+                                var customInputContext = this.customInputStreamContext;
                                 ffmpeg.av_freep(&customInputContext);
-                                this.CustomInputStreamContext = null;
+                                this.customInputStreamContext = null;
                             }
 
                             // Clear Custom Input fields
-                            this.CustomInputStreamRead = null;
-                            this.CustomInputStreamSeek = null;
-                            this.CustomInputStream?.Dispose();
-                            this.CustomInputStream = null;
+                            this.customInputStreamRead = null;
+                            this.customInputStreamSeek = null;
+                            this.customInputStream?.Dispose();
+                            this.customInputStream = null;
 
                             // Clear the input context
                             this.InputContext = null;
@@ -714,30 +715,30 @@ namespace AV.Core.Container
                     var openUrl = $"{prefix}{this.MediaSource}";
 
                     // If there is a custom input stream, set it up.
-                    if (this.CustomInputStream != null)
+                    if (this.customInputStream != null)
                     {
                         // we don't want to pass a Url because it will be a custom stream
                         openUrl = string.Empty;
 
                         // Setup the necessary context callbacks
-                        this.CustomInputStreamRead = this.CustomInputStream.Read;
-                        this.CustomInputStreamSeek = this.CustomInputStream.Seek;
+                        this.customInputStreamRead = this.customInputStream.Read;
+                        this.customInputStreamSeek = this.customInputStream.Seek;
 
                         // Allocate the read buffer
-                        var inputBuffer = (byte*)ffmpeg.av_malloc((ulong)this.CustomInputStream.ReadBufferLength);
-                        this.CustomInputStreamContext = ffmpeg.avio_alloc_context(
-                            inputBuffer, this.CustomInputStream.ReadBufferLength, 0, null, this.CustomInputStreamRead, null, this.CustomInputStreamSeek);
+                        var inputBuffer = (byte*)ffmpeg.av_malloc((ulong)this.customInputStream.ReadBufferLength);
+                        this.customInputStreamContext = ffmpeg.avio_alloc_context(
+                            inputBuffer, this.customInputStream.ReadBufferLength, 0, null, this.customInputStreamRead, null, this.customInputStreamSeek);
 
                         // Set the seekable flag based on the custom input stream implementation
-                        CustomInputStreamContext->seekable = this.CustomInputStream.CanSeek ? 1 : 0;
+                        customInputStreamContext->seekable = this.customInputStream.CanSeek ? 1 : 0;
 
                         // Assign the AVIOContext to the input context
-                        inputContextPtr->pb = this.CustomInputStreamContext;
+                        inputContextPtr->pb = this.customInputStreamContext;
                     }
 
                     // We set the start of the read operation time so timeouts can be detected
                     // and we open the URL so the input context can be initialized.
-                    this.StreamReadInterruptStartTime.Value = DateTime.UtcNow;
+                    this.streamReadInterruptStartTime.Value = DateTime.UtcNow;
                     var privateOptionsRef = privateOptions.Pointer;
 
                     // Open the input and pass the private options dictionary
@@ -847,7 +848,7 @@ namespace AV.Core.Container
                     this.MediaOptions.IsAudioDisabled = true;
                 }
 
-                this.CustomInputStream?.OnInitialized?.Invoke(inputFormat, this.InputContext, this.MediaInfo);
+                this.customInputStream?.OnInitialized?.Invoke(inputFormat, this.InputContext, this.MediaInfo);
             }
             catch (Exception ex)
             {
@@ -867,9 +868,9 @@ namespace AV.Core.Container
             this.InputContext = ffmpeg.avformat_alloc_context();
 
             // Setup an interrupt callback to detect read timeouts
-            this.SignalAbortReadsRequested.Value = false;
-            this.SignalAbortReadsAutoReset.Value = true;
-            InputContext->interrupt_callback.callback = this.StreamReadInterruptCallback;
+            this.signalAbortReadsRequested.Value = false;
+            this.signalAbortReadsAutoReset.Value = true;
+            InputContext->interrupt_callback.callback = this.streamReadInterruptCallback;
             InputContext->interrupt_callback.opaque = this.InputContext;
 
             // Acquire the format options to be applied
@@ -1059,7 +1060,7 @@ namespace AV.Core.Container
 
             // Allocate the packet to read
             var readPacket = MediaPacket.CreateReadPacket();
-            this.StreamReadInterruptStartTime.Value = DateTime.UtcNow;
+            this.streamReadInterruptStartTime.Value = DateTime.UtcNow;
             var readResult = ffmpeg.av_read_frame(this.InputContext, readPacket.Pointer);
 
             if (readResult < 0)
@@ -1129,15 +1130,15 @@ namespace AV.Core.Container
             const int OkResult = 0;
 
             // Check if a forced quit was triggered
-            if (this.SignalAbortReadsRequested.Value)
+            if (this.signalAbortReadsRequested.Value)
             {
                 this.LogInfo(
                     Aspects.Container,
                     $"{nameof(this.OnStreamReadInterrupt)} was requested an immediate read exit.");
 
-                if (this.SignalAbortReadsAutoReset.Value)
+                if (this.signalAbortReadsAutoReset.Value)
                 {
-                    this.SignalAbortReadsRequested.Value = false;
+                    this.signalAbortReadsRequested.Value = false;
                 }
 
                 return ErrorResult;
@@ -1146,7 +1147,7 @@ namespace AV.Core.Container
             var nowTicks = DateTime.UtcNow.Ticks;
 
             // We use Interlocked read because in 32 bits it takes 2 trips!
-            var start = this.StreamReadInterruptStartTime.Value;
+            var start = this.streamReadInterruptStartTime.Value;
             var timeDifference = TimeSpan.FromTicks(nowTicks - start.Ticks);
 
             if (this.Configuration.ReadTimeout.Ticks < 0 || timeDifference.Ticks <= this.Configuration.ReadTimeout.Ticks)
@@ -1226,8 +1227,7 @@ namespace AV.Core.Container
                     var entry = videoComponent.SeekIndex[entryIndex];
                     this.LogDebug(
                         Aspects.Container,
-                        $"SEEK IX: Seek index entry {entryIndex} found. " +
-                        $"Entry Position: {entry.StartTime.Format()} | Target: {targetPosition.Format()}");
+                        $"SEEK IX: Seek index entry {entryIndex} found. Entry Position: {entry.StartTime.Format()} | Target: {targetPosition.Format()}");
                     indexTimestamp = entry.PresentationTime;
                 }
             }
@@ -1257,7 +1257,7 @@ namespace AV.Core.Container
                 else
                 {
                     // Reset Interrupt start time
-                    this.StreamReadInterruptStartTime.Value = DateTime.UtcNow;
+                    this.streamReadInterruptStartTime.Value = DateTime.UtcNow;
 
                     // check if we have seeked before the start of the stream
                     if (streamSeekRelativeTime.Ticks <= comp.StartTime.Ticks)
@@ -1269,8 +1269,7 @@ namespace AV.Core.Container
                     seekResult = ffmpeg.av_seek_frame(this.InputContext, streamIndex, seekTimestamp, seekFlags);
                     this.LogTrace(
                         Aspects.Container,
-                        $"SEEK L: Elapsed: {startTime.FormatElapsed()} | Target: {streamSeekRelativeTime.Format()} " +
-                        $"| Seek: {seekTimestamp.Format()} | P0: {startPos.Format(1024)} | P1: {this.StreamPosition.Format(1024)} ");
+                        $"SEEK L: Elapsed: {startTime.FormatElapsed()} | Target: {streamSeekRelativeTime.Format()} | Seek: {seekTimestamp.Format()} | P0: {startPos.Format(1024)} | P1: {this.StreamPosition.Format(1024)} ");
                 }
 
                 // Flush the buffered packets and codec on every seek.
@@ -1283,8 +1282,7 @@ namespace AV.Core.Container
                 {
                     this.LogError(
                         Aspects.Container,
-                        $"SEEK R: Elapsed: {startTime.FormatElapsed()} | Seek operation failed. " +
-                        $"Error code {seekResult}, {FFInterop.DecodeMessage(seekResult)}");
+                        $"SEEK R: Elapsed: {startTime.FormatElapsed()} | Seek operation failed. Error code {seekResult}, {FFInterop.DecodeMessage(seekResult)}");
                     break;
                 }
 
@@ -1309,8 +1307,7 @@ namespace AV.Core.Container
 
             this.LogTrace(
                 Aspects.Container,
-                $"SEEK R: Elapsed: {startTime.FormatElapsed()} | Target: {streamSeekRelativeTime.Format()} " +
-                $"| Seek: {default(long).Format()} | P0: {startPos.Format(1024)} | P1: {this.StreamPosition.Format(1024)} ");
+                $"SEEK R: Elapsed: {startTime.FormatElapsed()} | Target: {streamSeekRelativeTime.Format()} | Seek: {default(long).Format()} | P0: {startPos.Format(1024)} | P1: {this.StreamPosition.Format(1024)} ");
 
             return frame;
         }
@@ -1329,7 +1326,7 @@ namespace AV.Core.Container
             var streamIndex = main.StreamIndex;
             var seekFlags = ffmpeg.AVSEEK_FLAG_BACKWARD;
 
-            this.StreamReadInterruptStartTime.Value = DateTime.UtcNow;
+            this.streamReadInterruptStartTime.Value = DateTime.UtcNow;
 
             // Execute the seek to start of main component
             var seekResult = ffmpeg.av_seek_frame(this.InputContext, streamIndex, seekTarget, seekFlags);
@@ -1361,7 +1358,7 @@ namespace AV.Core.Container
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private MediaFrame StreamPositionDecode(MediaComponent component)
         {
-            while (this.SignalAbortReadsRequested.Value == false)
+            while (this.signalAbortReadsRequested.Value == false)
             {
                 // We may have hit the end of our stream, but
                 // we'll continue decoding (and therefore returning)

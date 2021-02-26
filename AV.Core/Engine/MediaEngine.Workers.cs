@@ -7,12 +7,16 @@ namespace AV.Core.Engine
     using System;
     using System.Linq;
     using System.Runtime.CompilerServices;
+    using System.Text;
     using AV.Core.Common;
     using AV.Core.Container;
     using AV.Core.Diagnostics;
     using AV.Core.Platform;
     using AV.Core.Primitives;
 
+    /// <summary>
+    /// Media engine.
+    /// </summary>
     public partial class MediaEngine
     {
         /// <summary>
@@ -24,30 +28,30 @@ namespace AV.Core.Engine
         private readonly AtomicBoolean localIsSyncBuffering = new AtomicBoolean(false);
         private readonly AtomicBoolean localHasDecodingEnded = new AtomicBoolean(false);
 
-        private DateTime SyncBufferStartTime = DateTime.UtcNow;
+        private DateTime syncBufferStartTime = DateTime.UtcNow;
 
         /// <summary>
-        /// Holds the materialized block cache for each media type.
+        /// Gets the materialized block cache for each media type.
         /// </summary>
         internal MediaTypeDictionary<MediaBlockBuffer> Blocks { get; } = new MediaTypeDictionary<MediaBlockBuffer>();
 
         /// <summary>
-        /// Gets the preloaded subtitle blocks.
+        /// Gets or sets the preloaded subtitle blocks.
         /// </summary>
         internal MediaBlockBuffer PreloadedSubtitles { get; set; }
 
         /// <summary>
-        /// Gets the worker collection.
+        /// Gets or sets the worker collection.
         /// </summary>
         internal MediaWorkerSet Workers { get; set; }
 
         /// <summary>
-        /// Holds the block renderers.
+        /// Gets the block renderers.
         /// </summary>
         internal MediaTypeDictionary<IMediaRenderer> Renderers { get; } = new MediaTypeDictionary<IMediaRenderer>();
 
         /// <summary>
-        /// Holds the last rendered StartTime for each of the media block types.
+        /// Gets the last rendered StartTime for each of the media block types.
         /// </summary>
         internal MediaTypeDictionary<TimeSpan> CurrentRenderStartTime { get; } = new MediaTypeDictionary<TimeSpan>();
 
@@ -121,16 +125,16 @@ namespace AV.Core.Engine
             }
 
             this.PausePlayback();
-            this.SyncBufferStartTime = DateTime.UtcNow;
+            this.syncBufferStartTime = DateTime.UtcNow;
             this.IsSyncBuffering = true;
 
-            this.LogInfo(
-                Aspects.RenderingWorker,
-                $"SYNC-BUFFER: Entered at {this.PlaybackPosition.TotalSeconds:0.000} s." +
-                $" | Disconnected Clocks: {this.Timing.HasDisconnectedClocks}" +
-                $" | Buffer Progress: {this.State.BufferingProgress:p2}" +
-                $" | Buffer Audio: {this.Container?.Components[MediaType.Audio]?.BufferCount}" +
-                $" | Buffer Video: {this.Container?.Components[MediaType.Video]?.BufferCount}");
+            var sb = new StringBuilder();
+            sb.Append($"SYNC-BUFFER: Entered at {this.PlaybackPosition.TotalSeconds:0.000} s.");
+            sb.Append($" | Disconnected Clocks: {this.Timing.HasDisconnectedClocks}");
+            sb.Append($" | Buffer Progress: {this.State.BufferingProgress:p2}");
+            sb.Append($" | Buffer Audio: {this.Container?.Components[MediaType.Audio]?.BufferCount}");
+            sb.Append($" | Buffer Video: {this.Container?.Components[MediaType.Video]?.BufferCount}");
+            this.LogInfo(Aspects.RenderingWorker, sb.ToString());
         }
 
         /// <summary>
@@ -145,14 +149,15 @@ namespace AV.Core.Engine
             }
 
             this.IsSyncBuffering = false;
-            this.LogInfo(
-                Aspects.RenderingWorker,
-                $"SYNC-BUFFER: Exited in {DateTime.UtcNow.Subtract(this.SyncBufferStartTime).TotalSeconds:0.000} s." +
-                $" | Commands Pending: {this.Commands.HasPendingCommands}" +
-                $" | Decoding Ended: {this.HasDecodingEnded}" +
-                $" | Buffer Progress: {this.State.BufferingProgress:p2}" +
-                $" | Buffer Audio: {this.Container?.Components[MediaType.Audio]?.BufferCount}" +
-                $" | Buffer Video: {this.Container?.Components[MediaType.Video]?.BufferCount}");
+
+            var sb = new StringBuilder();
+            sb.Append($"SYNC-BUFFER: Exited in {DateTime.UtcNow.Subtract(this.syncBufferStartTime).TotalSeconds:0.000} s.");
+            sb.Append($" | Commands Pending: {this.Commands.HasPendingCommands}");
+            sb.Append($" | Decoding Ended: {this.HasDecodingEnded}");
+            sb.Append($" | Buffer Progress: {this.State.BufferingProgress:p2}");
+            sb.Append($" | Buffer Audio: {this.Container?.Components[MediaType.Audio]?.BufferCount}");
+            sb.Append($" | Buffer Video: {this.Container?.Components[MediaType.Video]?.BufferCount}");
+            this.LogInfo(Aspects.RenderingWorker, sb.ToString());
         }
 
         /// <summary>
@@ -166,10 +171,10 @@ namespace AV.Core.Engine
         {
             if (this.Timing.HasDisconnectedClocks && t == MediaType.None)
             {
-                this.LogWarning(
-                    Aspects.Container,
-                    $"Changing the playback position on disconnected clocks is not supported." +
-                    $"Plase set the {nameof(this.MediaOptions.IsTimeSyncDisabled)} to false.");
+                var sb = new StringBuilder();
+                sb.Append($"Changing the playback position on disconnected clocks is not supported.");
+                sb.Append($"Plase set the {nameof(this.MediaOptions.IsTimeSyncDisabled)} to false.");
+                this.LogWarning(Aspects.Container, sb.ToString());
             }
 
             this.Timing.Update(playbackPosition, t);

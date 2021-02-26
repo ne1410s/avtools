@@ -18,7 +18,7 @@ namespace FFmpeg.AutoGen
         public static IReadOnlyDictionary<string, int> LibraryFlags { get; } = FFLibrary.All.ToDictionary(k => k.Name, v => v.FlagId);
 
         /// <summary>
-        /// The full features. Tries to load everything.
+        /// Gets the full features. Tries to load everything.
         /// </summary>
         public static int FullFeatures { get; } =
             FFLibrary.LibAVCodec.FlagId |
@@ -31,7 +31,7 @@ namespace FFmpeg.AutoGen
             FFLibrary.LibSWScale.FlagId;
 
         /// <summary>
-        /// Loads everything except for AVDevice and AVFilter.
+        /// Gets everything except for AVDevice and AVFilter.
         /// </summary>
         public static int MinimumFeatures { get; } =
             FFLibrary.LibAVCodec.FlagId |
@@ -41,7 +41,7 @@ namespace FFmpeg.AutoGen
             FFLibrary.LibSWScale.FlagId;
 
         /// <summary>
-        /// Loads the minimum set for Audio-only programs.
+        /// Gets the minimum set for Audio-only programs.
         /// </summary>
         public static int AudioOnly { get; } =
             FFLibrary.LibAVCodec.FlagId |
@@ -50,7 +50,7 @@ namespace FFmpeg.AutoGen
             FFLibrary.LibSWResample.FlagId;
 
         /// <summary>
-        /// Loads the minimum set for Video-only programs.
+        /// Gets the minimum set for Video-only programs.
         /// </summary>
         public static int VideoOnly { get; } =
             FFLibrary.LibAVCodec.FlagId |

@@ -83,8 +83,11 @@ namespace AV.Core.Diagnostics
         /// <param name="message">The message text.</param>
         /// <param name="ex">The exception to log.</param>
         public static void LogError(this ILoggingSource sender, string aspectName, string message, Exception ex) =>
-            Log(sender.LoggingHandler, MediaLogMessageType.Error, aspectName, $"{message}\r\n" +
-                $"{ex?.GetType().Name}: {ex?.Message}\r\nStack Trace:\r\n{ex?.StackTrace}");
+            Log(
+                sender.LoggingHandler,
+                MediaLogMessageType.Error,
+                aspectName,
+                $"{message}\r\n{ex?.GetType().Name}: {ex?.Message}\r\nStack Trace:\r\n{ex?.StackTrace}");
 
         /// <summary>
         /// Logs the specified message. This the generic logging mechanism available to all classes.

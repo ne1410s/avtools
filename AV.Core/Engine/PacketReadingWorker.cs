@@ -17,6 +17,11 @@ namespace AV.Core.Engine
     /// <seealso cref="IMediaWorker" />
     internal sealed class PacketReadingWorker : IntervalWorkerBase, IMediaWorker, ILoggingSource
     {
+        /// <summary>
+        /// Initialises a new instance of the <see cref="PacketReadingWorker"/>
+        /// class.
+        /// </summary>
+        /// <param name="mediaCore">The media core.</param>
         public PacketReadingWorker(MediaEngine mediaCore)
             : base(nameof(PacketReadingWorker))
         {

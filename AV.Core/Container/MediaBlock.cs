@@ -85,20 +85,30 @@ namespace AV.Core.Container
         /// <summary>
         /// Gets a pointer to the first byte of the unmanaged data buffer.
         /// </summary>
-        public IntPtr Buffer { get { lock (this.localSyncLock)
-{
-    return this.localBuffer;
-}
-        } }
+        public IntPtr Buffer
+        {
+            get
+            {
+                lock (this.localSyncLock)
+                {
+                    return this.localBuffer;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the length of the unmanaged buffer in bytes.
         /// </summary>
-        public int BufferLength { get { lock (this.localSyncLock)
-{
-    return this.localBufferLength;
-}
-        } }
+        public int BufferLength
+        {
+            get
+            {
+                lock (this.localSyncLock)
+                {
+                    return this.localBufferLength;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets a value indicating whether an unmanaged buffer has been allocated.

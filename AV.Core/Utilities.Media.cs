@@ -14,6 +14,9 @@ namespace AV.Core
     using AV.Core.Diagnostics;
     using FFmpeg.AutoGen;
 
+    /// <summary>
+    /// Utilities.
+    /// </summary>
     public static partial class Utilities
     {
         /// <summary>

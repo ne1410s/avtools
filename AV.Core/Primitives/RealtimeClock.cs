@@ -12,9 +12,9 @@ namespace AV.Core.Primitives
     /// </summary>
     internal sealed class RealTimeClock
     {
-        private readonly Stopwatch Chronometer = new Stopwatch();
-        private readonly object SyncLock = new object();
-        private long OffsetTicks;
+        private readonly Stopwatch chronometer = new Stopwatch();
+        private readonly object syncLock = new object();
+        private long offsetTicks;
         private double localSpeedRatio = Constants.DefaultSpeedRatio;
 
         /// <summary>
@@ -30,10 +30,10 @@ namespace AV.Core.Primitives
         {
             get
             {
-                lock (this.SyncLock)
+                lock (this.syncLock)
                 {
                     return TimeSpan.FromTicks(
-                        this.OffsetTicks + Convert.ToInt64(this.Chronometer.Elapsed.Ticks * this.SpeedRatio));
+                        this.offsetTicks + Convert.ToInt64(this.chronometer.Elapsed.Ticks * this.SpeedRatio));
                 }
             }
         }
@@ -41,12 +41,12 @@ namespace AV.Core.Primitives
         /// <summary>
         /// Gets the elapsed time of the internal stopwatch.
         /// </summary>
-        public TimeSpan ElapsedInternal => this.Chronometer.Elapsed;
+        public TimeSpan ElapsedInternal => this.chronometer.Elapsed;
 
         /// <summary>
         /// Gets a value indicating whether the clock is running.
         /// </summary>
-        public bool IsRunning => this.Chronometer.IsRunning;
+        public bool IsRunning => this.chronometer.IsRunning;
 
         /// <summary>
         /// Gets or sets the speed ratio at which the clock runs.
@@ -55,7 +55,7 @@ namespace AV.Core.Primitives
         {
             get
             {
-                lock (this.SyncLock)
+                lock (this.syncLock)
                 {
                     return this.localSpeedRatio;
                 }
@@ -63,7 +63,7 @@ namespace AV.Core.Primitives
 
             set
             {
-                lock (this.SyncLock)
+                lock (this.syncLock)
                 {
                     // Capture the initial position se we set it even after the speed ratio has changed
                     // this ensures a smooth position transition
@@ -80,14 +80,14 @@ namespace AV.Core.Primitives
         /// <param name="value">The new value that the position property will hold.</param>
         public void Update(TimeSpan value)
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
-                var resume = this.Chronometer.IsRunning;
-                this.Chronometer.Reset();
-                this.OffsetTicks = value.Ticks;
+                var resume = this.chronometer.IsRunning;
+                this.chronometer.Reset();
+                this.offsetTicks = value.Ticks;
                 if (resume)
                 {
-                    this.Chronometer.Start();
+                    this.chronometer.Start();
                 }
             }
         }
@@ -97,14 +97,14 @@ namespace AV.Core.Primitives
         /// </summary>
         public void Play()
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
-                if (this.Chronometer.IsRunning)
+                if (this.chronometer.IsRunning)
                 {
                     return;
                 }
 
-                this.Chronometer.Start();
+                this.chronometer.Start();
             }
         }
 
@@ -113,9 +113,9 @@ namespace AV.Core.Primitives
         /// </summary>
         public void Pause()
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
-                this.Chronometer.Stop();
+                this.chronometer.Stop();
             }
         }
 
@@ -125,10 +125,10 @@ namespace AV.Core.Primitives
         /// </summary>
         public void Reset()
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
-                this.OffsetTicks = 0;
-                this.Chronometer.Reset();
+                this.offsetTicks = 0;
+                this.chronometer.Reset();
             }
         }
 
@@ -138,10 +138,10 @@ namespace AV.Core.Primitives
         /// </summary>
         public void Restart()
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
-                this.OffsetTicks = 0;
-                this.Chronometer.Restart();
+                this.offsetTicks = 0;
+                this.chronometer.Restart();
             }
         }
 
@@ -152,10 +152,10 @@ namespace AV.Core.Primitives
         /// <param name="offset">The offset to start at.</param>
         public void Restart(TimeSpan offset)
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
-                this.OffsetTicks = offset.Ticks;
-                this.Chronometer.Restart();
+                this.offsetTicks = offset.Ticks;
+                this.chronometer.Restart();
             }
         }
     }

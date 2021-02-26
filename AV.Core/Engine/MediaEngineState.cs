@@ -18,7 +18,7 @@ namespace AV.Core.Engine
     {
         private static readonly IReadOnlyDictionary<string, string> EmptyDictionary = new Dictionary<string, string>(0);
 
-        private readonly MediaEngine MediaCore;
+        private readonly MediaEngine mediaCore;
         private readonly AtomicInteger localMediaState = new AtomicInteger((int)MediaPlaybackState.Close);
         private readonly AtomicBoolean localHasMediaEnded = new AtomicBoolean(default);
 
@@ -83,7 +83,7 @@ namespace AV.Core.Engine
         internal MediaEngineState(MediaEngine mediaCore)
             : base(false)
         {
-            this.MediaCore = mediaCore;
+            this.mediaCore = mediaCore;
             this.ResetAll();
         }
 
@@ -150,7 +150,7 @@ namespace AV.Core.Engine
 
                 this.ReportCommandStatus();
                 this.ReportTimingStatus();
-                this.MediaCore.SendOnMediaStateChanged(oldState, value);
+                this.mediaCore.SendOnMediaStateChanged(oldState, value);
             }
         }
 
@@ -181,7 +181,7 @@ namespace AV.Core.Engine
 
                 if (value)
                 {
-                    this.MediaCore.SendOnMediaEnded();
+                    this.mediaCore.SendOnMediaEnded();
                 }
             }
         }
@@ -208,25 +208,25 @@ namespace AV.Core.Engine
         }
 
         /// <inheritdoc />
-        public bool IsAtEndOfStream => this.MediaCore.Container?.IsAtEndOfStream ?? false;
+        public bool IsAtEndOfStream => this.mediaCore.Container?.IsAtEndOfStream ?? false;
 
         /// <inheritdoc />
-        public bool IsPlaying => this.IsOpen && this.MediaCore.Timing.IsRunning;
+        public bool IsPlaying => this.IsOpen && this.mediaCore.Timing.IsRunning;
 
         /// <inheritdoc />
-        public bool IsPaused => this.IsOpen && !this.MediaCore.Timing.IsRunning;
+        public bool IsPaused => this.IsOpen && !this.mediaCore.Timing.IsRunning;
 
         /// <inheritdoc />
-        public bool IsSeeking => this.MediaCore.Commands?.IsSeeking ?? false;
+        public bool IsSeeking => this.mediaCore.Commands?.IsSeeking ?? false;
 
         /// <inheritdoc />
-        public bool IsClosing => this.MediaCore.Commands?.IsClosing ?? false;
+        public bool IsClosing => this.mediaCore.Commands?.IsClosing ?? false;
 
         /// <inheritdoc />
-        public bool IsOpening => this.MediaCore.Commands?.IsOpening ?? false;
+        public bool IsOpening => this.mediaCore.Commands?.IsOpening ?? false;
 
         /// <inheritdoc />
-        public bool IsChanging => this.MediaCore.Commands?.IsChanging ?? false;
+        public bool IsChanging => this.mediaCore.Commands?.IsChanging ?? false;
 
         /// <inheritdoc />
         public bool IsOpen
@@ -521,45 +521,45 @@ namespace AV.Core.Engine
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void UpdateFixedContainerProperties()
         {
-            this.BitRate = this.MediaCore.Container?.MediaBitRate ?? default;
-            this.IsOpen = !this.IsOpening && (this.MediaCore.Container?.IsOpen ?? default);
-            this.Metadata = this.MediaCore.Container?.Metadata ?? EmptyDictionary;
-            this.MediaFormat = this.MediaCore.Container?.MediaFormatName;
-            this.MediaStreamSize = this.MediaCore.Container?.MediaStreamSize ?? default;
-            this.VideoStreamIndex = this.MediaCore.Container?.Components.Video?.StreamIndex ?? -1;
-            this.AudioStreamIndex = this.MediaCore.Container?.Components.Audio?.StreamIndex ?? -1;
-            this.SubtitleStreamIndex = this.MediaCore.Container?.Components.Subtitles?.StreamIndex ?? -1;
-            this.HasAudio = this.MediaCore.Container?.Components.HasAudio ?? default;
-            this.HasVideo = this.MediaCore.Container?.Components.HasVideo ?? default;
-            this.HasClosedCaptions = this.MediaCore.Container?.Components.Video?.StreamInfo?.HasClosedCaptions ?? default;
-            this.HasSubtitles = (this.MediaCore.PreloadedSubtitles?.Count ?? 0) > 0
-                || (this.MediaCore.Container?.Components.HasSubtitles ?? false);
-            this.VideoCodec = this.MediaCore.Container?.Components.Video?.CodecName;
-            this.VideoBitRate = this.MediaCore.Container?.Components.Video?.BitRate ?? default;
-            this.VideoRotation = this.MediaCore.Container?.Components.Video?.DisplayRotation ?? default;
-            this.NaturalVideoWidth = this.MediaCore.Container?.Components.Video?.FrameWidth ?? default;
-            this.NaturalVideoHeight = this.MediaCore.Container?.Components.Video?.FrameHeight ?? default;
-            this.VideoFrameRate = this.MediaCore.Container?.Components.Video?.AverageFrameRate ?? default;
-            this.AudioCodec = this.MediaCore.Container?.Components.Audio?.CodecName;
-            this.AudioBitRate = this.MediaCore.Container?.Components.Audio?.BitRate ?? default;
-            this.AudioChannels = this.MediaCore.Container?.Components.Audio?.Channels ?? default;
-            this.AudioSampleRate = this.MediaCore.Container?.Components.Audio?.SampleRate ?? default;
-            this.AudioBitsPerSample = this.MediaCore.Container?.Components.Audio?.BitsPerSample ?? default;
-            this.NaturalDuration = this.MediaCore.Timing?.Duration;
-            this.PlaybackStartTime = this.MediaCore.Timing?.StartTime;
-            this.PlaybackEndTime = this.MediaCore.Timing?.EndTime;
-            this.IsLiveStream = this.MediaCore.Container?.IsLiveStream ?? default;
-            this.IsNetworkStream = this.MediaCore.Container?.IsNetworkStream ?? default;
-            this.IsSeekable = this.MediaCore.Container?.IsStreamSeekable ?? default;
+            this.BitRate = this.mediaCore.Container?.MediaBitRate ?? default;
+            this.IsOpen = !this.IsOpening && (this.mediaCore.Container?.IsOpen ?? default);
+            this.Metadata = this.mediaCore.Container?.Metadata ?? EmptyDictionary;
+            this.MediaFormat = this.mediaCore.Container?.MediaFormatName;
+            this.MediaStreamSize = this.mediaCore.Container?.MediaStreamSize ?? default;
+            this.VideoStreamIndex = this.mediaCore.Container?.Components.Video?.StreamIndex ?? -1;
+            this.AudioStreamIndex = this.mediaCore.Container?.Components.Audio?.StreamIndex ?? -1;
+            this.SubtitleStreamIndex = this.mediaCore.Container?.Components.Subtitles?.StreamIndex ?? -1;
+            this.HasAudio = this.mediaCore.Container?.Components.HasAudio ?? default;
+            this.HasVideo = this.mediaCore.Container?.Components.HasVideo ?? default;
+            this.HasClosedCaptions = this.mediaCore.Container?.Components.Video?.StreamInfo?.HasClosedCaptions ?? default;
+            this.HasSubtitles = (this.mediaCore.PreloadedSubtitles?.Count ?? 0) > 0
+                || (this.mediaCore.Container?.Components.HasSubtitles ?? false);
+            this.VideoCodec = this.mediaCore.Container?.Components.Video?.CodecName;
+            this.VideoBitRate = this.mediaCore.Container?.Components.Video?.BitRate ?? default;
+            this.VideoRotation = this.mediaCore.Container?.Components.Video?.DisplayRotation ?? default;
+            this.NaturalVideoWidth = this.mediaCore.Container?.Components.Video?.FrameWidth ?? default;
+            this.NaturalVideoHeight = this.mediaCore.Container?.Components.Video?.FrameHeight ?? default;
+            this.VideoFrameRate = this.mediaCore.Container?.Components.Video?.AverageFrameRate ?? default;
+            this.AudioCodec = this.mediaCore.Container?.Components.Audio?.CodecName;
+            this.AudioBitRate = this.mediaCore.Container?.Components.Audio?.BitRate ?? default;
+            this.AudioChannels = this.mediaCore.Container?.Components.Audio?.Channels ?? default;
+            this.AudioSampleRate = this.mediaCore.Container?.Components.Audio?.SampleRate ?? default;
+            this.AudioBitsPerSample = this.mediaCore.Container?.Components.Audio?.BitsPerSample ?? default;
+            this.NaturalDuration = this.mediaCore.Timing?.Duration;
+            this.PlaybackStartTime = this.mediaCore.Timing?.StartTime;
+            this.PlaybackEndTime = this.mediaCore.Timing?.EndTime;
+            this.IsLiveStream = this.mediaCore.Container?.IsLiveStream ?? default;
+            this.IsNetworkStream = this.mediaCore.Container?.IsNetworkStream ?? default;
+            this.IsSeekable = this.mediaCore.Container?.IsStreamSeekable ?? default;
             this.CanPause = this.IsOpen ? !this.IsLiveStream : default;
 
-            var videoAspectWidth = this.MediaCore.Container?.Components.Video?.DisplayAspectWidth ?? default;
-            var videoAspectHeight = this.MediaCore.Container?.Components.Video?.DisplayAspectHeight ?? default;
+            var videoAspectWidth = this.mediaCore.Container?.Components.Video?.DisplayAspectWidth ?? default;
+            var videoAspectHeight = this.mediaCore.Container?.Components.Video?.DisplayAspectHeight ?? default;
             this.VideoAspectRatio = videoAspectWidth != default && videoAspectHeight != default ?
                 $"{videoAspectWidth}:{videoAspectHeight}" : default;
 
-            var seekableType = this.MediaCore.Container?.Components.SeekableMediaType ?? MediaType.None;
-            var seekable = this.MediaCore.Container?.Components.Seekable;
+            var seekableType = this.mediaCore.Container?.Components.SeekableMediaType ?? MediaType.None;
+            var seekable = this.mediaCore.Container?.Components.Seekable;
 
             switch (seekableType)
             {
@@ -593,7 +593,7 @@ namespace AV.Core.Engine
             }
 
             // Update the discrete frame position upon rendering
-            if (block.MediaType == (this.MediaCore.Container?.Components.SeekableMediaType ?? MediaType.None))
+            if (block.MediaType == (this.mediaCore.Container?.Components.SeekableMediaType ?? MediaType.None))
             {
                 this.FramePosition = block.StartTime;
             }
@@ -628,7 +628,7 @@ namespace AV.Core.Engine
         /// Updates the playback position and related properties.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal void ReportPlaybackPosition() => this.ReportPlaybackPosition(this.MediaCore.PlaybackPosition);
+        internal void ReportPlaybackPosition() => this.ReportPlaybackPosition(this.mediaCore.PlaybackPosition);
 
         /// <summary>
         /// Updates the playback position related properties.
@@ -637,12 +637,12 @@ namespace AV.Core.Engine
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void ReportPlaybackPosition(TimeSpan newPosition)
         {
-            var oldSpeedRatio = this.MediaCore.Timing.SpeedRatio;
+            var oldSpeedRatio = this.mediaCore.Timing.SpeedRatio;
             var newSpeedRatio = this.SpeedRatio;
 
             if (Math.Abs(oldSpeedRatio - newSpeedRatio) > double.Epsilon)
             {
-                this.MediaCore.Timing.SpeedRatio = this.SpeedRatio;
+                this.mediaCore.Timing.SpeedRatio = this.SpeedRatio;
             }
 
             var oldPosition = this.Position;
@@ -652,7 +652,7 @@ namespace AV.Core.Engine
             }
 
             this.Position = newPosition;
-            this.MediaCore.SendOnPositionChanged(oldPosition, newPosition);
+            this.mediaCore.SendOnPositionChanged(oldPosition, newPosition);
         }
 
         /// <summary>
@@ -703,14 +703,14 @@ namespace AV.Core.Engine
             this.ResetBufferingStatistics();
 
             // Reset the properties if the is no associated container
-            if (this.MediaCore.Container == null)
+            if (this.mediaCore.Container == null)
             {
                 this.MediaStreamSize = default;
                 return;
             }
 
             // Try to get a valid stream size
-            this.MediaStreamSize = this.MediaCore.Container.MediaStreamSize;
+            this.MediaStreamSize = this.mediaCore.Container.MediaStreamSize;
             var durationSeconds = this.NaturalDuration?.TotalSeconds ?? 0d;
 
             // Compute the bit rate and buffering properties based on media byte size
@@ -729,9 +729,9 @@ namespace AV.Core.Engine
         internal void UpdateDecodingStats(long bitRate)
         {
             this.DecodingBitRate = bitRate;
-            this.NaturalDuration = this.MediaCore.Timing?.Duration;
-            this.PlaybackStartTime = this.MediaCore.Timing?.StartTime;
-            this.PlaybackEndTime = this.MediaCore.Timing?.EndTime;
+            this.NaturalDuration = this.mediaCore.Timing?.Duration;
+            this.PlaybackStartTime = this.mediaCore.Timing?.StartTime;
+            this.PlaybackEndTime = this.mediaCore.Timing?.EndTime;
         }
 
         /// <summary>
@@ -753,8 +753,8 @@ namespace AV.Core.Engine
             this.DownloadProgress = Math.Min(1d, (double)bufferLength / MediaEngine.BufferLengthMax);
 
             // Check if we are currently buffering
-            var isCurrentlyBuffering = this.MediaCore.ShouldReadMorePackets
-                && (this.MediaCore.IsSyncBuffering || this.BufferingProgress < 1d);
+            var isCurrentlyBuffering = this.mediaCore.ShouldReadMorePackets
+                && (this.mediaCore.IsSyncBuffering || this.BufferingProgress < 1d);
 
             // Detect and notify a change in buffering state
             if (isCurrentlyBuffering == this.IsBuffering)
@@ -765,11 +765,11 @@ namespace AV.Core.Engine
             this.IsBuffering = isCurrentlyBuffering;
             if (isCurrentlyBuffering)
             {
-                this.MediaCore.SendOnBufferingStarted();
+                this.mediaCore.SendOnBufferingStarted();
             }
             else
             {
-                this.MediaCore.SendOnBufferingEnded();
+                this.mediaCore.SendOnBufferingEnded();
             }
         }
 

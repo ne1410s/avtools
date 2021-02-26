@@ -18,12 +18,12 @@ namespace AV.Core.Primitives
         /// <summary>
         /// The locking object to perform synchronization.
         /// </summary>
-        private readonly object SyncLock = new object();
+        private readonly object syncLock = new object();
 
         /// <summary>
         /// The unmanaged buffer.
         /// </summary>
-        private IntPtr Buffer;
+        private IntPtr buffer;
 
         // Property backing
         private bool localIsDisposed;
@@ -40,10 +40,10 @@ namespace AV.Core.Primitives
         public CircularBuffer(int bufferLength)
         {
             this.localLength = bufferLength;
-            this.Buffer = Marshal.AllocHGlobal(this.localLength);
+            this.buffer = Marshal.AllocHGlobal(this.localLength);
 
             // Clear the memory as it might be dirty after allocating it.
-            var baseAddress = (byte*)this.Buffer.ToPointer();
+            var baseAddress = (byte*)this.buffer.ToPointer();
             for (var i = 0; i < this.localLength; i++)
             {
                 baseAddress[i] = 0;
@@ -53,29 +53,44 @@ namespace AV.Core.Primitives
         /// <summary>
         /// Gets a value indicating whether this instance is disposed.
         /// </summary>
-        public bool IsDisposed { get { lock (this.SyncLock)
-{
-    return this.localIsDisposed;
-}
-        } }
+        public bool IsDisposed
+        {
+            get
+            {
+                lock (this.syncLock)
+                {
+                    return this.localIsDisposed;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the capacity of this buffer.
         /// </summary>
-        public int Length { get { lock (this.SyncLock)
-{
-    return this.localLength;
-}
-        } }
+        public int Length
+        {
+            get
+            {
+                lock (this.syncLock)
+                {
+                    return this.localLength;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the current, 0-based read index.
         /// </summary>
-        public int ReadIndex { get { lock (this.SyncLock)
-{
-    return this.localReadIndex;
-}
-        } }
+        public int ReadIndex
+        {
+            get
+            {
+                lock (this.syncLock)
+                {
+                    return this.localReadIndex;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the maximum rewindable amount of bytes.
@@ -84,7 +99,7 @@ namespace AV.Core.Primitives
         {
             get
             {
-                lock (this.SyncLock)
+                lock (this.syncLock)
                 {
                     if (this.localWriteIndex < this.localReadIndex)
                     {
@@ -99,47 +114,72 @@ namespace AV.Core.Primitives
         /// <summary>
         /// Gets the current, 0-based write index.
         /// </summary>
-        public int WriteIndex { get { lock (this.SyncLock)
-{
-    return this.localWriteIndex;
-}
-        } }
+        public int WriteIndex
+        {
+            get
+            {
+                lock (this.syncLock)
+                {
+                    return this.localWriteIndex;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets an the object associated with the last write.
         /// </summary>
-        public TimeSpan WriteTag { get { lock (this.SyncLock)
-{
-    return this.localWriteTag;
-}
-        } }
+        public TimeSpan WriteTag
+        {
+            get
+            {
+                lock (this.syncLock)
+                {
+                    return this.localWriteTag;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the available bytes to read.
         /// </summary>
-        public int ReadableCount { get { lock (this.SyncLock)
-{
-    return this.localReadableCount;
-}
-        } }
+        public int ReadableCount
+        {
+            get
+            {
+                lock (this.syncLock)
+                {
+                    return this.localReadableCount;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the number of bytes that can be written.
         /// </summary>
-        public int WritableCount { get { lock (this.SyncLock)
-{
-    return this.localLength - this.localReadableCount;
-}
-        } }
+        public int WritableCount
+        {
+            get
+            {
+                lock (this.syncLock)
+                {
+                    return this.localLength - this.localReadableCount;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets percentage of used bytes (readable/available, from 0.0 to 1.0).
         /// </summary>
-        public double CapacityPercent { get { lock (this.SyncLock)
-{
-    return (double)this.localReadableCount / this.localLength;
-}
-        } }
+        public double CapacityPercent
+        {
+            get
+            {
+                lock (this.syncLock)
+                {
+                    return (double)this.localReadableCount / this.localLength;
+                }
+            }
+        }
 
         /// <summary>
         /// Skips the specified amount requested bytes to be read.
@@ -148,7 +188,7 @@ namespace AV.Core.Primitives
         /// <exception cref="InvalidOperationException">When requested bytes is greater than readable count.</exception>
         public void Skip(int requestedBytes)
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
                 if (requestedBytes > this.localReadableCount)
                 {
@@ -173,7 +213,7 @@ namespace AV.Core.Primitives
         /// <exception cref="InvalidOperationException">When requested is greater than rewindable.</exception>
         public void Rewind(int requestedBytes)
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
                 if (requestedBytes > this.RewindableCount)
                 {
@@ -200,7 +240,7 @@ namespace AV.Core.Primitives
         /// <exception cref="InvalidOperationException">When requested bytes is greater than readable count.</exception>
         public void Read(int requestedBytes, byte[] target, int targetOffset)
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
                 if (requestedBytes > this.localReadableCount)
                 {
@@ -212,7 +252,7 @@ namespace AV.Core.Primitives
                 while (readCount < requestedBytes)
                 {
                     var copyLength = Math.Min(this.localLength - this.localReadIndex, requestedBytes - readCount);
-                    var sourcePtr = this.Buffer + this.localReadIndex;
+                    var sourcePtr = this.buffer + this.localReadIndex;
                     Marshal.Copy(sourcePtr, target, targetOffset + readCount, copyLength);
 
                     readCount += copyLength;
@@ -238,7 +278,7 @@ namespace AV.Core.Primitives
         /// <exception cref="InvalidOperationException">When read needs to be called more often.</exception>
         public void Write(IntPtr source, int length, TimeSpan writeTag, bool overwrite)
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
                 if (overwrite == false && length > this.WritableCount)
                 {
@@ -251,7 +291,7 @@ namespace AV.Core.Primitives
                 {
                     var copyLength = Math.Min(this.localLength - this.localWriteIndex, length - writeCount);
                     var sourcePtr = source + writeCount;
-                    var targetPtr = this.Buffer + this.localWriteIndex;
+                    var targetPtr = this.buffer + this.localWriteIndex;
                     System.Buffer.MemoryCopy(
                         sourcePtr.ToPointer(),
                         targetPtr.ToPointer(),
@@ -277,7 +317,7 @@ namespace AV.Core.Primitives
         /// </summary>
         public void Clear()
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
                 this.localWriteIndex = 0;
                 this.localReadIndex = 0;
@@ -289,7 +329,7 @@ namespace AV.Core.Primitives
         /// <inheritdoc />
         public void Dispose()
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
                 if (this.localIsDisposed)
                 {
@@ -297,8 +337,8 @@ namespace AV.Core.Primitives
                 }
 
                 this.Clear();
-                Marshal.FreeHGlobal(this.Buffer);
-                this.Buffer = IntPtr.Zero;
+                Marshal.FreeHGlobal(this.buffer);
+                this.buffer = IntPtr.Zero;
                 this.localLength = 0;
                 this.localIsDisposed = true;
             }

@@ -21,19 +21,19 @@ namespace AV.Core.Container
         /// <summary>
         /// The blocks that are available to be filled.
         /// </summary>
-        private readonly Queue<MediaBlock> PoolBlocks;
+        private readonly Queue<MediaBlock> poolBlocks;
 
         /// <summary>
         /// The blocks that are available for rendering.
         /// </summary>
-        private readonly List<MediaBlock> PlaybackBlocks;
+        private readonly List<MediaBlock> playbackBlocks;
 
         /// <summary>
         /// Controls multiple reads and exclusive writes.
         /// </summary>
-        private readonly object SyncLock = new ();
+        private readonly object syncLock = new ();
 
-        private bool IsNonMonotonic;
+        private bool isNonMonotonic;
         private TimeSpan localRangeStartTime;
         private TimeSpan localRangeEndTime;
         private TimeSpan localRangeMidTime;
@@ -48,8 +48,8 @@ namespace AV.Core.Container
         private bool localIsDisposed;
 
         // Fast Last Lookup.
-        private long LastLookupTimeTicks = TimeSpan.MinValue.Ticks;
-        private int LastLookupIndex = -1;
+        private long lastLookupTimeTicks = TimeSpan.MinValue.Ticks;
+        private int lastLookupIndex = -1;
 
         /// <summary>
         /// Initialises a new instance of the <see cref="MediaBlockBuffer"/> class.
@@ -60,13 +60,13 @@ namespace AV.Core.Container
         {
             this.Capacity = capacity;
             this.MediaType = mediaType;
-            this.PoolBlocks = new Queue<MediaBlock>(capacity + 1); // +1 to be safe and not degrade performance
-            this.PlaybackBlocks = new List<MediaBlock>(capacity + 1); // +1 to be safe and not degrade performance
+            this.poolBlocks = new Queue<MediaBlock>(capacity + 1); // +1 to be safe and not degrade performance
+            this.playbackBlocks = new List<MediaBlock>(capacity + 1); // +1 to be safe and not degrade performance
 
             // allocate the blocks
             for (var i = 0; i < capacity; i++)
             {
-                this.PoolBlocks.Enqueue(CreateBlock(mediaType));
+                this.poolBlocks.Enqueue(CreateBlock(mediaType));
             }
         }
 
@@ -83,43 +83,63 @@ namespace AV.Core.Container
         /// <summary>
         /// Gets a value indicating whether this instance is disposed.
         /// </summary>
-        public bool IsDisposed { get { lock (this.SyncLock)
-{
-    return this.localIsDisposed;
-}
-        } }
+        public bool IsDisposed
+        {
+            get
+            {
+                lock (this.syncLock)
+                {
+                    return this.localIsDisposed;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the start time of the first block.
         /// </summary>
-        public TimeSpan RangeStartTime { get { lock (this.SyncLock)
-{
-    return this.localRangeStartTime;
-}
-        } }
+        public TimeSpan RangeStartTime
+        {
+            get
+            {
+                lock (this.syncLock)
+                {
+                    return this.localRangeStartTime;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the middle time of the range.
         /// </summary>
-        public TimeSpan RangeMidTime { get { lock (this.SyncLock)
-{
-    return this.localRangeMidTime;
-}
-        } }
+        public TimeSpan RangeMidTime
+        {
+            get
+            {
+                lock (this.syncLock)
+                {
+                    return this.localRangeMidTime;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the end time of the last block.
         /// </summary>
-        public TimeSpan RangeEndTime { get { lock (this.SyncLock)
-{
-    return this.localRangeEndTime;
-}
-        } }
+        public TimeSpan RangeEndTime
+        {
+            get
+            {
+                lock (this.syncLock)
+                {
+                    return this.localRangeEndTime;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the range of time between the first block and the end time of the last block.
         /// </summary>
-        public TimeSpan RangeDuration { get { lock (this.SyncLock)
+        public TimeSpan RangeDuration { get { lock (this.syncLock)
 {
     return this.localRangeDuration;
 }
@@ -128,7 +148,7 @@ namespace AV.Core.Container
         /// <summary>
         /// Gets the compressed data bit rate from which media blocks were created.
         /// </summary>
-        public long RangeBitRate { get { lock (this.SyncLock)
+        public long RangeBitRate { get { lock (this.syncLock)
 {
     return this.localRangeBitRate;
 }
@@ -137,7 +157,7 @@ namespace AV.Core.Container
         /// <summary>
         /// Gets the average duration of the currently available playback blocks.
         /// </summary>
-        public TimeSpan AverageBlockDuration { get { lock (this.SyncLock)
+        public TimeSpan AverageBlockDuration { get { lock (this.syncLock)
 {
     return this.localAverageBlockDuration;
 }
@@ -146,7 +166,7 @@ namespace AV.Core.Container
         /// <summary>
         /// Gets a value indicating whether all the durations of the blocks are equal.
         /// </summary>
-        public bool IsMonotonic { get { lock (this.SyncLock)
+        public bool IsMonotonic { get { lock (this.syncLock)
 {
     return this.localIsMonotonic;
 }
@@ -155,7 +175,7 @@ namespace AV.Core.Container
         /// <summary>
         /// Gets the duration of the blocks. If the blocks are not monotonic returns zero.
         /// </summary>
-        public TimeSpan MonotonicDuration { get { lock (this.SyncLock)
+        public TimeSpan MonotonicDuration { get { lock (this.syncLock)
 {
     return this.localMonotonicDuration;
 }
@@ -164,7 +184,7 @@ namespace AV.Core.Container
         /// <summary>
         /// Gets the number of available playback blocks.
         /// </summary>
-        public int Count { get { lock (this.SyncLock)
+        public int Count { get { lock (this.syncLock)
 {
     return this.localCount;
 }
@@ -173,7 +193,7 @@ namespace AV.Core.Container
         /// <summary>
         /// Gets the usage percent from 0.0 to 1.0.
         /// </summary>
-        public double CapacityPercent { get { lock (this.SyncLock)
+        public double CapacityPercent { get { lock (this.syncLock)
 {
     return this.localCapacityPercent;
 }
@@ -182,7 +202,7 @@ namespace AV.Core.Container
         /// <summary>
         /// Gets a value indicating whether the playback blocks are all allocated.
         /// </summary>
-        public bool IsFull { get { lock (this.SyncLock)
+        public bool IsFull { get { lock (this.syncLock)
 {
     return this.localIsFull;
 }
@@ -200,9 +220,9 @@ namespace AV.Core.Container
         {
             get
             {
-                lock (this.SyncLock)
+                lock (this.syncLock)
                 {
-                    return this.PlaybackBlocks[index];
+                    return this.playbackBlocks[index];
                 }
             }
         }
@@ -219,10 +239,10 @@ namespace AV.Core.Container
         {
             get
             {
-                lock (this.SyncLock)
+                lock (this.syncLock)
                 {
                     var index = this.IndexOf(positionTicks);
-                    return index >= 0 ? this.PlaybackBlocks[index] : null;
+                    return index >= 0 ? this.playbackBlocks[index] : null;
                 }
             }
         }
@@ -236,7 +256,7 @@ namespace AV.Core.Container
         /// <returns>The percent of the range.</returns>
         public double GetRangePercent(TimeSpan position)
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
                 return this.RangeDuration.Ticks != 0 ?
                     Convert.ToDouble(position.Ticks - this.RangeStartTime.Ticks) / this.RangeDuration.Ticks : 0d;
@@ -251,7 +271,7 @@ namespace AV.Core.Container
         /// <returns>The previous (if any) and next (if any) blocks.</returns>
         public MediaBlock[] Neighbors(MediaBlock current)
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
                 var result = new MediaBlock[3];
                 if (current == null)
@@ -275,7 +295,7 @@ namespace AV.Core.Container
         /// <returns>The previous (if any) and next (if any) blocks.</returns>
         public MediaBlock[] Neighbors(TimeSpan position)
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
                 var current = this[position.Ticks];
                 return this.Neighbors(current);
@@ -295,7 +315,7 @@ namespace AV.Core.Container
                 return null;
             }
 
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
                 return current.Next;
             }
@@ -313,7 +333,7 @@ namespace AV.Core.Container
                 return null;
             }
 
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
                 // capture the next frame
                 var next = current.Next;
@@ -348,7 +368,7 @@ namespace AV.Core.Container
                 return null;
             }
 
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
                 return current.Previous;
             }
@@ -363,9 +383,9 @@ namespace AV.Core.Container
         /// </returns>
         public bool IsInRange(TimeSpan renderTime)
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
-                if (this.PlaybackBlocks.Count == 0)
+                if (this.playbackBlocks.Count == 0)
                 {
                     return false;
                 }
@@ -385,25 +405,25 @@ namespace AV.Core.Container
         /// <returns>The media block's index.</returns>
         public int IndexOf(long renderTimeTicks)
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
-                if (this.LastLookupTimeTicks != TimeSpan.MinValue.Ticks && renderTimeTicks == this.LastLookupTimeTicks)
+                if (this.lastLookupTimeTicks != TimeSpan.MinValue.Ticks && renderTimeTicks == this.lastLookupTimeTicks)
                 {
-                    return this.LastLookupIndex;
+                    return this.lastLookupIndex;
                 }
 
-                this.LastLookupTimeTicks = renderTimeTicks;
-                this.LastLookupIndex = this.PlaybackBlocks.Count > 0 && renderTimeTicks <= this.PlaybackBlocks[0].StartTime.Ticks ? 0 :
-                    this.PlaybackBlocks.StartIndexOf(this.LastLookupTimeTicks);
+                this.lastLookupTimeTicks = renderTimeTicks;
+                this.lastLookupIndex = this.playbackBlocks.Count > 0 && renderTimeTicks <= this.playbackBlocks[0].StartTime.Ticks ? 0 :
+                    this.playbackBlocks.StartIndexOf(this.lastLookupTimeTicks);
 
-                return this.LastLookupIndex;
+                return this.lastLookupIndex;
             }
         }
 
         /// <inheritdoc />
         public void Dispose()
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
                 if (this.localIsDisposed)
                 {
@@ -412,16 +432,16 @@ namespace AV.Core.Container
 
                 this.localIsDisposed = true;
 
-                while (this.PoolBlocks.Count > 0)
+                while (this.poolBlocks.Count > 0)
                 {
-                    var block = this.PoolBlocks.Dequeue();
+                    var block = this.poolBlocks.Dequeue();
                     block.Dispose();
                 }
 
-                for (var i = this.PlaybackBlocks.Count - 1; i >= 0; i--)
+                for (var i = this.playbackBlocks.Count - 1; i >= 0; i--)
                 {
-                    var block = this.PlaybackBlocks[i];
-                    this.PlaybackBlocks.RemoveAt(i);
+                    var block = this.playbackBlocks[i];
+                    this.playbackBlocks.RemoveAt(i);
                     block.Dispose();
                 }
 
@@ -444,43 +464,43 @@ namespace AV.Core.Container
                 return null;
             }
 
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
                 try
                 {
                     // Check if we already have a block at the given time
                     if (this.IsInRange(source.StartTime) && source.HasValidStartTime)
                     {
-                        var repeatedBlock = this.PlaybackBlocks.FirstOrDefault(f => f.StartTime.Ticks == source.StartTime.Ticks);
+                        var repeatedBlock = this.playbackBlocks.FirstOrDefault(f => f.StartTime.Ticks == source.StartTime.Ticks);
                         if (repeatedBlock != null)
                         {
-                            this.PlaybackBlocks.Remove(repeatedBlock);
-                            this.PoolBlocks.Enqueue(repeatedBlock);
+                            this.playbackBlocks.Remove(repeatedBlock);
+                            this.poolBlocks.Enqueue(repeatedBlock);
                         }
                     }
 
                     // if there are no available blocks, make room!
-                    if (this.PoolBlocks.Count <= 0)
+                    if (this.poolBlocks.Count <= 0)
                     {
                         // Remove the first block from playback
-                        var firstBlock = this.PlaybackBlocks[0];
-                        this.PlaybackBlocks.RemoveAt(0);
-                        this.PoolBlocks.Enqueue(firstBlock);
+                        var firstBlock = this.playbackBlocks[0];
+                        this.playbackBlocks.RemoveAt(0);
+                        this.poolBlocks.Enqueue(firstBlock);
                     }
 
                     // Get a block reference from the pool and convert it!
-                    var targetBlock = this.PoolBlocks.Dequeue();
-                    var lastBlock = this.PlaybackBlocks.Count > 0 ? this.PlaybackBlocks[^1] : null;
+                    var targetBlock = this.poolBlocks.Dequeue();
+                    var lastBlock = this.playbackBlocks.Count > 0 ? this.playbackBlocks[^1] : null;
 
                     if (container.Convert(source, ref targetBlock, true, lastBlock) == false)
                     {
                         // return the converted block to the pool
-                        this.PoolBlocks.Enqueue(targetBlock);
+                        this.poolBlocks.Enqueue(targetBlock);
                         return null;
                     }
 
                     // Add the target block to the playback blocks
-                    this.PlaybackBlocks.Add(targetBlock);
+                    this.playbackBlocks.Add(targetBlock);
 
                     // return the new target block
                     return targetBlock;
@@ -499,15 +519,15 @@ namespace AV.Core.Container
         /// </summary>
         internal void Clear()
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
                 // return all the blocks to the block pool
-                foreach (var block in this.PlaybackBlocks)
+                foreach (var block in this.playbackBlocks)
                 {
-                    this.PoolBlocks.Enqueue(block);
+                    this.poolBlocks.Enqueue(block);
                 }
 
-                this.PlaybackBlocks.Clear();
+                this.playbackBlocks.Clear();
                 this.UpdateCollectionProperties();
             }
         }
@@ -518,10 +538,10 @@ namespace AV.Core.Container
         /// <returns>The formatted string.</returns>
         internal string Debug()
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
-                return $"{this.MediaType,-12} - CAP: {this.Capacity,10} | FRE: {this.PoolBlocks.Count,7} | " +
-                    $"USD: {this.PlaybackBlocks.Count,4} |  RNG: {this.RangeStartTime.Format(),8} to {this.RangeEndTime.Format().Trim()}";
+                return $"{this.MediaType,-12} - CAP: {this.Capacity,10} | FRE: {this.poolBlocks.Count,7} | " +
+                    $"USD: {this.playbackBlocks.Count,4} |  RNG: {this.RangeStartTime.Format(),8} to {this.RangeEndTime.Format().Trim()}";
             }
         }
 
@@ -534,7 +554,7 @@ namespace AV.Core.Container
         /// <returns>A discrete frame position.</returns>
         internal TimeSpan? GetSnapPosition(TimeSpan position)
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
                 if (this.IsMonotonic == false)
                 {
@@ -585,7 +605,7 @@ namespace AV.Core.Container
         }
 
         /// <summary>
-        /// Updates the <see cref="PlaybackBlocks"/> collection properties.
+        /// Updates the <see cref="playbackBlocks"/> collection properties.
         /// This method must be called whenever the collection is modified.
         /// The reason this exists is to avoid computing and iterating over these values every time they are read.
         /// </summary>
@@ -593,36 +613,36 @@ namespace AV.Core.Container
         private void UpdateCollectionProperties()
         {
             // Update the playback blocks sorting
-            if (this.PlaybackBlocks.Count > 0)
+            if (this.playbackBlocks.Count > 0)
             {
-                var maxBlockIndex = this.PlaybackBlocks.Count - 1;
+                var maxBlockIndex = this.playbackBlocks.Count - 1;
 
                 // Perform the sorting and assignment of Previous and Next blocks
-                this.PlaybackBlocks.Sort();
-                this.PlaybackBlocks[0].Index = 0;
-                this.PlaybackBlocks[0].Previous = null;
-                this.PlaybackBlocks[0].Next = maxBlockIndex > 0 ? this.PlaybackBlocks[1] : null;
+                this.playbackBlocks.Sort();
+                this.playbackBlocks[0].Index = 0;
+                this.playbackBlocks[0].Previous = null;
+                this.playbackBlocks[0].Next = maxBlockIndex > 0 ? this.playbackBlocks[1] : null;
 
                 for (var blockIndex = 1; blockIndex <= maxBlockIndex; blockIndex++)
                 {
-                    this.PlaybackBlocks[blockIndex].Index = blockIndex;
-                    this.PlaybackBlocks[blockIndex].Previous = this.PlaybackBlocks[blockIndex - 1];
-                    this.PlaybackBlocks[blockIndex].Next = blockIndex + 1 <= maxBlockIndex ? this.PlaybackBlocks[blockIndex + 1] : null;
+                    this.playbackBlocks[blockIndex].Index = blockIndex;
+                    this.playbackBlocks[blockIndex].Previous = this.playbackBlocks[blockIndex - 1];
+                    this.playbackBlocks[blockIndex].Next = blockIndex + 1 <= maxBlockIndex ? this.playbackBlocks[blockIndex + 1] : null;
                 }
             }
 
-            this.LastLookupIndex = -1;
-            this.LastLookupTimeTicks = TimeSpan.MinValue.Ticks;
+            this.lastLookupIndex = -1;
+            this.lastLookupTimeTicks = TimeSpan.MinValue.Ticks;
 
-            this.localCount = this.PlaybackBlocks.Count;
-            this.localRangeStartTime = this.PlaybackBlocks.Count == 0 ? TimeSpan.Zero : this.PlaybackBlocks[0].StartTime;
-            this.localRangeEndTime = this.PlaybackBlocks.Count == 0 ? TimeSpan.Zero : this.PlaybackBlocks[^1].EndTime;
+            this.localCount = this.playbackBlocks.Count;
+            this.localRangeStartTime = this.playbackBlocks.Count == 0 ? TimeSpan.Zero : this.playbackBlocks[0].StartTime;
+            this.localRangeEndTime = this.playbackBlocks.Count == 0 ? TimeSpan.Zero : this.playbackBlocks[^1].EndTime;
             this.localRangeDuration = TimeSpan.FromTicks(this.RangeEndTime.Ticks - this.RangeStartTime.Ticks);
             this.localRangeMidTime = TimeSpan.FromTicks(this.localRangeStartTime.Ticks + (this.localRangeDuration.Ticks / 2));
             this.localCapacityPercent = Convert.ToDouble(this.localCount) / this.Capacity;
             this.localIsFull = this.localCount >= this.Capacity;
             this.localRangeBitRate = this.localRangeDuration.TotalSeconds <= 0 || this.localCount <= 1 ? 0 :
-                Convert.ToInt64(8d * this.PlaybackBlocks.Sum(m => m.CompressedSize) / this.localRangeDuration.TotalSeconds);
+                Convert.ToInt64(8d * this.playbackBlocks.Sum(m => m.CompressedSize) / this.localRangeDuration.TotalSeconds);
 
             // don't compute an average if we don't have blocks
             if (this.localCount <= 0)
@@ -632,21 +652,21 @@ namespace AV.Core.Container
             }
 
             // Don't compute if we've already determined that it's non-monotonic
-            if (this.IsNonMonotonic)
+            if (this.isNonMonotonic)
             {
                 this.localAverageBlockDuration = TimeSpan.FromTicks(
-                    Convert.ToInt64(this.PlaybackBlocks.Average(b => Convert.ToDouble(b.Duration.Ticks))));
+                    Convert.ToInt64(this.playbackBlocks.Average(b => Convert.ToDouble(b.Duration.Ticks))));
 
                 return;
             }
 
             // Monotonic verification
-            var lastBlockDuration = this.PlaybackBlocks[this.localCount - 1].Duration;
-            this.IsNonMonotonic = this.PlaybackBlocks.Any(b => b.Duration.Ticks != lastBlockDuration.Ticks);
-            this.localIsMonotonic = !this.IsNonMonotonic;
+            var lastBlockDuration = this.playbackBlocks[this.localCount - 1].Duration;
+            this.isNonMonotonic = this.playbackBlocks.Any(b => b.Duration.Ticks != lastBlockDuration.Ticks);
+            this.localIsMonotonic = !this.isNonMonotonic;
             this.localMonotonicDuration = this.localIsMonotonic ? lastBlockDuration : default;
             this.localAverageBlockDuration = this.localIsMonotonic ? lastBlockDuration : TimeSpan.FromTicks(
-                Convert.ToInt64(this.PlaybackBlocks.Average(b => Convert.ToDouble(b.Duration.Ticks))));
+                Convert.ToInt64(this.playbackBlocks.Average(b => Convert.ToDouble(b.Duration.Ticks))));
         }
     }
 }

@@ -22,12 +22,12 @@ namespace AV.Core.Engine
     /// <seealso cref="IMediaWorker" />
     internal sealed class BlockRenderingWorker : WorkerBase, IMediaWorker, ILoggingSource
     {
-        private readonly AtomicBoolean HasInitialized = new (false);
-        private readonly Action<MediaType[]> SerialRenderBlocks;
-        private readonly Action<MediaType[]> ParallelRenderBlocks;
-        private readonly Thread QuantumThread;
-        private readonly ManualResetEventSlim QuantumWaiter = new (false);
-        private DateTime LastSpeedRatioTime;
+        private readonly AtomicBoolean hasInitialized = new (false);
+        private readonly Action<MediaType[]> serialRenderBlocks;
+        private readonly Action<MediaType[]> parallelRenderBlocks;
+        private readonly Thread quantumThread;
+        private readonly ManualResetEventSlim quantumWaiter = new (false);
+        private DateTime lastSpeedRatioTime;
 
         /// <summary>
         /// Initialises a new instance of the <see cref="BlockRenderingWorker"/> class.
@@ -41,21 +41,21 @@ namespace AV.Core.Engine
             this.Container = this.MediaCore.Container;
             this.MediaOptions = mediaCore.MediaOptions;
             this.State = this.MediaCore.State;
-            this.ParallelRenderBlocks = (all) => Parallel.ForEach(all, (t) => this.RenderBlock(t));
-            this.SerialRenderBlocks = (all) => { foreach (var t in all)
+            this.parallelRenderBlocks = (all) => Parallel.ForEach(all, (t) => this.RenderBlock(t));
+            this.serialRenderBlocks = (all) => { foreach (var t in all)
 {
     this.RenderBlock(t);
 }
             };
 
-            this.QuantumThread = new Thread(this.RunQuantumThread)
+            this.quantumThread = new Thread(this.RunQuantumThread)
             {
                 IsBackground = true,
                 Priority = ThreadPriority.Highest,
                 Name = $"{nameof(BlockRenderingWorker)}.Thread",
             };
 
-            this.QuantumThread.Start();
+            this.quantumThread.Start();
         }
 
         /// <inheritdoc />
@@ -149,11 +149,11 @@ namespace AV.Core.Engine
                 // Render each of the Media Types if it is time to do so.
                 if (this.MediaOptions.UseParallelRendering)
                 {
-                    this.ParallelRenderBlocks.Invoke(all);
+                    this.parallelRenderBlocks.Invoke(all);
                 }
                 else
                 {
-                    this.SerialRenderBlocks.Invoke(all);
+                    this.serialRenderBlocks.Invoke(all);
                 }
             }
             catch (Exception ex)
@@ -188,7 +188,7 @@ namespace AV.Core.Engine
         protected override void Dispose(bool alsoManaged)
         {
             base.Dispose(alsoManaged);
-            this.QuantumWaiter.Dispose();
+            this.quantumWaiter.Dispose();
         }
 
         /// <summary>
@@ -230,7 +230,7 @@ namespace AV.Core.Engine
                     var waitTime = this.RemainingCycleTime;
                     if (waitTime.Ticks > 0)
                     {
-                        this.QuantumWaiter.Wait(waitTime);
+                        this.quantumWaiter.Wait(waitTime);
                     }
                 }
 
@@ -252,7 +252,7 @@ namespace AV.Core.Engine
         private bool Initialize(MediaType[] all)
         {
             // Don't run the cycle if we have already initialized
-            if (this.HasInitialized == true)
+            if (this.hasInitialized == true)
             {
                 return true;
             }
@@ -264,7 +264,7 @@ namespace AV.Core.Engine
             }
 
             // Mark as initialized
-            this.HasInitialized.Value = true;
+            this.hasInitialized.Value = true;
             return true;
         }
 
@@ -419,7 +419,7 @@ namespace AV.Core.Engine
             var needsSpeedUp = canChangeSpeed && bufferedMs > maxBufferedMs;
             var needsSlowDown = canChangeSpeed && bufferedMs < minBufferedMs;
             var needsSpeedChange = needsSpeedUp || needsSlowDown;
-            var lastUpdateSinceMs = TimeSpan.FromTicks(DateTime.UtcNow.Ticks - this.LastSpeedRatioTime.Ticks).TotalMilliseconds;
+            var lastUpdateSinceMs = TimeSpan.FromTicks(DateTime.UtcNow.Ticks - this.lastSpeedRatioTime.Ticks).TotalMilliseconds;
             var bufferedDelta = needsSpeedUp
                 ? bufferedMs - maxBufferedMs
                 : minBufferedMs - bufferedMs;
@@ -440,7 +440,7 @@ namespace AV.Core.Engine
                 }
 
                 this.MediaCore.Timing.Update(this.MediaCore.Timing.Position.Add(deltaPosition), MediaType.None);
-                this.LastSpeedRatioTime = DateTime.UtcNow;
+                this.lastSpeedRatioTime = DateTime.UtcNow;
 
                 this.LogWarning(
                     nameof(BlockRenderingWorker),

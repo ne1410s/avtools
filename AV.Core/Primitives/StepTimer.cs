@@ -32,9 +32,9 @@ namespace AV.Core.Primitives
             Priority = ThreadPriority.AboveNormal,
         };
 
-        private static double TickCount;
+        private static double tickCount;
 
-        private readonly Action UserCallback;
+        private readonly Action userCallback;
         private int localIsDisposing;
         private int localIsRunningCycle;
 
@@ -55,7 +55,7 @@ namespace AV.Core.Primitives
         /// <param name="callback">The callback.</param>
         public StepTimer(Action callback)
         {
-            this.UserCallback = callback;
+            this.userCallback = callback;
             PendingAddTimers.Enqueue(this);
         }
 
@@ -109,12 +109,12 @@ namespace AV.Core.Primitives
         {
             while (true)
             {
-                TickCount++;
-                if (TickCount >= 60)
+                tickCount++;
+                if (tickCount >= 60)
                 {
-                    Resolution = TimeSpan.FromMilliseconds(Stopwatch.Elapsed.TotalMilliseconds / TickCount);
+                    Resolution = TimeSpan.FromMilliseconds(Stopwatch.Elapsed.TotalMilliseconds / tickCount);
                     Stopwatch.Restart();
-                    TickCount = 0;
+                    tickCount = 0;
 
                     // Debug.WriteLine($"Timer Resolution is now {Resolution.TotalMilliseconds}");
                 }
@@ -132,7 +132,7 @@ namespace AV.Core.Primitives
                     {
                         try
                         {
-                            t.UserCallback?.Invoke();
+                            t.userCallback?.Invoke();
                         }
                         finally
                         {

@@ -21,21 +21,21 @@ namespace AV.Core.Container
         /// Holds a reference to the audio re-sampler
         /// This re-sampler gets disposed upon disposal of this object.
         /// </summary>
-        private SwrContext* Scaler;
+        private SwrContext* scaler;
 
         /// <summary>
         /// Used to determine if we have to reset the scaler parameters.
         /// </summary>
-        private FFAudioParams LastSourceSpec;
+        private FFAudioParams lastSourceSpec;
 
-        private AVFilterGraph* FilterGraph;
-        private AVFilterContext* SourceFilter;
-        private AVFilterContext* SinkFilter;
-        private AVFilterInOut* SinkInput;
-        private AVFilterInOut* SourceOutput;
+        private AVFilterGraph* filterGraph;
+        private AVFilterContext* sourceFilter;
+        private AVFilterContext* sinkFilter;
+        private AVFilterInOut* sinkInput;
+        private AVFilterInOut* sourceOutput;
 
-        private string AppliedFilterString;
-        private string CurrentFilterArguments;
+        private string appliedFilterString;
+        private string currentFilterArguments;
 
         /// <summary>
         /// Initialises a new instance of the <see cref="AudioComponent"/> class.
@@ -66,7 +66,7 @@ namespace AV.Core.Container
         public int BitsPerSample { get; }
 
         /// <summary>
-        /// Provides access to the AudioFilter string of the container's MediaOptions.
+        /// Gets access to the AudioFilter string of the container's MediaOptions.
         /// </summary>
         private string FilterString => this.Container?.MediaOptions?.AudioFilter;
 
@@ -92,10 +92,10 @@ namespace AV.Core.Container
             var targetSpec = FFAudioParams.CreateTarget(source.Pointer);
 
             // Initialize or update the audio scaler if required
-            if (this.Scaler == null || this.LastSourceSpec == null || FFAudioParams.AreCompatible(this.LastSourceSpec, sourceSpec) == false)
+            if (this.scaler == null || this.lastSourceSpec == null || FFAudioParams.AreCompatible(this.lastSourceSpec, sourceSpec) == false)
             {
-                this.Scaler = ffmpeg.swr_alloc_set_opts(
-                    this.Scaler,
+                this.scaler = ffmpeg.swr_alloc_set_opts(
+                    this.scaler,
                     targetSpec.ChannelLayout,
                     targetSpec.Format,
                     targetSpec.SampleRate,
@@ -105,9 +105,9 @@ namespace AV.Core.Container
                     0,
                     null);
 
-                RC.Current.Add(this.Scaler);
-                ffmpeg.swr_init(this.Scaler);
-                this.LastSourceSpec = sourceSpec;
+                RC.Current.Add(this.scaler);
+                ffmpeg.swr_init(this.scaler);
+                this.lastSourceSpec = sourceSpec;
             }
 
             // Allocate the unmanaged output buffer and convert to stereo.
@@ -121,7 +121,7 @@ namespace AV.Core.Container
 
                     // Execute the conversion (audio scaling). It will return the number of samples that were output
                     outputSamplesPerChannel = ffmpeg.swr_convert(
-                        this.Scaler,
+                        this.scaler,
                         &outputBufferPtr,
                         targetSpec.SamplesPerChannel,
                         source.Pointer->extended_data,
@@ -184,15 +184,15 @@ namespace AV.Core.Container
             AVFrame* outputFrame;
 
             // Filter Graph can be changed by issuing a ChangeMedia command
-            if (this.FilterGraph != null)
+            if (this.filterGraph != null)
             {
                 // Allocate the output frame
                 outputFrame = MediaFrame.CloneAVFrame(frame);
 
-                var result = ffmpeg.av_buffersrc_add_frame(this.SourceFilter, outputFrame);
+                var result = ffmpeg.av_buffersrc_add_frame(this.sourceFilter, outputFrame);
                 while (result >= 0)
                 {
-                    result = ffmpeg.av_buffersink_get_frame_flags(this.SinkFilter, outputFrame, 0);
+                    result = ffmpeg.av_buffersink_get_frame_flags(this.sinkFilter, outputFrame, 0);
                 }
 
                 if (outputFrame->nb_samples <= 0)
@@ -227,12 +227,12 @@ namespace AV.Core.Container
         /// <inheritdoc />
         protected override void Dispose(bool alsoManaged)
         {
-            RC.Current.Remove(this.Scaler);
-            if (this.Scaler != null)
+            RC.Current.Remove(this.scaler);
+            if (this.scaler != null)
             {
-                var scalerRef = this.Scaler;
+                var scalerRef = this.scaler;
                 ffmpeg.swr_free(&scalerRef);
-                this.Scaler = null;
+                this.scaler = null;
             }
 
             this.DestroyFilterGraph();
@@ -247,23 +247,23 @@ namespace AV.Core.Container
         {
             try
             {
-                if (this.FilterGraph == null)
+                if (this.filterGraph == null)
                 {
                     return;
                 }
 
-                RC.Current.Remove(this.FilterGraph);
-                var filterGraphRef = this.FilterGraph;
+                RC.Current.Remove(this.filterGraph);
+                var filterGraphRef = this.filterGraph;
                 ffmpeg.avfilter_graph_free(&filterGraphRef);
 
-                this.FilterGraph = null;
-                this.SinkInput = null;
-                this.SourceOutput = null;
+                this.filterGraph = null;
+                this.sinkInput = null;
+                this.sourceOutput = null;
             }
             finally
             {
-                this.AppliedFilterString = null;
-                this.CurrentFilterArguments = null;
+                this.appliedFilterString = null;
+                this.currentFilterArguments = null;
             }
         }
 
@@ -324,14 +324,14 @@ namespace AV.Core.Container
             }
 
             // Recreate the filtergraph if we have to
-            if (filterString != this.AppliedFilterString)
+            if (filterString != this.appliedFilterString)
             {
                 this.DestroyFilterGraph();
             }
 
             // Ensure the filtergraph is compatible with the frame
             var filterArguments = this.ComputeFilterArguments(frame);
-            if (filterArguments != this.CurrentFilterArguments)
+            if (filterArguments != this.currentFilterArguments)
             {
                 this.DestroyFilterGraph();
             }
@@ -340,8 +340,8 @@ namespace AV.Core.Container
                 return;
             }
 
-            this.FilterGraph = ffmpeg.avfilter_graph_alloc();
-            RC.Current.Add(this.FilterGraph);
+            this.filterGraph = ffmpeg.avfilter_graph_alloc();
+            RC.Current.Add(this.filterGraph);
 
             try
             {
@@ -349,7 +349,7 @@ namespace AV.Core.Container
                 AVFilterContext* sinkFilterRef = null;
 
                 var result = ffmpeg.avfilter_graph_create_filter(
-                    &sourceFilterRef, ffmpeg.avfilter_get_by_name(SourceFilterName), SourceFilterInstance, filterArguments, null, this.FilterGraph);
+                    &sourceFilterRef, ffmpeg.avfilter_get_by_name(SourceFilterName), SourceFilterInstance, filterArguments, null, this.filterGraph);
                 if (result != 0)
                 {
                     throw new MediaContainerException(
@@ -357,19 +357,19 @@ namespace AV.Core.Container
                 }
 
                 result = ffmpeg.avfilter_graph_create_filter(
-                    &sinkFilterRef, ffmpeg.avfilter_get_by_name(SinkFilterName), SinkFilterInstance, null, null, this.FilterGraph);
+                    &sinkFilterRef, ffmpeg.avfilter_get_by_name(SinkFilterName), SinkFilterInstance, null, null, this.filterGraph);
                 if (result != 0)
                 {
                     throw new MediaContainerException(
                         $"{nameof(ffmpeg.avfilter_graph_create_filter)} ({SinkFilterInstance}) failed. Error {result}: {FFInterop.DecodeMessage(result)}");
                 }
 
-                this.SourceFilter = sourceFilterRef;
-                this.SinkFilter = sinkFilterRef;
+                this.sourceFilter = sourceFilterRef;
+                this.sinkFilter = sinkFilterRef;
 
                 if (string.IsNullOrWhiteSpace(filterString))
                 {
-                    result = ffmpeg.avfilter_link(this.SourceFilter, 0, this.SinkFilter, 0);
+                    result = ffmpeg.avfilter_link(this.sourceFilter, 0, this.sinkFilter, 0);
                     if (result != 0)
                     {
                         throw new MediaContainerException($"{nameof(ffmpeg.avfilter_link)} failed. Error {result}: {FFInterop.DecodeMessage(result)}");
@@ -377,37 +377,37 @@ namespace AV.Core.Container
                 }
                 else
                 {
-                    var initFilterCount = FilterGraph->nb_filters;
+                    var initFilterCount = filterGraph->nb_filters;
 
-                    this.SourceOutput = ffmpeg.avfilter_inout_alloc();
-                    SourceOutput->name = ffmpeg.av_strdup("in");
-                    SourceOutput->filter_ctx = this.SourceFilter;
-                    SourceOutput->pad_idx = 0;
-                    SourceOutput->next = null;
+                    this.sourceOutput = ffmpeg.avfilter_inout_alloc();
+                    sourceOutput->name = ffmpeg.av_strdup("in");
+                    sourceOutput->filter_ctx = this.sourceFilter;
+                    sourceOutput->pad_idx = 0;
+                    sourceOutput->next = null;
 
-                    this.SinkInput = ffmpeg.avfilter_inout_alloc();
-                    SinkInput->name = ffmpeg.av_strdup("out");
-                    SinkInput->filter_ctx = this.SinkFilter;
-                    SinkInput->pad_idx = 0;
-                    SinkInput->next = null;
+                    this.sinkInput = ffmpeg.avfilter_inout_alloc();
+                    sinkInput->name = ffmpeg.av_strdup("out");
+                    sinkInput->filter_ctx = this.sinkFilter;
+                    sinkInput->pad_idx = 0;
+                    sinkInput->next = null;
 
-                    result = ffmpeg.avfilter_graph_parse(this.FilterGraph, filterString, this.SinkInput, this.SourceOutput, null);
+                    result = ffmpeg.avfilter_graph_parse(this.filterGraph, filterString, this.sinkInput, this.sourceOutput, null);
                     if (result != 0)
                     {
                         throw new MediaContainerException($"{nameof(ffmpeg.avfilter_graph_parse)} failed. Error {result}: {FFInterop.DecodeMessage(result)}");
                     }
 
                     // Reorder the filters to ensure that inputs of the custom filters are merged first
-                    for (var i = 0; i < FilterGraph->nb_filters - initFilterCount; i++)
+                    for (var i = 0; i < filterGraph->nb_filters - initFilterCount; i++)
                     {
-                        var sourceAddress = FilterGraph->filters[i];
-                        var targetAddress = FilterGraph->filters[i + initFilterCount];
-                        FilterGraph->filters[i] = targetAddress;
-                        FilterGraph->filters[i + initFilterCount] = sourceAddress;
+                        var sourceAddress = filterGraph->filters[i];
+                        var targetAddress = filterGraph->filters[i + initFilterCount];
+                        filterGraph->filters[i] = targetAddress;
+                        filterGraph->filters[i + initFilterCount] = sourceAddress;
                     }
                 }
 
-                result = ffmpeg.avfilter_graph_config(this.FilterGraph, null);
+                result = ffmpeg.avfilter_graph_config(this.filterGraph, null);
                 if (result != 0)
                 {
                     throw new MediaContainerException($"{nameof(ffmpeg.avfilter_graph_config)} failed. Error {result}: {FFInterop.DecodeMessage(result)}");
@@ -420,8 +420,8 @@ namespace AV.Core.Container
             }
             finally
             {
-                this.CurrentFilterArguments = filterArguments;
-                this.AppliedFilterString = filterString;
+                this.currentFilterArguments = filterArguments;
+                this.appliedFilterString = filterString;
             }
         }
     }

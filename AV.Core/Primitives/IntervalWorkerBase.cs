@@ -9,7 +9,7 @@ namespace AV.Core.Primitives
     /// </summary>
     internal abstract class IntervalWorkerBase : WorkerBase
     {
-        private readonly StepTimer QuantumTimer;
+        private readonly StepTimer quantumTimer;
 
         /// <summary>
         /// Initialises a new instance of the <see cref="IntervalWorkerBase"/> class.
@@ -18,14 +18,14 @@ namespace AV.Core.Primitives
         protected IntervalWorkerBase(string name)
             : base(name)
         {
-            this.QuantumTimer = new StepTimer(this.OnQuantumTicked);
+            this.quantumTimer = new StepTimer(this.OnQuantumTicked);
         }
 
         /// <inheritdoc />
         protected override void Dispose(bool alsoManaged)
         {
             base.Dispose(alsoManaged);
-            this.QuantumTimer.Dispose();
+            this.quantumTimer.Dispose();
         }
 
         /// <summary>

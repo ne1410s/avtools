@@ -47,12 +47,12 @@ namespace AV.Core.Engine
         ILoggingHandler ILoggingSource.LoggingHandler => this;
 
         /// <summary>
-        /// Contains the Media Status.
+        /// Gets the Media Status.
         /// </summary>
         public MediaEngineState State { get; }
 
         /// <summary>
-        /// Provides stream, chapter and program info of the underlying media.
+        /// Gets stream, chapter and program info of the underlying media.
         /// Returns null when no media is loaded.
         /// </summary>
         public MediaInfo MediaInfo => this.Container?.MediaInfo;
@@ -73,7 +73,7 @@ namespace AV.Core.Engine
         public TimeSpan PlaybackPosition => this.Timing.Position;
 
         /// <summary>
-        /// Represents a real-time time clock controller.
+        /// Gets a real-time time clock controller.
         /// </summary>
         internal TimingController Timing { get; }
 

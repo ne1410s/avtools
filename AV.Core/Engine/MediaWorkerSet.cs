@@ -15,8 +15,8 @@ namespace AV.Core.Engine
     /// <seealso cref="IDisposable" />
     internal sealed class MediaWorkerSet : IDisposable
     {
-        private readonly object SyncLock = new object();
-        private readonly IMediaWorker[] Workers = new IMediaWorker[3];
+        private readonly object syncLock = new object();
+        private readonly IMediaWorker[] workers = new IMediaWorker[3];
         private bool localIsDisposed;
 
         /// <summary>
@@ -31,9 +31,9 @@ namespace AV.Core.Engine
             this.Decoding = new FrameDecodingWorker(mediaCore);
             this.Rendering = new BlockRenderingWorker(mediaCore);
 
-            this.Workers[(int)MediaWorkerType.Read] = this.Reading;
-            this.Workers[(int)MediaWorkerType.Decode] = this.Decoding;
-            this.Workers[(int)MediaWorkerType.Render] = this.Rendering;
+            this.workers[(int)MediaWorkerType.Read] = this.Reading;
+            this.workers[(int)MediaWorkerType.Decode] = this.Decoding;
+            this.workers[(int)MediaWorkerType.Render] = this.Rendering;
         }
 
         /// <summary>
@@ -63,7 +63,7 @@ namespace AV.Core.Engine
         {
             get
             {
-                lock (this.SyncLock)
+                lock (this.syncLock)
                 {
                     return this.localIsDisposed;
                 }
@@ -71,7 +71,7 @@ namespace AV.Core.Engine
 
             private set
             {
-                lock (this.SyncLock)
+                lock (this.syncLock)
                 {
                     this.localIsDisposed = value;
                 }
@@ -86,7 +86,7 @@ namespace AV.Core.Engine
         /// </value>
         /// <param name="workerType">Type of the worker.</param>
         /// <returns>The matching worker.</returns>
-        public IMediaWorker this[MediaWorkerType workerType] => this.Workers[(int)workerType];
+        public IMediaWorker this[MediaWorkerType workerType] => this.workers[(int)workerType];
 
         /// <summary>
         /// Starts the workers.
@@ -98,10 +98,10 @@ namespace AV.Core.Engine
                 return;
             }
 
-            var tasks = new Task[this.Workers.Length];
-            for (var i = 0; i < this.Workers.Length; i++)
+            var tasks = new Task[this.workers.Length];
+            for (var i = 0; i < this.workers.Length; i++)
             {
-                tasks[i] = this.Workers[i].StartAsync();
+                tasks[i] = this.workers[i].StartAsync();
             }
 
             Task.WaitAll(tasks);
@@ -233,7 +233,7 @@ namespace AV.Core.Engine
         /// <param name="alsoManaged"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
         private void Dispose(bool alsoManaged)
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
                 if (this.IsDisposed)
                 {
@@ -248,7 +248,7 @@ namespace AV.Core.Engine
                 }
 
                 this.Pause(true, true, true, true);
-                foreach (var worker in this.Workers)
+                foreach (var worker in this.workers)
                 {
                     worker.Dispose();
                 }

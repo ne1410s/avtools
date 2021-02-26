@@ -199,7 +199,7 @@ namespace AV.Core.ClosedCaptions
             CaptionsStyle.WhiteItalicsUnderline,
         };
 
-        private readonly byte[] Data;
+        private readonly byte[] data;
 
         /// <summary>
         /// Initialises a new instance of the <see cref="ClosedCaptionPacket"/> class.
@@ -222,7 +222,7 @@ namespace AV.Core.ClosedCaptions
         /// <param name="d1">The d1.</param>
         internal ClosedCaptionPacket(TimeSpan timestamp, byte header, byte d0, byte d1)
         {
-            this.Data = new[] { header, d0, d1 };
+            this.data = new[] { header, d0, d1 };
 
             this.D0 = DropParityBit(d0);
             this.D1 = DropParityBit(d1);
@@ -434,8 +434,8 @@ namespace AV.Core.ClosedCaptions
         /// </summary>
         public byte D0
         {
-            get => this.Data[1];
-            private set => this.Data[1] = value;
+            get => this.data[1];
+            private set => this.data[1] = value;
         }
 
         /// <summary>
@@ -443,8 +443,8 @@ namespace AV.Core.ClosedCaptions
         /// </summary>
         public byte D1
         {
-            get => this.Data[2];
-            private set => this.Data[2] = value;
+            get => this.data[2];
+            private set => this.data[2] = value;
         }
 
         /// <summary>
@@ -695,7 +695,7 @@ namespace AV.Core.ClosedCaptions
         {
             return
                 this.Timestamp.GetHashCode() ^
-                this.Data.GetHashCode();
+                this.data.GetHashCode();
         }
 
         /// <summary>

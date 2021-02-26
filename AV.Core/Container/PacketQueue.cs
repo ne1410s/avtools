@@ -16,8 +16,8 @@ namespace AV.Core.Container
     /// </summary>
     internal sealed class PacketQueue : IDisposable
     {
-        private readonly List<MediaPacket> Packets = new List<MediaPacket>(2048);
-        private readonly object SyncLock = new object();
+        private readonly List<MediaPacket> packets = new List<MediaPacket>(2048);
+        private readonly object syncLock = new object();
         private long localBufferLength;
         private long localDuration;
 
@@ -28,9 +28,9 @@ namespace AV.Core.Container
         {
             get
             {
-                lock (this.SyncLock)
+                lock (this.syncLock)
                 {
-                    return this.Packets.Count;
+                    return this.packets.Count;
                 }
             }
         }
@@ -43,7 +43,7 @@ namespace AV.Core.Container
         {
             get
             {
-                lock (this.SyncLock)
+                lock (this.syncLock)
                 {
                     return this.localBufferLength;
                 }
@@ -57,7 +57,7 @@ namespace AV.Core.Container
         /// <returns>The total duration.</returns>
         public TimeSpan GetDuration(AVRational timeBase)
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
                 return this.localDuration.ToTimeSpan(timeBase);
             }
@@ -70,9 +70,9 @@ namespace AV.Core.Container
         /// <returns>The packet.</returns>
         public MediaPacket Peek()
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
-                return this.Packets.Count <= 0 ? null : this.Packets[0];
+                return this.packets.Count <= 0 ? null : this.packets[0];
             }
         }
 
@@ -89,9 +89,9 @@ namespace AV.Core.Container
                 return;
             }
 
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
-                this.Packets.Add(packet);
+                this.packets.Add(packet);
                 this.localBufferLength += packet.Size < 0 ? default : packet.Size;
                 this.localDuration += packet.Duration < 0 ? default : packet.Duration;
             }
@@ -103,15 +103,15 @@ namespace AV.Core.Container
         /// <returns>The dequeued packet.</returns>
         public MediaPacket Dequeue()
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
-                if (this.Packets.Count <= 0)
+                if (this.packets.Count <= 0)
                 {
                     return null;
                 }
 
-                var result = this.Packets[0];
-                this.Packets.RemoveAt(0);
+                var result = this.packets[0];
+                this.packets.RemoveAt(0);
 
                 var packet = result;
                 this.localBufferLength -= packet.Size < 0 ? default : packet.Size;
@@ -125,9 +125,9 @@ namespace AV.Core.Container
         /// </summary>
         public void Clear()
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
-                while (this.Packets.Count > 0)
+                while (this.packets.Count > 0)
                 {
                     var packet = this.Dequeue();
                     packet.Dispose();
@@ -152,7 +152,7 @@ namespace AV.Core.Container
                 return;
             }
 
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
                 this.Clear();
             }

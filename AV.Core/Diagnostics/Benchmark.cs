@@ -187,9 +187,9 @@ namespace AV.Core.Diagnostics
         /// <seealso cref="IDisposable" />
         private sealed class BenchmarkUnit : IDisposable
         {
-            private readonly string Identifier;
-            private readonly AtomicBoolean IsDisposed = new AtomicBoolean(false); // To detect redundant calls
-            private readonly Stopwatch Stopwatch = new Stopwatch();
+            private readonly string identifier;
+            private readonly AtomicBoolean isDisposed = new AtomicBoolean(false); // To detect redundant calls
+            private readonly Stopwatch stopwatch = new Stopwatch();
 
             /// <summary>
             /// Initialises a new instance of the <see cref="BenchmarkUnit"/> class.
@@ -197,8 +197,8 @@ namespace AV.Core.Diagnostics
             /// <param name="identifier">The identifier.</param>
             public BenchmarkUnit(string identifier)
             {
-                this.Identifier = identifier;
-                this.Stopwatch.Start();
+                this.identifier = identifier;
+                this.stopwatch.Start();
             }
 
             /// <inheritdoc />
@@ -210,19 +210,19 @@ namespace AV.Core.Diagnostics
             /// <param name="alsoManaged"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
             private void Dispose(bool alsoManaged)
             {
-                if (this.IsDisposed == true)
+                if (this.isDisposed == true)
                 {
                     return;
                 }
 
-                this.IsDisposed.Value = true;
+                this.isDisposed.Value = true;
                 if (!alsoManaged)
                 {
                     return;
                 }
 
-                Add(this.Identifier, this.Stopwatch.Elapsed);
-                this.Stopwatch.Stop();
+                Add(this.identifier, this.stopwatch.Elapsed);
+                this.stopwatch.Stop();
             }
         }
     }

@@ -7,6 +7,9 @@ namespace AV.Core
     using System;
     using System.Runtime.CompilerServices;
 
+    /// <summary>
+    /// Utilities.
+    /// </summary>
     public static partial class Utilities
     {
         /// <summary>

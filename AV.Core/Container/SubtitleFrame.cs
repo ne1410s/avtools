@@ -16,8 +16,8 @@ namespace AV.Core.Container
     /// <seealso cref="MediaFrame" />
     internal sealed unsafe class SubtitleFrame : MediaFrame
     {
-        private readonly object DisposeLock = new object();
-        private bool IsDisposed;
+        private readonly object disposeLock = new object();
+        private bool isDisposed;
 
         /// <summary>
         /// Initialises a new instance of the <see cref="SubtitleFrame"/> class.
@@ -92,9 +92,9 @@ namespace AV.Core.Container
         /// <inheritdoc />
         public override void Dispose()
         {
-            lock (this.DisposeLock)
+            lock (this.disposeLock)
             {
-                if (this.IsDisposed)
+                if (this.isDisposed)
                 {
                     return;
                 }
@@ -105,7 +105,7 @@ namespace AV.Core.Container
                 }
 
                 this.InternalPointer = IntPtr.Zero;
-                this.IsDisposed = true;
+                this.isDisposed = true;
             }
         }
     }

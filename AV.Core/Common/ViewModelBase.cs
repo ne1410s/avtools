@@ -85,7 +85,9 @@ namespace AV.Core.Common
         protected bool SetProperty<T>(ref T storage, T value, [CallerMemberName] string propertyName = "", string[] notifyAlso = null)
         {
             if (EqualityComparer<T>.Default.Equals(storage, value))
+            {
                 return false;
+            }
 
             storage = value;
             this.NotifyPropertyChanged(propertyName, notifyAlso);
@@ -107,7 +109,9 @@ namespace AV.Core.Common
         {
             // Queue property notification
             if (string.IsNullOrWhiteSpace(mainProperty) == false)
+            {
                 this.localQueuedNotifications[mainProperty] = true;
+            }
 
             // Set the state for notification properties
             if (auxiliaryProperties != null)
@@ -115,16 +119,22 @@ namespace AV.Core.Common
                 foreach (var property in auxiliaryProperties)
                 {
                     if (string.IsNullOrWhiteSpace(property) == false)
+                    {
                         this.localQueuedNotifications[property] = true;
+                    }
                 }
             }
 
             // Depending on operation mode, either fire the notifications in the background
             // or fire them immediately
             if (this.localUseDeferredNotifications)
+            {
                 Task.Run(this.NotifyQueuedProperties);
+            }
             else
+            {
                 this.NotifyQueuedProperties();
+            }
         }
 
         /// <summary>
@@ -139,7 +149,10 @@ namespace AV.Core.Common
             foreach (var property in propertyNames)
             {
                 // don't notify if we don't have a change
-                if (!this.localQueuedNotifications[property]) continue;
+                if (!this.localQueuedNotifications[property])
+                {
+                    continue;
+                }
 
                 // notify and reset queued state to false
                 try

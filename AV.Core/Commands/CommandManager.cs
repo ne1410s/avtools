@@ -26,7 +26,7 @@ namespace AV.Core.Commands
     /// <seealso cref="ILoggingSource" />
     internal sealed partial class CommandManager : IntervalWorkerBase, IMediaWorker, ILoggingSource
     {
-        private readonly object SyncLock = new ();
+        private readonly object syncLock = new ();
 
         /// <summary>
         /// Initialises a new instance of the <see cref="CommandManager"/> class.
@@ -85,7 +85,7 @@ namespace AV.Core.Commands
         /// <returns>An awaitable task which contains a boolean whether or not to resume media when completed.</returns>
         public Task<bool> CloseMediaAsync()
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
                 if (this.IsCloseInterruptPending)
                 {
@@ -182,7 +182,7 @@ namespace AV.Core.Commands
         /// </summary>
         /// <param name="millisecondsTimeout">The timeout to wait for.</param>
         /// <returns>If the wait completed successfully.</returns>
-        public bool WaitForSeekBlocks(int millisecondsTimeout) => this.SeekBlocksAvailable.Wait(millisecondsTimeout);
+        public bool WaitForSeekBlocks(int millisecondsTimeout) => this.seekBlocksAvailable.Wait(millisecondsTimeout);
 
         /// <inheritdoc />
         protected override void ExecuteCycleLogic(CancellationToken ct)
@@ -223,11 +223,11 @@ namespace AV.Core.Commands
             while (true)
             {
                 SeekOperation seekOperation;
-                lock (this.SyncLock)
+                lock (this.syncLock)
                 {
-                    seekOperation = this.QueuedSeekOperation;
-                    this.QueuedSeekOperation = null;
-                    this.QueuedSeekTask = null;
+                    seekOperation = this.queuedSeekOperation;
+                    this.queuedSeekOperation = null;
+                    this.queuedSeekTask = null;
                 }
 
                 if (seekOperation == null)
@@ -240,9 +240,9 @@ namespace AV.Core.Commands
             }
 
             // Handle the case when there is no more seeking needed.
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
-                if (this.IsSeeking && this.QueuedSeekOperation == null)
+                if (this.IsSeeking && this.queuedSeekOperation == null)
                 {
                     this.IsSeeking = false;
 
@@ -280,7 +280,7 @@ namespace AV.Core.Commands
             this.LogDebug(Aspects.EngineCommand, "Dispose Entered. Waiting for Command Manager processor to stop.");
             this.ClearPriorityCommands();
             this.ClearSeekCommands();
-            this.SeekBlocksAvailable.Set();
+            this.seekBlocksAvailable.Set();
 
             // wait for any pending direct commands (unlikely)
             this.LogDebug(Aspects.EngineCommand, "Dispose is waiting for pending direct commands.");
@@ -309,10 +309,10 @@ namespace AV.Core.Commands
             base.Dispose(alsoManaged);
 
             // Dispose unmanged resources
-            this.PriorityCommandCompleted.Dispose();
-            this.SeekBlocksAvailable.Dispose();
-            this.QueuedSeekOperation?.Dispose();
-            this.QueuedSeekOperation = null;
+            this.priorityCommandCompleted.Dispose();
+            this.seekBlocksAvailable.Dispose();
+            this.queuedSeekOperation?.Dispose();
+            this.queuedSeekOperation = null;
             this.LogDebug(Aspects.EngineCommand, "Dispose completed.");
         }
 

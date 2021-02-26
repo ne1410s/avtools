@@ -33,12 +33,12 @@ namespace AV.Core.Container
         /// <summary>
         /// Contains the packets pending to be sent to the decoder.
         /// </summary>
-        private readonly PacketQueue Packets = new ();
+        private readonly PacketQueue packets = new ();
 
         /// <summary>
         /// The decode packet function.
         /// </summary>
-        private readonly Func<MediaFrame> DecodePacketFunction;
+        private readonly Func<MediaFrame> decodePacketFunction;
 
         /// <summary>
         /// Detects redundant, unmanaged calls to the Dispose method.
@@ -230,12 +230,12 @@ namespace AV.Core.Container
                 case MediaType.Video:
                     this.BufferCountThreshold = 25;
                     this.BufferDurationThreshold = TimeSpan.FromSeconds(1);
-                    this.DecodePacketFunction = this.DecodeNextAVFrame;
+                    this.decodePacketFunction = this.DecodeNextAVFrame;
                     break;
                 case MediaType.Subtitle:
                     this.BufferCountThreshold = 0;
                     this.BufferDurationThreshold = TimeSpan.Zero;
-                    this.DecodePacketFunction = this.DecodeNextAVSubtitle;
+                    this.decodePacketFunction = this.DecodeNextAVSubtitle;
                     break;
                 default:
                     throw new NotSupportedException($"A component of MediaType '{this.MediaType}' is not supported");
@@ -330,18 +330,18 @@ namespace AV.Core.Container
         /// packet buffer. Limit your Reads to something reasonable before
         /// this becomes too large.
         /// </summary>
-        public long BufferLength => this.Packets.BufferLength;
+        public long BufferLength => this.packets.BufferLength;
 
         /// <summary>
         /// Gets the duration of the packet buffer.
         /// </summary>
-        public TimeSpan BufferDuration => this.Packets.GetDuration(this.StreamInfo.TimeBase);
+        public TimeSpan BufferDuration => this.packets.GetDuration(this.StreamInfo.TimeBase);
 
         /// <summary>
         /// Gets the number of packets in the queue.
         /// Decode packets until this number becomes 0.
         /// </summary>
-        public int BufferCount => this.Packets.Count;
+        public int BufferCount => this.packets.Count;
 
         /// <summary>
         /// Gets the number of packets to cache before <see cref="HasEnoughPackets"/> returns true.
@@ -436,7 +436,7 @@ namespace AV.Core.Container
         public void ClearQueuedPackets(bool flushBuffers)
         {
             // Release packets that are already in the queue.
-            this.Packets.Clear();
+            this.packets.Clear();
 
             if (flushBuffers)
             {
@@ -471,7 +471,7 @@ namespace AV.Core.Container
                 return;
             }
 
-            this.Packets.Push(packet);
+            this.packets.Push(packet);
             this.Container.Components.ProcessPacketQueueChanges(PacketQueueOp.Queued, packet, this.MediaType);
         }
 
@@ -481,7 +481,7 @@ namespace AV.Core.Container
         /// <returns>The received Media Frame. It is null if no frame could be retrieved.</returns>
         public MediaFrame ReceiveNextFrame()
         {
-            var frame = this.DecodePacketFunction?.Invoke();
+            var frame = this.decodePacketFunction?.Invoke();
 
             // Check if we need to update the duration of this component.
             // This means we have decoded more frames than what was initially reported by the container.
@@ -534,7 +534,7 @@ namespace AV.Core.Container
 
             // free all the pending and sent packets
             this.ClearQueuedPackets(true);
-            this.Packets.Dispose();
+            this.packets.Dispose();
         }
 
         /// <summary>
@@ -592,16 +592,16 @@ namespace AV.Core.Container
             var packetCount = 0;
             int sendPacketResult;
 
-            while (this.Packets.Count > 0)
+            while (this.packets.Count > 0)
             {
-                var packet = this.Packets.Peek();
+                var packet = this.packets.Peek();
                 if (packet.IsFlushPacket)
                 {
                     this.FlushCodecBuffers();
 
                     // Dequeue the flush packet. We don't add to the decode
                     // count or call the OnPacketDequeued callback because the size is 0
-                    packet = this.Packets.Dequeue();
+                    packet = this.packets.Dequeue();
 
                     packet.Dispose();
                     continue;
@@ -616,7 +616,7 @@ namespace AV.Core.Container
                 if (sendPacketResult != -ffmpeg.EAGAIN)
                 {
                     // Dequeue the packet and release it.
-                    packet = this.Packets.Dequeue();
+                    packet = this.packets.Dequeue();
                     this.Container.Components.ProcessPacketQueueChanges(PacketQueueOp.Dequeued, packet, this.MediaType);
 
                     packet.Dispose();
@@ -734,7 +734,7 @@ namespace AV.Core.Container
                 packet.Dispose();
 
                 // Dequeue the packet and try to decode with it.
-                packet = this.Packets.Dequeue();
+                packet = this.packets.Dequeue();
 
                 if (packet != null)
                 {

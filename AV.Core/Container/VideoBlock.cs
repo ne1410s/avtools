@@ -35,51 +35,51 @@ namespace AV.Core.Container
         public int PixelHeight { get; private set; }
 
         /// <summary>
-        /// Gets the pixel aspect width.
+        /// Gets or sets the pixel aspect width.
         /// This is NOT the display aspect width.
         /// </summary>
         public int PixelAspectWidth { get; internal set; }
 
         /// <summary>
-        /// Gets the pixel aspect height.
+        /// Gets or sets the pixel aspect height.
         /// This is NOT the display aspect height.
         /// </summary>
         public int PixelAspectHeight { get; internal set; }
 
         /// <summary>
-        /// Gets the SMTPE time code.
+        /// Gets or sets the SMTPE time code.
         /// </summary>
         public string SmtpeTimeCode { get; internal set; }
 
         /// <summary>
-        /// Gets a value indicating whether this frame was decoded in a hardware context.
+        /// Gets or sets a value indicating whether this frame was decoded in a hardware context.
         /// </summary>
         public bool IsHardwareFrame { get; internal set; }
 
         /// <summary>
-        /// Gets the name of the hardware decoder if the frame was decoded in a hardware context.
+        /// Gets or sets the name of the hardware decoder if the frame was decoded in a hardware context.
         /// </summary>
         public string HardwareAcceleratorName { get; internal set; }
 
         /// <summary>
-        /// Gets the display picture number (frame number).
+        /// Gets or sets the display picture number (frame number).
         /// If not set by the decoder, this attempts to obtain it by dividing the start time by the
         /// frame duration.
         /// </summary>
         public long DisplayPictureNumber { get; internal set; }
 
         /// <summary>
-        /// Gets the coded picture number set by the decoder.
+        /// Gets or sets the coded picture number set by the decoder.
         /// </summary>
         public long CodedPictureNumber { get; internal set; }
 
         /// <summary>
-        /// Gets the picture type.
+        /// Gets or sets the picture type.
         /// </summary>
         public AVPictureType PictureType { get; internal set; }
 
         /// <summary>
-        /// Gets the closed caption packets for this video block.
+        /// Gets or sets the closed caption packets for this video block.
         /// </summary>
         public IReadOnlyList<ClosedCaptionPacket> ClosedCaptions { get; internal set; }
 

@@ -80,7 +80,7 @@ namespace AV.Core.Commands
         /// <returns>The awaitable task.</returns>
         private Task<bool> ExecuteDirectCommand(DirectCommandType command, Func<bool> commandDeleagte)
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
                 // Check the basic conditions for a direct command to execute
                 if (this.IsDisposed || this.IsDisposing)

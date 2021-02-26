@@ -13,8 +13,8 @@ namespace AV.Core.Common
     /// </summary>
     public sealed class DecoderOptions
     {
-        private readonly Dictionary<string, string> GlobalOptions = new (64);
-        private readonly Dictionary<int, Dictionary<string, string>> PrivateOptions = new ();
+        private readonly Dictionary<string, string> globalOptions = new (64);
+        private readonly Dictionary<int, Dictionary<string, string>> privateOptions = new ();
 
         /// <summary>
         /// Initialises a new instance of the <see cref="DecoderOptions"/> class.
@@ -38,9 +38,10 @@ namespace AV.Core.Common
         public bool EnableFastDecoding { get; set; }
 
         /// <summary>
-        /// Enables low_delay flag for no delay in frame decoding.
-        /// When frames are received by some codecs, they are delayed by 1 frame per active thread.
-        /// This flag is not of much use because the decoder pre-caches and pre-orders a set of decoded
+        /// Gets or sets a value indicating whether low_delay flag for no delay
+        /// in frame decoding. When frames are received by some codecs, they are
+        /// delayed by 1 frame per active thread. This flag is not of much use
+        /// because the decoder pre-caches and pre-orders a set of decoded
         /// frames internally.
         /// </summary>
         public bool EnableLowDelayDecoding { get; set; }
@@ -80,8 +81,8 @@ namespace AV.Core.Common
         /// <returns>The value of the option.</returns>
         public string this[string globalOptionName]
         {
-            get => this.GlobalOptions.ContainsKey(globalOptionName) ? this.GlobalOptions[globalOptionName] : null;
-            set => this.GlobalOptions[globalOptionName] = value;
+            get => this.globalOptions.ContainsKey(globalOptionName) ? this.globalOptions[globalOptionName] : null;
+            set => this.globalOptions[globalOptionName] = value;
         }
 
         /// <summary>
@@ -95,23 +96,23 @@ namespace AV.Core.Common
         {
             get
             {
-                if (this.PrivateOptions.ContainsKey(streamIndex) == false)
+                if (this.privateOptions.ContainsKey(streamIndex) == false)
                 {
                     return null;
                 }
 
-                return this.PrivateOptions[streamIndex].ContainsKey(privateOptionName) ?
-                    this.PrivateOptions[streamIndex][privateOptionName] : null;
+                return this.privateOptions[streamIndex].ContainsKey(privateOptionName) ?
+                    this.privateOptions[streamIndex][privateOptionName] : null;
             }
 
             set
             {
-                if (this.PrivateOptions.ContainsKey(streamIndex) == false)
+                if (this.privateOptions.ContainsKey(streamIndex) == false)
                 {
-                    this.PrivateOptions[streamIndex] = new ();
+                    this.privateOptions[streamIndex] = new ();
                 }
 
-                this.PrivateOptions[streamIndex][privateOptionName] = value;
+                this.privateOptions[streamIndex][privateOptionName] = value;
             }
         }
 
@@ -122,13 +123,13 @@ namespace AV.Core.Common
         /// <returns>An options dictionary.</returns>
         internal FFDictionary GetStreamCodecOptions(int streamIndex)
         {
-            var result = new Dictionary<string, string>(this.GlobalOptions);
-            if (!this.PrivateOptions.ContainsKey(streamIndex))
+            var result = new Dictionary<string, string>(this.globalOptions);
+            if (!this.privateOptions.ContainsKey(streamIndex))
             {
                 return new FFDictionary(result);
             }
 
-            foreach (var kvp in this.PrivateOptions[streamIndex])
+            foreach (var kvp in this.privateOptions[streamIndex])
             {
                 result[kvp.Key] = kvp.Value;
             }

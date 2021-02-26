@@ -13,15 +13,18 @@ namespace AV.Core.Commands
     using AV.Core.Diagnostics;
     using AV.Core.Primitives;
 
+    /// <summary>
+    /// Command manager.
+    /// </summary>
     internal partial class CommandManager
     {
-        private readonly ManualResetEventSlim SeekBlocksAvailable = new (true);
+        private readonly ManualResetEventSlim seekBlocksAvailable = new (true);
         private readonly AtomicBoolean localIsSeeking = new (false);
         private readonly AtomicBoolean localPlayAfterSeek = new (false);
         private readonly AtomicInteger localActiveSeekMode = new ((int)SeekMode.Normal);
 
-        private SeekOperation QueuedSeekOperation;
-        private Task<bool> QueuedSeekTask;
+        private SeekOperation queuedSeekOperation;
+        private Task<bool> queuedSeekTask;
 
         /// <summary>
         /// Gets a value indicating whether a seek operation is pending or in progress.
@@ -39,10 +42,10 @@ namespace AV.Core.Commands
         /// <summary>
         /// Gets a value indicating whether this instance is actively seeking within a stream.
         /// </summary>
-        public bool IsActivelySeeking => !this.SeekBlocksAvailable.IsSet;
+        public bool IsActivelySeeking => !this.seekBlocksAvailable.IsSet;
 
         /// <summary>
-        /// When actively seeking, provides the active seek mode.
+        /// Gets the active seek mode (when actively seeking).
         /// </summary>
         public SeekMode ActiveSeekMode
         {
@@ -93,18 +96,18 @@ namespace AV.Core.Commands
         /// <returns>An awaitable task.</returns>
         private Task<bool> QueueSeekCommand(TimeSpan seekTarget, SeekMode seekMode)
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
                 if (this.IsDisposed || this.IsDisposing || !this.State.IsOpen || this.IsDirectCommandPending || this.IsPriorityCommandPending || !this.State.IsSeekable)
                 {
                     return Task.FromResult(false);
                 }
 
-                if (this.QueuedSeekTask != null)
+                if (this.queuedSeekTask != null)
                 {
-                    this.QueuedSeekOperation.Mode = seekMode;
-                    this.QueuedSeekOperation.Position = seekTarget;
-                    return this.QueuedSeekTask;
+                    this.queuedSeekOperation.Mode = seekMode;
+                    this.queuedSeekOperation.Position = seekTarget;
+                    return this.queuedSeekTask;
                 }
 
                 if (this.IsSeeking == false)
@@ -117,15 +120,15 @@ namespace AV.Core.Commands
                 }
 
                 var seekOperation = new SeekOperation(seekTarget, seekMode);
-                this.QueuedSeekOperation = seekOperation;
-                this.QueuedSeekTask = new Task<bool>(() =>
+                this.queuedSeekOperation = seekOperation;
+                this.queuedSeekTask = new Task<bool>(() =>
                 {
                     seekOperation.Wait();
                     return true;
                 });
 
-                this.QueuedSeekTask.Start();
-                return this.QueuedSeekTask;
+                this.queuedSeekTask.Start();
+                return this.queuedSeekTask;
             }
         }
 
@@ -134,11 +137,11 @@ namespace AV.Core.Commands
         /// </summary>
         private void ClearSeekCommands()
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
-                this.QueuedSeekOperation?.Dispose();
-                this.QueuedSeekOperation = null;
-                this.QueuedSeekTask = null;
+                this.queuedSeekOperation?.Dispose();
+                this.queuedSeekOperation = null;
+                this.queuedSeekTask = null;
                 this.IsSeeking = false;
             }
         }
@@ -191,7 +194,7 @@ namespace AV.Core.Commands
                 // to finish. We don't want to interfere with reading in progress
                 // or decoding in progress.
                 this.MediaCore.Workers.PauseReadDecode();
-                this.SeekBlocksAvailable.Reset();
+                this.seekBlocksAvailable.Reset();
 
                 // Signal the starting state clearing the packet buffer cache
                 // TODO: this may not be necessary because the container does this for us.
@@ -286,8 +289,7 @@ namespace AV.Core.Commands
 
                     this.LogWarning(
                         Aspects.EngineCommand,
-                        $"SEEK TP: Target Pos {targetPosition.Format()} not between {mainBlocks.RangeStartTime.TotalSeconds:0.000} " +
-                        $"and {mainBlocks.RangeEndTime.TotalSeconds:0.000}");
+                        $"SEEK TP: Target Pos {targetPosition.Format()} not between {mainBlocks.RangeStartTime.TotalSeconds:0.000} and {mainBlocks.RangeEndTime.TotalSeconds:0.000}");
 
                     resultPosition = TimeSpan.FromTicks(targetPosition.Ticks.Clamp(minStartTimeTicks, maxStartTimeTicks));
                 }
@@ -318,7 +320,7 @@ namespace AV.Core.Commands
                         $"SEEK D: Elapsed: {startTime.FormatElapsed()} | Target: {targetPosition.Format()}");
                 }
 
-                this.SeekBlocksAvailable.Set();
+                this.seekBlocksAvailable.Set();
                 this.MediaCore.InvalidateRenderers();
                 seekOperation.Dispose();
             }
@@ -338,7 +340,7 @@ namespace AV.Core.Commands
                     ? mainBlocks[targetPosition.Ticks].StartTime
                     : targetPosition);
 
-                this.SeekBlocksAvailable.Set();
+                this.seekBlocksAvailable.Set();
                 return true;
             }
 

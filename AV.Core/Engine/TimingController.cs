@@ -17,10 +17,10 @@ namespace AV.Core.Engine
     /// </summary>
     internal sealed class TimingController
     {
-        private readonly object SyncLock = new object();
-        private readonly MediaTypeDictionary<RealTimeClock> Clocks = new MediaTypeDictionary<RealTimeClock>();
-        private readonly MediaTypeDictionary<TimeSpan> Offsets = new MediaTypeDictionary<TimeSpan>();
-        private bool IsReady;
+        private readonly object syncLock = new object();
+        private readonly MediaTypeDictionary<RealTimeClock> clocks = new MediaTypeDictionary<RealTimeClock>();
+        private readonly MediaTypeDictionary<TimeSpan> offsets = new MediaTypeDictionary<TimeSpan>();
+        private bool isReady;
         private MediaType localReferenceType;
         private bool localHasDisconnectedClocks;
 
@@ -40,28 +40,28 @@ namespace AV.Core.Engine
         {
             get
             {
-                lock (this.SyncLock)
+                lock (this.syncLock)
                 {
-                    if (!this.IsReady)
+                    if (!this.isReady)
                     {
                         return Constants.DefaultSpeedRatio;
                     }
 
-                    return this.Clocks[MediaType.None].SpeedRatio;
+                    return this.clocks[MediaType.None].SpeedRatio;
                 }
             }
 
             set
             {
-                lock (this.SyncLock)
+                lock (this.syncLock)
                 {
-                    if (!this.IsReady)
+                    if (!this.isReady)
                     {
                         return;
                     }
 
-                    this.Clocks[MediaType.Audio].SpeedRatio = value;
-                    this.Clocks[MediaType.Video].SpeedRatio = value;
+                    this.clocks[MediaType.Audio].SpeedRatio = value;
+                    this.clocks[MediaType.Video].SpeedRatio = value;
                 }
             }
         }
@@ -73,7 +73,7 @@ namespace AV.Core.Engine
         {
             get
             {
-                lock (this.SyncLock)
+                lock (this.syncLock)
                 {
                     return this.localReferenceType;
                 }
@@ -81,7 +81,7 @@ namespace AV.Core.Engine
 
             private set
             {
-                lock (this.SyncLock)
+                lock (this.syncLock)
                 {
                     this.localReferenceType = value;
                 }
@@ -95,7 +95,7 @@ namespace AV.Core.Engine
         {
             get
             {
-                lock (this.SyncLock)
+                lock (this.syncLock)
                 {
                     return this.localHasDisconnectedClocks;
                 }
@@ -103,7 +103,7 @@ namespace AV.Core.Engine
 
             private set
             {
-                lock (this.SyncLock)
+                lock (this.syncLock)
                 {
                     this.localHasDisconnectedClocks = value;
                 }
@@ -146,7 +146,7 @@ namespace AV.Core.Engine
         /// </summary>
         public void Setup()
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
                 var options = this.MediaCore?.MediaOptions;
                 var components = this.MediaCore?.Container?.Components;
@@ -161,7 +161,7 @@ namespace AV.Core.Engine
                 // Save the current clocks so they can be recreated with the
                 // same properties (position and speed ratio)
                 var lastClocks = new MediaTypeDictionary<RealTimeClock>();
-                foreach (var kvp in this.Clocks)
+                foreach (var kvp in this.clocks)
                 {
                     lastClocks[kvp.Key] = kvp.Value;
                 }
@@ -193,8 +193,7 @@ namespace AV.Core.Engine
                     {
                         this.MediaCore.LogWarning(
                             Aspects.Timing,
-                            $"{nameof(MediaOptions)}.{nameof(MediaOptions.IsTimeSyncDisabled)} has been ignored because the " +
-                            $"streams seem to have unrelated timing information. Time Difference: {startTimeDifference.Format()} s.");
+                            $"{nameof(MediaOptions)}.{nameof(MediaOptions.IsTimeSyncDisabled)} has been ignored because the streams seem to have unrelated timing information. Time Difference: {startTimeDifference.Format()} s.");
 
                         options.IsTimeSyncDisabled = true;
                     }
@@ -203,30 +202,30 @@ namespace AV.Core.Engine
                 {
                     if (components.HasAudio && components.HasVideo)
                     {
-                        this.Clocks[MediaType.Audio] = new RealTimeClock();
-                        this.Clocks[MediaType.Video] = new RealTimeClock();
+                        this.clocks[MediaType.Audio] = new RealTimeClock();
+                        this.clocks[MediaType.Video] = new RealTimeClock();
 
-                        this.Offsets[MediaType.Audio] = this.GetComponentStartOffset(MediaType.Audio);
-                        this.Offsets[MediaType.Video] = this.GetComponentStartOffset(MediaType.Video);
+                        this.offsets[MediaType.Audio] = this.GetComponentStartOffset(MediaType.Audio);
+                        this.offsets[MediaType.Video] = this.GetComponentStartOffset(MediaType.Video);
                     }
                     else
                     {
-                        this.Clocks[MediaType.Audio] = new RealTimeClock();
-                        this.Clocks[MediaType.Video] = this.Clocks[MediaType.Audio];
+                        this.clocks[MediaType.Audio] = new RealTimeClock();
+                        this.clocks[MediaType.Video] = this.clocks[MediaType.Audio];
 
-                        this.Offsets[MediaType.Audio] = this.GetComponentStartOffset(components.HasAudio ? MediaType.Audio : MediaType.Video);
-                        this.Offsets[MediaType.Video] = this.Offsets[MediaType.Audio];
+                        this.offsets[MediaType.Audio] = this.GetComponentStartOffset(components.HasAudio ? MediaType.Audio : MediaType.Video);
+                        this.offsets[MediaType.Video] = this.offsets[MediaType.Audio];
                     }
 
                     // Subtitles will always be whatever the video data is.
-                    this.Clocks[MediaType.Subtitle] = this.Clocks[MediaType.Video];
-                    this.Offsets[MediaType.Subtitle] = this.Offsets[MediaType.Video];
+                    this.clocks[MediaType.Subtitle] = this.clocks[MediaType.Video];
+                    this.offsets[MediaType.Subtitle] = this.offsets[MediaType.Video];
 
                     // Update from previous clocks to keep state
                     foreach (var clock in lastClocks)
                     {
-                        this.Clocks[clock.Key].SpeedRatio = clock.Value.SpeedRatio;
-                        this.Clocks[clock.Key].Update(clock.Value.Position);
+                        this.clocks[clock.Key].SpeedRatio = clock.Value.SpeedRatio;
+                        this.clocks[clock.Key].Update(clock.Value.Position);
                     }
 
                     // By default the continuous type is the audio component if it's a live stream
@@ -235,13 +234,13 @@ namespace AV.Core.Engine
                         : components.SeekableMediaType;
 
                     var discreteType = components.SeekableMediaType;
-                    this.HasDisconnectedClocks = options.IsTimeSyncDisabled && this.Clocks[MediaType.Audio] != this.Clocks[MediaType.Video];
+                    this.HasDisconnectedClocks = options.IsTimeSyncDisabled && this.clocks[MediaType.Audio] != this.clocks[MediaType.Video];
                     this.ReferenceType = this.HasDisconnectedClocks ? continuousType : discreteType;
 
                     // The default data is what the clock reference contains
-                    this.Clocks[MediaType.None] = this.Clocks[this.ReferenceType];
-                    this.Offsets[MediaType.None] = this.Offsets[this.ReferenceType];
-                    this.IsReady = true;
+                    this.clocks[MediaType.None] = this.clocks[this.ReferenceType];
+                    this.offsets[MediaType.None] = this.offsets[this.ReferenceType];
+                    this.isReady = true;
 
                     this.MediaCore.State.ReportTimingStatus();
                 }
@@ -255,11 +254,11 @@ namespace AV.Core.Engine
         {
             try
             {
-                lock (this.SyncLock)
+                lock (this.syncLock)
                 {
-                    this.IsReady = false;
-                    this.Clocks.Clear();
-                    this.Offsets.Clear();
+                    this.isReady = false;
+                    this.clocks.Clear();
+                    this.offsets.Clear();
                 }
             }
             finally
@@ -275,16 +274,16 @@ namespace AV.Core.Engine
         /// <returns>The clock position.</returns>
         public TimeSpan GetPosition(MediaType t)
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
-                if (!this.IsReady)
+                if (!this.isReady)
                 {
                     return default;
                 }
 
                 return TimeSpan.FromTicks(
-                    this.Clocks[t].Position.Ticks +
-                    this.Offsets[this.HasDisconnectedClocks ? t : this.ReferenceType].Ticks);
+                    this.clocks[t].Position.Ticks +
+                    this.offsets[this.HasDisconnectedClocks ? t : this.ReferenceType].Ticks);
             }
         }
 
@@ -295,9 +294,9 @@ namespace AV.Core.Engine
         /// <returns>The duration of the component type.</returns>
         public TimeSpan? GetDuration(MediaType t)
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
-                return this.IsReady ? this.GetComponentDuration(t) : default;
+                return this.isReady ? this.GetComponentDuration(t) : default;
             }
         }
 
@@ -308,9 +307,9 @@ namespace AV.Core.Engine
         /// <returns>The duration of the component type.</returns>
         public TimeSpan GetStartTime(MediaType t)
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
-                return this.IsReady ? this.Offsets[t] : default;
+                return this.isReady ? this.offsets[t] : default;
             }
         }
 
@@ -321,10 +320,10 @@ namespace AV.Core.Engine
         /// <returns>The duration of the component type.</returns>
         public TimeSpan? GetEndTime(MediaType t)
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
                 var duration = this.GetComponentDuration(t);
-                return this.IsReady ? duration.HasValue ? TimeSpan.FromTicks(duration.Value.Ticks + this.Offsets[t].Ticks) : default : default;
+                return this.isReady ? duration.HasValue ? TimeSpan.FromTicks(duration.Value.Ticks + this.offsets[t].Ticks) : default : default;
             }
         }
 
@@ -335,14 +334,14 @@ namespace AV.Core.Engine
         /// <returns>Whether the component's RTC is running.</returns>
         public bool GetIsRunning(MediaType t)
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
-                if (!this.IsReady)
+                if (!this.isReady)
                 {
                     return default;
                 }
 
-                return this.Clocks[t].IsRunning;
+                return this.clocks[t].IsRunning;
             }
         }
 
@@ -355,29 +354,29 @@ namespace AV.Core.Engine
         {
             try
             {
-                lock (this.SyncLock)
+                lock (this.syncLock)
                 {
-                    if (!this.IsReady)
+                    if (!this.isReady)
                     {
                         return;
                     }
 
                     if (t == MediaType.None)
                     {
-                        this.Clocks[MediaType.Audio].Update(TimeSpan.FromTicks(
+                        this.clocks[MediaType.Audio].Update(TimeSpan.FromTicks(
                             position.Ticks -
-                            this.Offsets[this.HasDisconnectedClocks ? MediaType.Audio : this.ReferenceType].Ticks));
+                            this.offsets[this.HasDisconnectedClocks ? MediaType.Audio : this.ReferenceType].Ticks));
 
-                        this.Clocks[MediaType.Video].Update(TimeSpan.FromTicks(
+                        this.clocks[MediaType.Video].Update(TimeSpan.FromTicks(
                             position.Ticks -
-                            this.Offsets[this.HasDisconnectedClocks ? MediaType.Video : this.ReferenceType].Ticks));
+                            this.offsets[this.HasDisconnectedClocks ? MediaType.Video : this.ReferenceType].Ticks));
 
                         return;
                     }
 
-                    this.Clocks[t].Update(TimeSpan.FromTicks(
+                    this.clocks[t].Update(TimeSpan.FromTicks(
                         position.Ticks -
-                        this.Offsets[this.HasDisconnectedClocks ? t : this.ReferenceType].Ticks));
+                        this.offsets[this.HasDisconnectedClocks ? t : this.ReferenceType].Ticks));
                 }
             }
             finally
@@ -394,21 +393,21 @@ namespace AV.Core.Engine
         {
             try
             {
-                lock (this.SyncLock)
+                lock (this.syncLock)
                 {
-                    if (!this.IsReady)
+                    if (!this.isReady)
                     {
                         return;
                     }
 
                     if (t == MediaType.None)
                     {
-                        this.Clocks[MediaType.Audio].Pause();
-                        this.Clocks[MediaType.Video].Pause();
+                        this.clocks[MediaType.Audio].Pause();
+                        this.clocks[MediaType.Video].Pause();
                         return;
                     }
 
-                    this.Clocks[t].Pause();
+                    this.clocks[t].Pause();
                 }
             }
             finally
@@ -425,21 +424,21 @@ namespace AV.Core.Engine
         {
             try
             {
-                lock (this.SyncLock)
+                lock (this.syncLock)
                 {
-                    if (!this.IsReady)
+                    if (!this.isReady)
                     {
                         return;
                     }
 
                     if (t == MediaType.None)
                     {
-                        this.Clocks[MediaType.Audio].Reset();
-                        this.Clocks[MediaType.Video].Reset();
+                        this.clocks[MediaType.Audio].Reset();
+                        this.clocks[MediaType.Video].Reset();
                         return;
                     }
 
-                    this.Clocks[t].Reset();
+                    this.clocks[t].Reset();
                 }
             }
             finally
@@ -456,21 +455,21 @@ namespace AV.Core.Engine
         {
             try
             {
-                lock (this.SyncLock)
+                lock (this.syncLock)
                 {
-                    if (!this.IsReady)
+                    if (!this.isReady)
                     {
                         return;
                     }
 
                     if (t == MediaType.None)
                     {
-                        this.Clocks[MediaType.Audio].Play();
-                        this.Clocks[MediaType.Video].Play();
+                        this.clocks[MediaType.Audio].Play();
+                        this.clocks[MediaType.Video].Play();
                         return;
                     }
 
-                    this.Clocks[t].Play();
+                    this.clocks[t].Play();
                 }
             }
             finally

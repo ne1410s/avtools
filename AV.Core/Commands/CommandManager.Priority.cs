@@ -11,10 +11,13 @@ namespace AV.Core.Commands
     using AV.Core.Common;
     using AV.Core.Primitives;
 
+    /// <summary>
+    /// Command manager.
+    /// </summary>
     internal partial class CommandManager
     {
         private readonly AtomicInteger localPendingPriorityCommand = new (0);
-        private readonly ManualResetEventSlim PriorityCommandCompleted = new (true);
+        private readonly ManualResetEventSlim priorityCommandCompleted = new (true);
 
         /// <summary>
         /// Gets a value indicating whether a priority command is pending.
@@ -28,7 +31,7 @@ namespace AV.Core.Commands
         /// <returns>An awaitable task.</returns>
         private Task<bool> QueuePriorityCommand(PriorityCommandType command)
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
                 if (this.IsDisposed || this.IsDisposing || !this.State.IsOpen || this.IsDirectCommandPending || this.IsPriorityCommandPending)
                 {
@@ -36,12 +39,12 @@ namespace AV.Core.Commands
                 }
 
                 this.PendingPriorityCommand = command;
-                this.PriorityCommandCompleted.Reset();
+                this.priorityCommandCompleted.Reset();
 
                 var commandTask = new Task<bool>(() =>
                 {
                     this.ResumeAsync().Wait();
-                    this.PriorityCommandCompleted.Wait();
+                    this.priorityCommandCompleted.Wait();
                     return true;
                 });
 
@@ -55,10 +58,10 @@ namespace AV.Core.Commands
         /// </summary>
         private void ClearPriorityCommands()
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
                 this.PendingPriorityCommand = PriorityCommandType.None;
-                this.PriorityCommandCompleted.Set();
+                this.priorityCommandCompleted.Set();
             }
         }
 

@@ -68,7 +68,7 @@ namespace AV.Core.Common
         public TimeSpan StartTime { get; }
 
         /// <summary>
-        /// If available, returns a non-zero value as reported by the container format.
+        /// Gets a value as reported by the container format.
         /// </summary>
         public long BitRate { get; }
 
@@ -88,7 +88,7 @@ namespace AV.Core.Common
         public IReadOnlyDictionary<int, StreamInfo> Streams { get; }
 
         /// <summary>
-        /// Provides access to the best streams of each media type found in the container.
+        /// Gets access to the best streams of each media type found in the container.
         /// This uses some internal FFmpeg heuristics.
         /// </summary>
         public IReadOnlyDictionary<AVMediaType, StreamInfo> BestStreams { get; }

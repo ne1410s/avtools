@@ -29,7 +29,7 @@ namespace AV.Core.Diagnostics
         /// <summary>
         /// The instances.
         /// </summary>
-        private readonly Dictionary<IntPtr, ReferenceEntry> Instances = new ();
+        private readonly Dictionary<IntPtr, ReferenceEntry> instances = new ();
 
         /// <summary>
         /// The types of tracked unmanaged types.
@@ -96,7 +96,7 @@ namespace AV.Core.Diagnostics
                 lock (SyncLock)
                 {
                     var result = new Dictionary<string, int>(256);
-                    foreach (var kvp in this.Instances)
+                    foreach (var kvp in this.instances)
                     {
                         var loc = $"{kvp.Value}";
                         if (result.ContainsKey(loc) == false)
@@ -127,7 +127,7 @@ namespace AV.Core.Diagnostics
 
             lock (SyncLock)
             {
-                this.Instances.Remove(ptr);
+                this.instances.Remove(ptr);
             }
         }
 
@@ -241,7 +241,7 @@ namespace AV.Core.Diagnostics
 
             lock (SyncLock)
             {
-                this.Instances[pointer] = new ReferenceEntry(
+                this.instances[pointer] = new ReferenceEntry(
                     unmanagedType, pointer, memberName, filePath, lineNumber);
             }
         }

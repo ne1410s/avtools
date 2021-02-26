@@ -30,7 +30,7 @@ namespace AV.Core.Common
             $",{nameof(VideoSeekIndexEntry.PresentationTime)}" +
             $",{nameof(VideoSeekIndexEntry.DecodingTime)}";
 
-        private readonly VideoSeekIndexEntryComparer LookupComparer = new VideoSeekIndexEntryComparer();
+        private readonly VideoSeekIndexEntryComparer lookupComparer = new VideoSeekIndexEntryComparer();
 
         /// <summary>
         /// Initialises a new instance of the <see cref="VideoSeekIndex"/> class.
@@ -188,14 +188,14 @@ namespace AV.Core.Common
             var seekEntry = new VideoSeekIndexEntry(managedFrame);
 
             // Check if the entry already exists.
-            if (this.Entries.BinarySearch(seekEntry, this.LookupComparer) >= 0)
+            if (this.Entries.BinarySearch(seekEntry, this.lookupComparer) >= 0)
             {
                 return false;
             }
 
             // Add the seek entry and ensure they are sorted.
             this.Entries.Add(seekEntry);
-            this.Entries.Sort(this.LookupComparer);
+            this.Entries.Sort(this.lookupComparer);
             return true;
         }
 

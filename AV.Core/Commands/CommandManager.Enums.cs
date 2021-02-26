@@ -4,6 +4,9 @@
 
 namespace AV.Core.Commands
 {
+    /// <summary>
+    /// Command manager.
+    /// </summary>
     internal partial class CommandManager
     {
         /// <summary>
