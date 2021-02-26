@@ -10,22 +10,29 @@ namespace AV.Core.Primitives
     using System.Threading;
     using System.Threading.Tasks;
 
+    /// <summary>
+    /// Worker base.
+    /// </summary>
     internal abstract class WorkerBase : IWorker
     {
-        private readonly object SyncLock = new object();
-        private readonly Stopwatch CycleClock = new Stopwatch();
-        private readonly ManualResetEventSlim WantedStateCompleted = new ManualResetEventSlim(true);
+        private readonly object syncLock = new object();
+        private readonly Stopwatch cycleClock = new Stopwatch();
+        private readonly ManualResetEventSlim wantedStateCompleted = new ManualResetEventSlim(true);
 
         private int localIsDisposed;
         private int localIsDisposing;
         private int localWorkerState = (int)WorkerState.Created;
         private int localWantedWorkerState = (int)WorkerState.Running;
-        private CancellationTokenSource TokenSource = new CancellationTokenSource();
+        private CancellationTokenSource tokenSource = new CancellationTokenSource();
 
+        /// <summary>
+        /// Initialises a new instance of the <see cref="WorkerBase"/> class.
+        /// </summary>
+        /// <param name="name">The name.</param>
         protected WorkerBase(string name)
         {
             this.Name = name;
-            this.CycleClock.Restart();
+            this.cycleClock.Restart();
         }
 
         /// <summary>
@@ -76,12 +83,12 @@ namespace AV.Core.Primitives
         /// <summary>
         /// Gets the elapsed time of the current cycle.
         /// </summary>
-        protected TimeSpan CurrentCycleElapsed => this.CycleClock.Elapsed;
+        protected TimeSpan CurrentCycleElapsed => this.cycleClock.Elapsed;
 
         /// <inheritdoc />
         public Task<WorkerState> StartAsync()
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
                 if (this.IsDisposed || this.IsDisposing)
                 {
@@ -96,7 +103,7 @@ namespace AV.Core.Primitives
                 }
                 else if (this.WorkerState == WorkerState.Paused)
                 {
-                    this.WantedStateCompleted.Reset();
+                    this.wantedStateCompleted.Reset();
                     this.WantedWorkerState = WorkerState.Running;
                 }
             }
@@ -107,7 +114,7 @@ namespace AV.Core.Primitives
         /// <inheritdoc />
         public Task<WorkerState> PauseAsync()
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
                 if (this.IsDisposed || this.IsDisposing)
                 {
@@ -119,7 +126,7 @@ namespace AV.Core.Primitives
                     return Task.FromResult(this.WorkerState);
                 }
 
-                this.WantedStateCompleted.Reset();
+                this.wantedStateCompleted.Reset();
                 this.WantedWorkerState = WorkerState.Paused;
             }
 
@@ -129,7 +136,7 @@ namespace AV.Core.Primitives
         /// <inheritdoc />
         public Task<WorkerState> ResumeAsync()
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
                 if (this.IsDisposed || this.IsDisposing)
                 {
@@ -141,7 +148,7 @@ namespace AV.Core.Primitives
                     return Task.FromResult(this.WorkerState);
                 }
 
-                this.WantedStateCompleted.Reset();
+                this.wantedStateCompleted.Reset();
                 this.WantedWorkerState = WorkerState.Running;
             }
 
@@ -151,7 +158,7 @@ namespace AV.Core.Primitives
         /// <inheritdoc />
         public Task<WorkerState> StopAsync()
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
                 if (this.IsDisposed || this.IsDisposing)
                 {
@@ -163,7 +170,7 @@ namespace AV.Core.Primitives
                     return Task.FromResult(this.WorkerState);
                 }
 
-                this.WantedStateCompleted.Reset();
+                this.wantedStateCompleted.Reset();
                 this.WantedWorkerState = WorkerState.Stopped;
                 this.Interrupt();
             }
@@ -182,7 +189,7 @@ namespace AV.Core.Primitives
         {
             this.StopAsync().Wait();
 
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
                 if (this.IsDisposed || this.IsDisposing)
                 {
@@ -190,17 +197,19 @@ namespace AV.Core.Primitives
                 }
 
                 this.IsDisposing = true;
-                this.WantedStateCompleted.Set();
+                this.wantedStateCompleted.Set();
                 try
                 {
                     this.OnDisposing();
                 }
                 catch
-                { /* Ignore */
+                {
+                    /* Ignore */
                 }
-                this.CycleClock.Reset();
-                this.WantedStateCompleted.Dispose();
-                this.TokenSource.Dispose();
+
+                this.cycleClock.Reset();
+                this.wantedStateCompleted.Dispose();
+                this.tokenSource.Dispose();
                 this.IsDisposed = true;
                 this.IsDisposing = false;
             }
@@ -235,7 +244,7 @@ namespace AV.Core.Primitives
         /// Interrupts a cycle or a wait operation.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected void Interrupt() => this.TokenSource.Cancel();
+        protected void Interrupt() => this.tokenSource.Cancel();
 
         /// <summary>
         /// Tries to acquire a cycle for execution.
@@ -248,13 +257,13 @@ namespace AV.Core.Primitives
                 return false;
             }
 
-            this.LastCycleElapsed = this.CycleClock.Elapsed;
-            this.CycleClock.Restart();
+            this.LastCycleElapsed = this.cycleClock.Elapsed;
+            this.cycleClock.Restart();
 
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
                 this.WorkerState = this.WantedWorkerState;
-                this.WantedStateCompleted.Set();
+                this.wantedStateCompleted.Set();
 
                 if (this.WorkerState == WorkerState.Stopped)
                 {
@@ -271,10 +280,10 @@ namespace AV.Core.Primitives
         protected void ExecuteCyle()
         {
             // Recreate the token source -- applies to cycle logic and delay
-            var ts = this.TokenSource;
+            var ts = this.tokenSource;
             if (ts.IsCancellationRequested)
             {
-                this.TokenSource = new CancellationTokenSource();
+                this.tokenSource = new CancellationTokenSource();
                 ts.Dispose();
             }
 
@@ -282,7 +291,7 @@ namespace AV.Core.Primitives
             {
                 try
                 {
-                    this.ExecuteCycleLogic(this.TokenSource.Token);
+                    this.ExecuteCycleLogic(this.tokenSource.Token);
                 }
                 catch (Exception ex)
                 {
@@ -297,7 +306,7 @@ namespace AV.Core.Primitives
         /// <returns>The awaitable state change task.</returns>
         private Task<WorkerState> RunWaitForWantedState() => Task.Run(() =>
         {
-            while (!this.WantedStateCompleted.Wait(Constants.DefaultTimingPeriod))
+            while (!this.wantedStateCompleted.Wait(Constants.DefaultTimingPeriod))
             {
                 this.Interrupt();
             }

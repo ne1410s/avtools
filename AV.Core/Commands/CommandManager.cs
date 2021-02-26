@@ -56,7 +56,8 @@ namespace AV.Core.Commands
         private MediaEngineState State => this.MediaCore.State;
 
         /// <summary>
-        /// Gets the pending priority command. There can only be one at a time.
+        /// Gets or sets the pending priority command. There can only be one at
+        /// a time.
         /// </summary>
         private PriorityCommandType PendingPriorityCommand
         {
@@ -106,7 +107,7 @@ namespace AV.Core.Commands
                     {
                         try
                         {
-                            while (this.HasDirectCommandCompleted == false)
+                            while (this.hasDirectCommandCompleted == false)
                             {
                                 this.MediaCore.Container?.SignalAbortReads(false);
                                 Task.Delay(Constants.DefaultTimingPeriod).GetAwaiter().GetResult();

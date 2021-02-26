@@ -15,6 +15,11 @@ namespace AV.Core.Container
     {
         private readonly object localSyncLock = new object();
 
+        /// <summary>
+        /// Packet received delegate.
+        /// </summary>
+        /// <param name="dataPacket">The data packet.</param>
+        /// <param name="stream">The stream.</param>
         public delegate void OnDataPacketReceivedDelegate(MediaPacket dataPacket, StreamInfo stream);
 
         /// <summary>

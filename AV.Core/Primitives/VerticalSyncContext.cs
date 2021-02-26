@@ -22,13 +22,13 @@ namespace AV.Core.Primitives
     internal sealed class VerticalSyncContext : IDisposable
     {
         private static readonly object NativeSyncLock = new object();
-        private readonly Stopwatch RefreshStopwatch = Stopwatch.StartNew();
-        private readonly object SyncLock = new object();
-        private bool IsDisposed;
-        private DisplayDeviceInfo? DisplayDevice;
-        private AdapterInfo CurrentAdapterInfo;
-        private VerticalSyncEventInfo VerticalSyncEvent;
-        private double RefreshCount;
+        private readonly Stopwatch refreshStopwatch = Stopwatch.StartNew();
+        private readonly object syncLock = new object();
+        private bool isDisposed;
+        private DisplayDeviceInfo? displayDevice;
+        private AdapterInfo currentAdapterInfo;
+        private VerticalSyncEventInfo verticalSyncEvent;
+        private double refreshCount;
 
         /// <summary>
         /// Initialises static members of the <see cref="VerticalSyncContext"/> class.
@@ -44,7 +44,7 @@ namespace AV.Core.Primitives
         /// </summary>
         public VerticalSyncContext()
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
                 this.EnsureAdapter();
             }
@@ -157,7 +157,7 @@ namespace AV.Core.Primitives
         /// <returns>True if the wait was performed using the adapter, and false otherwise.</returns>
         public bool WaitForBlank()
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
                 try
                 {
@@ -169,7 +169,7 @@ namespace AV.Core.Primitives
 
                     try
                     {
-                        var waitResult = NativeMethods.D3DKMTWaitForVerticalBlankEvent(ref this.VerticalSyncEvent);
+                        var waitResult = NativeMethods.D3DKMTWaitForVerticalBlankEvent(ref this.verticalSyncEvent);
                         if (waitResult != 0)
                         {
                             throw new Exception("Adapter needs to be recreated. Resources will be released.");
@@ -185,13 +185,13 @@ namespace AV.Core.Primitives
                 }
                 finally
                 {
-                    this.RefreshCount++;
+                    this.refreshCount++;
 
-                    if (this.RefreshCount >= 60)
+                    if (this.refreshCount >= 60)
                     {
-                        this.RefreshRateHz = this.RefreshCount / this.RefreshStopwatch.Elapsed.TotalSeconds;
-                        this.RefreshStopwatch.Restart();
-                        this.RefreshCount = 0;
+                        this.RefreshRateHz = this.refreshCount / this.refreshStopwatch.Elapsed.TotalSeconds;
+                        this.refreshStopwatch.Restart();
+                        this.refreshCount = 0;
                     }
                 }
             }
@@ -200,14 +200,14 @@ namespace AV.Core.Primitives
         /// <inheritdoc />
         public void Dispose()
         {
-            lock (this.SyncLock)
+            lock (this.syncLock)
             {
-                if (this.IsDisposed)
+                if (this.isDisposed)
                 {
                     return;
                 }
 
-                this.IsDisposed = true;
+                this.isDisposed = true;
 
                 this.ReleaseAdapter();
             }
@@ -220,23 +220,23 @@ namespace AV.Core.Primitives
         /// <returns>True if the adapter is available, and false otherwise.</returns>
         private bool EnsureAdapter()
         {
-            if (this.DisplayDevice == null)
+            if (this.displayDevice == null)
             {
-                this.DisplayDevice = PrimaryDisplayDevice;
-                if (this.DisplayDevice == null)
+                this.displayDevice = PrimaryDisplayDevice;
+                if (this.displayDevice == null)
                 {
                     IsAvailable = false;
                     return false;
                 }
             }
 
-            if (this.CurrentAdapterInfo.DCHandle == IntPtr.Zero)
+            if (this.currentAdapterInfo.DCHandle == IntPtr.Zero)
             {
                 try
                 {
-                    this.CurrentAdapterInfo = default;
-                    this.CurrentAdapterInfo.DCHandle = NativeMethods.CreateDC(this.DisplayDevice.Value.DeviceName, null, null, IntPtr.Zero);
-                    if (this.CurrentAdapterInfo.DCHandle == IntPtr.Zero)
+                    this.currentAdapterInfo = default;
+                    this.currentAdapterInfo.DCHandle = NativeMethods.CreateDC(this.displayDevice.Value.DeviceName, null, null, IntPtr.Zero);
+                    if (this.currentAdapterInfo.DCHandle == IntPtr.Zero)
                     {
                         throw new NotSupportedException("Unable to create DC for adapter.");
                     }
@@ -249,17 +249,17 @@ namespace AV.Core.Primitives
                 }
             }
 
-            if (this.VerticalSyncEvent.AdapterHandle == 0 && this.CurrentAdapterInfo.DCHandle != IntPtr.Zero)
+            if (this.verticalSyncEvent.AdapterHandle == 0 && this.currentAdapterInfo.DCHandle != IntPtr.Zero)
             {
                 try
                 {
-                    var openAdapterResult = NativeMethods.D3DKMTOpenAdapterFromHdc(ref this.CurrentAdapterInfo);
+                    var openAdapterResult = NativeMethods.D3DKMTOpenAdapterFromHdc(ref this.currentAdapterInfo);
                     if (openAdapterResult == 0)
                     {
-                        this.VerticalSyncEvent = default;
-                        this.VerticalSyncEvent.AdapterHandle = this.CurrentAdapterInfo.AdapterHandle;
-                        this.VerticalSyncEvent.DeviceHandle = 0;
-                        this.VerticalSyncEvent.PresentSourceId = this.CurrentAdapterInfo.PresentSourceId;
+                        this.verticalSyncEvent = default;
+                        this.verticalSyncEvent.AdapterHandle = this.currentAdapterInfo.AdapterHandle;
+                        this.verticalSyncEvent.DeviceHandle = 0;
+                        this.verticalSyncEvent.PresentSourceId = this.currentAdapterInfo.PresentSourceId;
                     }
                     else
                     {
@@ -274,7 +274,7 @@ namespace AV.Core.Primitives
                 }
             }
 
-            return this.VerticalSyncEvent.AdapterHandle != 0;
+            return this.verticalSyncEvent.AdapterHandle != 0;
         }
 
         /// <summary>
@@ -282,12 +282,12 @@ namespace AV.Core.Primitives
         /// </summary>
         private void ReleaseAdapter()
         {
-            if (this.CurrentAdapterInfo.AdapterHandle != 0)
+            if (this.currentAdapterInfo.AdapterHandle != 0)
             {
                 try
                 {
                     var closeInfo = default(CloseAdapterInfo);
-                    closeInfo.AdapterHandle = this.CurrentAdapterInfo.AdapterHandle;
+                    closeInfo.AdapterHandle = this.currentAdapterInfo.AdapterHandle;
 
                     // This will return 0 on success, and another value for failure.
                     var closeAdapterResult = NativeMethods.D3DKMTCloseAdapter(ref closeInfo);
@@ -298,12 +298,12 @@ namespace AV.Core.Primitives
                 }
             }
 
-            if (this.CurrentAdapterInfo.DCHandle != IntPtr.Zero)
+            if (this.currentAdapterInfo.DCHandle != IntPtr.Zero)
             {
                 try
                 {
                     // this will return 1 on success, 0 on failure.
-                    var deleteContextResult = NativeMethods.DeleteDC(this.CurrentAdapterInfo.DCHandle);
+                    var deleteContextResult = NativeMethods.DeleteDC(this.currentAdapterInfo.DCHandle);
                 }
                 catch
                 {
@@ -311,9 +311,9 @@ namespace AV.Core.Primitives
                 }
             }
 
-            this.DisplayDevice = null;
-            this.CurrentAdapterInfo = default;
-            this.VerticalSyncEvent = default;
+            this.displayDevice = null;
+            this.currentAdapterInfo = default;
+            this.verticalSyncEvent = default;
         }
 
         [StructLayout(LayoutKind.Sequential)]

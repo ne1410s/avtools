@@ -794,6 +794,9 @@
             <seealso cref="T:AV.Core.Primitives.IntervalWorkerBase" />
             <seealso cref="T:AV.Core.Engine.IMediaWorker" />
             <seealso cref="T:AV.Core.Diagnostics.ILoggingSource" />
+            <summary>
+            Command manager.
+            </summary>
         </member>
         <member name="M:AV.Core.Commands.CommandManager.#ctor(AV.Core.Engine.MediaEngine)">
             <summary>
@@ -819,7 +822,8 @@
         </member>
         <member name="P:AV.Core.Commands.CommandManager.PendingPriorityCommand">
             <summary>
-            Gets the pending priority command. There can only be one at a time.
+            Gets or sets the pending priority command. There can only be one at
+            a time.
             </summary>
         </member>
         <member name="M:AV.Core.Commands.CommandManager.OpenMediaAsync(System.Uri)">
@@ -922,12 +926,14 @@
         </member>
         <member name="P:AV.Core.Commands.CommandManager.IsChanging">
             <summary>
-            Gets a value indicating whether a <see cref="M:AV.Core.Commands.CommandManager.ChangeMediaAsync"/> operation is in progress.
+            Gets a value indicating whether a <see cref="M:AV.Core.Commands.CommandManager.ChangeMediaAsync"/>
+            operation is in progress.
             </summary>
         </member>
         <member name="P:AV.Core.Commands.CommandManager.PendingDirectCommand">
             <summary>
-            Gets a value indicating the direct command that is pending or in progress.
+            Gets or sets a value indicating the direct command that is pending
+            or in progress.
             </summary>
         </member>
         <member name="P:AV.Core.Commands.CommandManager.IsDirectCommandPending">
@@ -3274,6 +3280,13 @@
             data frames is up to the user.
             </summary>
         </member>
+        <member name="T:AV.Core.Container.DataComponentSet.OnDataPacketReceivedDelegate">
+            <summary>
+            Packet received delegate.
+            </summary>
+            <param name="dataPacket">The data packet.</param>
+            <param name="stream">The stream.</param>
+        </member>
         <member name="P:AV.Core.Container.DataComponentSet.OnDataPacketReceived">
             <summary>
             Gets or sets a method that gets called when a data packet is received from the input stream.
@@ -3375,7 +3388,7 @@
         </member>
         <member name="M:AV.Core.Container.MediaBlock.Finalize">
             <summary>
-            Finalizes an instance of the <see cref="T:AV.Core.Container.MediaBlock"/> class.
+            Finalises an instance of the <see cref="T:AV.Core.Container.MediaBlock"/> class.
             </summary>
         </member>
         <member name="P:AV.Core.Container.MediaBlock.MediaType">
@@ -4094,6 +4107,28 @@
             a single set. Sending packets is automatically handled by
             this class. This class is thread safe.
             </summary>
+        </member>
+        <member name="T:AV.Core.Container.MediaComponentSet.OnPacketQueueChangedDelegate">
+            <summary>
+            Packet queue changed delegate.
+            </summary>
+            <param name="operation">The operation.</param>
+            <param name="avPacket">The av packet.</param>
+            <param name="mediaType">The media type.</param>
+            <param name="bufferState">The buffer state.</param>
+        </member>
+        <member name="T:AV.Core.Container.MediaComponentSet.OnFrameDecodedDelegate">
+            <summary>
+            Frame decoded delegate.
+            </summary>
+            <param name="avFrame">The frame pointer.</param>
+            <param name="mediaType">The media type.</param>
+        </member>
+        <member name="T:AV.Core.Container.MediaComponentSet.OnSubtitleDecodedDelegate">
+            <summary>
+            Subtitle decoded delegate.
+            </summary>
+            <param name="avSubtitle">The subtitle pointer.</param>
         </member>
         <member name="P:AV.Core.Container.MediaComponentSet.OnPacketQueueChanged">
             <summary>
@@ -5296,7 +5331,7 @@
         </member>
         <member name="P:AV.Core.Container.VideoComponent.FilterString">
             <summary>
-            Provides access to the VideoFilter string of the container's MediaOptions.
+            Gets access to the VideoFilter string of the container's MediaOptions.
             </summary>
         </member>
         <member name="M:AV.Core.Container.VideoComponent.AttachHardwareDevice(AV.Core.Common.HardwareDeviceInfo)">
@@ -5435,6 +5470,81 @@
         <member name="T:AV.Core.Diagnostics.Aspects">
             <summary>
             Provides constants for logging aspect identifiers.
+            </summary>
+        </member>
+        <member name="P:AV.Core.Diagnostics.Aspects.None">
+            <summary>
+            Gets none.
+            </summary>
+        </member>
+        <member name="P:AV.Core.Diagnostics.Aspects.FFmpegLog">
+            <summary>
+            Gets ffmpeg log.
+            </summary>
+        </member>
+        <member name="P:AV.Core.Diagnostics.Aspects.EngineCommand">
+            <summary>
+            Gets engine command.
+            </summary>
+        </member>
+        <member name="P:AV.Core.Diagnostics.Aspects.ReadingWorker">
+            <summary>
+            Gets reading worker.
+            </summary>
+        </member>
+        <member name="P:AV.Core.Diagnostics.Aspects.DecodingWorker">
+            <summary>
+            Gets decoder worker.
+            </summary>
+        </member>
+        <member name="P:AV.Core.Diagnostics.Aspects.RenderingWorker">
+            <summary>
+            Gets rendering worker.
+            </summary>
+        </member>
+        <member name="P:AV.Core.Diagnostics.Aspects.Connector">
+            <summary>
+            Gets connector.
+            </summary>
+        </member>
+        <member name="P:AV.Core.Diagnostics.Aspects.Container">
+            <summary>
+            Gets container.
+            </summary>
+        </member>
+        <member name="P:AV.Core.Diagnostics.Aspects.Timing">
+            <summary>
+            Gets timing.
+            </summary>
+        </member>
+        <member name="P:AV.Core.Diagnostics.Aspects.Component">
+            <summary>
+            Gets component.
+            </summary>
+        </member>
+        <member name="P:AV.Core.Diagnostics.Aspects.ReferenceCounter">
+            <summary>
+            Gets reference counter.
+            </summary>
+        </member>
+        <member name="P:AV.Core.Diagnostics.Aspects.VideoRenderer">
+            <summary>
+            Gets video renderer.
+            </summary>
+        </member>
+        <member name="P:AV.Core.Diagnostics.Aspects.AudioRenderer">
+            <summary>
+            Gets audio renderer.
+            </summary>
+        </member>
+        <member name="P:AV.Core.Diagnostics.Aspects.SubtitleRenderer">
+            <summary>
+            Gets subtitle.
+            </summary>
+        </member>
+        <member name="P:AV.Core.Diagnostics.Aspects.Events">
+            <summary>
+            Gets events.
             </summary>
         </member>
         <member name="T:AV.Core.Diagnostics.Benchmark">
@@ -6080,7 +6190,7 @@
             </summary>
             <seealso cref="T:AV.Core.Engine.IMediaWorker" />
         </member>
-        <member name="F:AV.Core.Engine.FrameDecodingWorker.DecodedFrameCount">
+        <member name="F:AV.Core.Engine.FrameDecodingWorker.decodedFrameCount">
             <summary>
             The decoded frame count for a cycle. This is used to detect end of decoding scenarios.
             </summary>
@@ -8404,7 +8514,7 @@
         </member>
         <member name="P:AV.Core.Primitives.SyncLockerFactory.SyncLockReleaser.Empty">
             <summary>
-            An action-less, dummy disposable object.
+            Gets an actionless, dummy disposable object.
             </summary>
         </member>
         <member name="M:AV.Core.Primitives.SyncLockerFactory.SyncLockReleaser.Dispose">
@@ -8601,6 +8711,17 @@
             <summary>
             Releases the adapter and associated unmanaged references.
             </summary>
+        </member>
+        <member name="T:AV.Core.Primitives.WorkerBase">
+            <summary>
+            Worker base.
+            </summary>
+        </member>
+        <member name="M:AV.Core.Primitives.WorkerBase.#ctor(System.String)">
+            <summary>
+            Initialises a new instance of the <see cref="T:AV.Core.Primitives.WorkerBase"/> class.
+            </summary>
+            <param name="name">The name.</param>
         </member>
         <member name="P:AV.Core.Primitives.WorkerBase.Name">
             <summary>

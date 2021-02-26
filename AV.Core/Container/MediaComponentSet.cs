@@ -19,8 +19,8 @@ namespace AV.Core.Container
     public sealed class MediaComponentSet : IDisposable
     {
         // Synchronization locks
-        private readonly object ComponentSyncLock = new object();
-        private readonly object BufferSyncLock = new object();
+        private readonly object componentSyncLock = new object();
+        private readonly object bufferSyncLock = new object();
         private readonly AtomicBoolean localIsDisposed = new AtomicBoolean(false);
 
         private IReadOnlyList<MediaComponent> localAll = new List<MediaComponent>(0);
@@ -34,11 +34,30 @@ namespace AV.Core.Container
         private SubtitleComponent localSubtitle;
         private PacketBufferState localBufferState;
 
+        /// <summary>
+        /// Packet queue changed delegate.
+        /// </summary>
+        /// <param name="operation">The operation.</param>
+        /// <param name="avPacket">The av packet.</param>
+        /// <param name="mediaType">The media type.</param>
+        /// <param name="bufferState">The buffer state.</param>
         public delegate void OnPacketQueueChangedDelegate(
-            PacketQueueOp operation, MediaPacket avPacket, MediaType mediaType, PacketBufferState bufferState);
+            PacketQueueOp operation,
+            MediaPacket avPacket,
+            MediaType mediaType,
+            PacketBufferState bufferState);
 
+        /// <summary>
+        /// Frame decoded delegate.
+        /// </summary>
+        /// <param name="avFrame">The frame pointer.</param>
+        /// <param name="mediaType">The media type.</param>
         public delegate void OnFrameDecodedDelegate(IntPtr avFrame, MediaType mediaType);
 
+        /// <summary>
+        /// Subtitle decoded delegate.
+        /// </summary>
+        /// <param name="avSubtitle">The subtitle pointer.</param>
         public delegate void OnSubtitleDecodedDelegate(IntPtr avSubtitle);
 
         /// <summary>
@@ -68,7 +87,7 @@ namespace AV.Core.Container
         {
             get
             {
-                lock (this.ComponentSyncLock)
+                lock (this.componentSyncLock)
                 {
                     return this.localCount;
                 }
@@ -82,7 +101,7 @@ namespace AV.Core.Container
         {
             get
             {
-                lock (this.ComponentSyncLock)
+                lock (this.componentSyncLock)
                 {
                     return this.localMediaTypes;
                 }
@@ -96,7 +115,7 @@ namespace AV.Core.Container
         {
             get
             {
-                lock (this.ComponentSyncLock)
+                lock (this.componentSyncLock)
                 {
                     return this.localAll;
                 }
@@ -110,7 +129,7 @@ namespace AV.Core.Container
         {
             get
             {
-                lock (this.ComponentSyncLock)
+                lock (this.componentSyncLock)
                 {
                     return this.localSeekableMediaType;
                 }
@@ -125,7 +144,7 @@ namespace AV.Core.Container
         {
             get
             {
-                lock (this.ComponentSyncLock)
+                lock (this.componentSyncLock)
                 {
                     return this.localSeekable;
                 }
@@ -140,7 +159,7 @@ namespace AV.Core.Container
         {
             get
             {
-                lock (this.ComponentSyncLock)
+                lock (this.componentSyncLock)
                 {
                     return this.localVideo;
                 }
@@ -155,7 +174,7 @@ namespace AV.Core.Container
         {
             get
             {
-                lock (this.ComponentSyncLock)
+                lock (this.componentSyncLock)
                 {
                     return this.localAudio;
                 }
@@ -170,7 +189,7 @@ namespace AV.Core.Container
         {
             get
             {
-                lock (this.ComponentSyncLock)
+                lock (this.componentSyncLock)
                 {
                     return this.localSubtitle;
                 }
@@ -184,7 +203,7 @@ namespace AV.Core.Container
         {
             get
             {
-                lock (this.ComponentSyncLock)
+                lock (this.componentSyncLock)
                 {
                     return this.localVideo != null;
                 }
@@ -198,7 +217,7 @@ namespace AV.Core.Container
         {
             get
             {
-                lock (this.ComponentSyncLock)
+                lock (this.componentSyncLock)
                 {
                     return this.localAudio != null;
                 }
@@ -212,7 +231,7 @@ namespace AV.Core.Container
         {
             get
             {
-                lock (this.ComponentSyncLock)
+                lock (this.componentSyncLock)
                 {
                     return this.localSubtitle != null;
                 }
@@ -227,7 +246,7 @@ namespace AV.Core.Container
         {
             get
             {
-                lock (this.BufferSyncLock)
+                lock (this.bufferSyncLock)
                 {
                     return this.localBufferState.Length;
                 }
@@ -241,7 +260,7 @@ namespace AV.Core.Container
         {
             get
             {
-                lock (this.BufferSyncLock)
+                lock (this.bufferSyncLock)
                 {
                     return this.localBufferState.Count;
                 }
@@ -257,7 +276,7 @@ namespace AV.Core.Container
         {
             get
             {
-                lock (this.BufferSyncLock)
+                lock (this.bufferSyncLock)
                 {
                     return this.localBufferState.Duration;
                 }
@@ -271,7 +290,7 @@ namespace AV.Core.Container
         {
             get
             {
-                lock (this.BufferSyncLock)
+                lock (this.bufferSyncLock)
                 {
                     return this.localBufferState.CountThreshold;
                 }
@@ -286,7 +305,7 @@ namespace AV.Core.Container
         {
             get
             {
-                lock (this.BufferSyncLock)
+                lock (this.bufferSyncLock)
                 {
                     return this.localBufferState.HasEnoughPackets;
                 }
@@ -306,7 +325,7 @@ namespace AV.Core.Container
         {
             get
             {
-                lock (this.ComponentSyncLock)
+                lock (this.componentSyncLock)
                 {
                     return mediaType switch
                     {
@@ -420,7 +439,7 @@ namespace AV.Core.Container
             }
 
             // Update the buffer state
-            lock (this.BufferSyncLock)
+            lock (this.bufferSyncLock)
             {
                 this.localBufferState = state;
             }
@@ -439,7 +458,7 @@ namespace AV.Core.Container
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void AddComponent(MediaComponent component)
         {
-            lock (this.ComponentSyncLock)
+            lock (this.componentSyncLock)
             {
                 if (component == null)
                 {
@@ -489,7 +508,7 @@ namespace AV.Core.Container
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void RemoveComponent(MediaType mediaType)
         {
-            lock (this.ComponentSyncLock)
+            lock (this.componentSyncLock)
             {
                 var component = default(MediaComponent);
                 if (mediaType == MediaType.Audio)
@@ -589,7 +608,7 @@ namespace AV.Core.Container
         /// <param name="alsoManaged"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
         private void Dispose(bool alsoManaged)
         {
-            lock (this.ComponentSyncLock)
+            lock (this.componentSyncLock)
             {
                 if (this.IsDisposed || alsoManaged == false)
                 {

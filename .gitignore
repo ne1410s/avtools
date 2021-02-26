@@ -4,7 +4,7 @@
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
 # Xml documentation (build output)
-SecureMedia.*/SecureMedia.*.[Xx]ml
+AV.*/AV.*.[Xx]ml
 
 # User-specific files
 *.rsuser

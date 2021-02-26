@@ -62,9 +62,9 @@ namespace AV.Core.Primitives
         /// <inheritdoc />
         private sealed class SyncLockReleaser : IDisposable
         {
-            private readonly ISyncReleasable Parent;
-            private readonly LockHolderType Operation;
-            private bool IsDisposed;
+            private readonly ISyncReleasable parent;
+            private readonly LockHolderType operation;
+            private bool isDisposed;
 
             /// <summary>
             /// Initialises a new instance of the <see cref="SyncLockReleaser"/> class.
@@ -73,37 +73,37 @@ namespace AV.Core.Primitives
             /// <param name="operation">The operation.</param>
             public SyncLockReleaser(ISyncReleasable parent, LockHolderType operation)
             {
-                this.Parent = parent;
-                this.Operation = operation;
+                this.parent = parent;
+                this.operation = operation;
 
                 if (parent == null)
                 {
-                    this.IsDisposed = true;
+                    this.isDisposed = true;
                 }
             }
 
             /// <summary>
-            /// An action-less, dummy disposable object.
+            /// Gets an actionless, dummy disposable object.
             /// </summary>
             public static SyncLockReleaser Empty { get; } = new SyncLockReleaser(null, default);
 
             /// <inheritdoc />
             public void Dispose()
             {
-                if (this.IsDisposed)
+                if (this.isDisposed)
                 {
                     return;
                 }
 
-                this.IsDisposed = true;
+                this.isDisposed = true;
 
-                if (this.Operation == LockHolderType.Read)
+                if (this.operation == LockHolderType.Read)
                 {
-                    this.Parent?.ReleaseReaderLock();
+                    this.parent?.ReleaseReaderLock();
                 }
                 else
                 {
-                    this.Parent?.ReleaseWriterLock();
+                    this.parent?.ReleaseWriterLock();
                 }
             }
         }
@@ -116,7 +116,7 @@ namespace AV.Core.Primitives
         private sealed class SyncLocker : ISyncLocker, ISyncReleasable
         {
             private readonly AtomicBoolean localIsDisposed = new AtomicBoolean(false);
-            private readonly ReaderWriterLock Locker = new ReaderWriterLock();
+            private readonly ReaderWriterLock locker = new ReaderWriterLock();
 
             /// <summary>
             /// Gets a value indicating whether this instance is disposed.
@@ -154,10 +154,10 @@ namespace AV.Core.Primitives
                 this.TryAcquireReaderLock(DefaultTimeout, out locker);
 
             /// <inheritdoc />
-            public void ReleaseWriterLock() => this.Locker.ReleaseWriterLock();
+            public void ReleaseWriterLock() => this.locker.ReleaseWriterLock();
 
             /// <inheritdoc />
-            public void ReleaseReaderLock() => this.Locker.ReleaseReaderLock();
+            public void ReleaseReaderLock() => this.locker.ReleaseReaderLock();
 
             /// <inheritdoc />
             public void Dispose()
@@ -168,7 +168,7 @@ namespace AV.Core.Primitives
                 }
 
                 this.localIsDisposed.Value = true;
-                this.Locker.ReleaseLock();
+                this.locker.ReleaseLock();
             }
 
             /// <summary>
@@ -185,20 +185,20 @@ namespace AV.Core.Primitives
                 }
 
                 releaser = SyncLockReleaser.Empty;
-                if (this.Locker.IsReaderLockHeld)
+                if (this.locker.IsReaderLockHeld)
                 {
-                    this.Locker.AcquireReaderLock(timeoutMilliseconds);
+                    this.locker.AcquireReaderLock(timeoutMilliseconds);
                     releaser = new SyncLockReleaser(this, LockHolderType.Read);
-                    return this.Locker.IsReaderLockHeld;
+                    return this.locker.IsReaderLockHeld;
                 }
 
-                this.Locker.AcquireWriterLock(timeoutMilliseconds);
-                if (this.Locker.IsWriterLockHeld)
+                this.locker.AcquireWriterLock(timeoutMilliseconds);
+                if (this.locker.IsWriterLockHeld)
                 {
                     releaser = new SyncLockReleaser(this, LockHolderType.Write);
                 }
 
-                return this.Locker.IsWriterLockHeld;
+                return this.locker.IsWriterLockHeld;
             }
 
             /// <summary>
@@ -215,8 +215,8 @@ namespace AV.Core.Primitives
                 }
 
                 releaser = SyncLockReleaser.Empty;
-                this.Locker.AcquireReaderLock(timeoutMilliseconds);
-                if (!this.Locker.IsReaderLockHeld)
+                this.locker.AcquireReaderLock(timeoutMilliseconds);
+                if (!this.locker.IsReaderLockHeld)
                 {
                     return false;
                 }
@@ -234,7 +234,7 @@ namespace AV.Core.Primitives
         private sealed class SyncLockerSlim : ISyncLocker, ISyncReleasable
         {
             private readonly AtomicBoolean localIsDisposed = new AtomicBoolean(false);
-            private readonly ReaderWriterLockSlim Locker = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
+            private readonly ReaderWriterLockSlim locker = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
 
             /// <inheritdoc />
             public bool IsDisposed => this.localIsDisposed.Value;
@@ -270,10 +270,10 @@ namespace AV.Core.Primitives
                 this.TryAcquireReaderLock(DefaultTimeout, out locker);
 
             /// <inheritdoc />
-            public void ReleaseWriterLock() => this.Locker.ExitWriteLock();
+            public void ReleaseWriterLock() => this.locker.ExitWriteLock();
 
             /// <inheritdoc />
-            public void ReleaseReaderLock() => this.Locker.ExitReadLock();
+            public void ReleaseReaderLock() => this.locker.ExitReadLock();
 
             /// <inheritdoc />
             public void Dispose()
@@ -284,7 +284,7 @@ namespace AV.Core.Primitives
                 }
 
                 this.localIsDisposed.Value = true;
-                this.Locker.Dispose();
+                this.locker.Dispose();
             }
 
             /// <summary>
@@ -303,9 +303,9 @@ namespace AV.Core.Primitives
                 releaser = SyncLockReleaser.Empty;
                 bool result;
 
-                if (this.Locker.IsReadLockHeld)
+                if (this.locker.IsReadLockHeld)
                 {
-                    result = this.Locker.TryEnterReadLock(timeoutMilliseconds);
+                    result = this.locker.TryEnterReadLock(timeoutMilliseconds);
                     if (result)
                     {
                         releaser = new SyncLockReleaser(this, LockHolderType.Read);
@@ -314,7 +314,7 @@ namespace AV.Core.Primitives
                     return result;
                 }
 
-                result = this.Locker.TryEnterWriteLock(timeoutMilliseconds);
+                result = this.locker.TryEnterWriteLock(timeoutMilliseconds);
                 if (result)
                 {
                     releaser = new SyncLockReleaser(this, LockHolderType.Write);
@@ -337,7 +337,7 @@ namespace AV.Core.Primitives
                 }
 
                 releaser = SyncLockReleaser.Empty;
-                var result = this.Locker.TryEnterReadLock(timeoutMilliseconds);
+                var result = this.locker.TryEnterReadLock(timeoutMilliseconds);
                 if (result)
                 {
                     releaser = new SyncLockReleaser(this, LockHolderType.Read);

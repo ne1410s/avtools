@@ -17,9 +17,12 @@ namespace AV.Core.Commands
     using AV.Core.Primitives;
     using FFmpeg.AutoGen;
 
+    /// <summary>
+    /// Command manager.
+    /// </summary>
     internal partial class CommandManager
     {
-        private readonly AtomicBoolean HasDirectCommandCompleted = new (true);
+        private readonly AtomicBoolean hasDirectCommandCompleted = new (true);
         private readonly AtomicInteger localPendingDirectCommand = new ((int)DirectCommandType.None);
         private readonly AtomicBoolean localIsCloseInterruptPending = new (false);
 
@@ -34,12 +37,14 @@ namespace AV.Core.Commands
         public bool IsClosing => this.PendingDirectCommand == DirectCommandType.Close;
 
         /// <summary>
-        /// Gets a value indicating whether a <see cref="ChangeMediaAsync"/> operation is in progress.
+        /// Gets a value indicating whether a <see cref="ChangeMediaAsync"/>
+        /// operation is in progress.
         /// </summary>
         public bool IsChanging => this.PendingDirectCommand == DirectCommandType.Change;
 
         /// <summary>
-        /// Gets a value indicating the direct command that is pending or in progress.
+        /// Gets or sets a value indicating the direct command that is pending
+        /// or in progress.
         /// </summary>
         private DirectCommandType PendingDirectCommand
         {
@@ -56,7 +61,7 @@ namespace AV.Core.Commands
         /// </summary>
         private bool IsDirectCommandPending =>
             this.PendingDirectCommand != DirectCommandType.None ||
-            this.HasDirectCommandCompleted.Value == false;
+            this.hasDirectCommandCompleted.Value == false;
 
         /// <summary>
         /// Gets or sets a value indicating whether a close interrupt is pending.
@@ -113,7 +118,7 @@ namespace AV.Core.Commands
                 this.LogDebug(Aspects.EngineCommand, $"Direct Command '{command}' accepted. Perparing execution.");
 
                 this.PendingDirectCommand = command;
-                this.HasDirectCommandCompleted.Value = false;
+                this.hasDirectCommandCompleted.Value = false;
                 this.MediaCore.PausePlayback();
 
                 var commandTask = new Task<bool>(() =>
@@ -178,7 +183,7 @@ namespace AV.Core.Commands
                     finally
                     {
                         // Allow for a new direct command to be processed
-                        this.HasDirectCommandCompleted.Value = true;
+                        this.hasDirectCommandCompleted.Value = true;
                         this.LogDebug(Aspects.EngineCommand, $"Direct Command '{command}' completed. Result: {commandResult}");
                     }
 
@@ -376,15 +381,19 @@ namespace AV.Core.Commands
                     this.StopWorkers();
                 }
                 catch
-                { /* Ignore any exceptions and continue */
+                {
+                    /* Ignore any exceptions and continue */
                 }
+
                 try
                 {
                     this.MediaCore.Container?.Dispose();
                 }
                 catch
-                { /* Ignore any exceptions and continue */
+                {
+                    /* Ignore any exceptions and continue */
                 }
+
                 this.DisposePreloadedSubtitles();
                 this.MediaCore.Container = null;
                 throw;

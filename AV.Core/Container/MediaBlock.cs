@@ -36,7 +36,7 @@ namespace AV.Core.Container
         }
 
         /// <summary>
-        /// Finalizes an instance of the <see cref="MediaBlock"/> class.
+        /// Finalises an instance of the <see cref="MediaBlock"/> class.
         /// </summary>
         ~MediaBlock() => this.Dispose(false);
 

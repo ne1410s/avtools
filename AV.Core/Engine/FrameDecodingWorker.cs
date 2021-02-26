@@ -22,13 +22,13 @@ namespace AV.Core.Engine
     /// <seealso cref="IMediaWorker" />
     internal sealed class FrameDecodingWorker : IntervalWorkerBase, IMediaWorker, ILoggingSource
     {
-        private readonly Action<IEnumerable<MediaType>, CancellationToken> SerialDecodeBlocks;
-        private readonly Action<IEnumerable<MediaType>, CancellationToken> ParallelDecodeBlocks;
+        private readonly Action<IEnumerable<MediaType>, CancellationToken> serialDecodeBlocks;
+        private readonly Action<IEnumerable<MediaType>, CancellationToken> parallelDecodeBlocks;
 
         /// <summary>
         /// The decoded frame count for a cycle. This is used to detect end of decoding scenarios.
         /// </summary>
-        private int DecodedFrameCount;
+        private int decodedFrameCount;
 
         /// <summary>
         /// Initialises a new instance of the <see cref="FrameDecodingWorker"/> class.
@@ -41,19 +41,19 @@ namespace AV.Core.Engine
             this.Container = mediaCore.Container;
             this.State = mediaCore.State;
 
-            this.ParallelDecodeBlocks = (all, ct) =>
+            this.parallelDecodeBlocks = (all, ct) =>
             {
                 Parallel.ForEach(all, (t) =>
                     Interlocked.Add(
-                        ref this.DecodedFrameCount,
+                    ref this.decodedFrameCount,
                     this.DecodeComponentBlocks(t, ct)));
             };
 
-            this.SerialDecodeBlocks = (all, ct) =>
+            this.serialDecodeBlocks = (all, ct) =>
             {
                 foreach (var t in this.Container.Components.MediaTypes)
                 {
-                    this.DecodedFrameCount += this.DecodeComponentBlocks(t, ct);
+                    this.decodedFrameCount += this.DecodeComponentBlocks(t, ct);
                 }
             };
 
@@ -113,14 +113,14 @@ namespace AV.Core.Engine
                 }
 
                 // Call the frame decoding logic
-                this.DecodedFrameCount = 0;
+                this.decodedFrameCount = 0;
                 if (this.UseParallelDecoding)
                 {
-                    this.ParallelDecodeBlocks.Invoke(this.Container.Components.MediaTypes, ct);
+                    this.parallelDecodeBlocks.Invoke(this.Container.Components.MediaTypes, ct);
                 }
                 else
                 {
-                    this.SerialDecodeBlocks.Invoke(this.Container.Components.MediaTypes, ct);
+                    this.serialDecodeBlocks.Invoke(this.Container.Components.MediaTypes, ct);
                 }
             }
             finally
@@ -193,7 +193,7 @@ namespace AV.Core.Engine
         /// <returns>True if media docding has ended.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool DetectHasDecodingEnded() =>
-            this.DecodedFrameCount <= 0 &&
+            this.decodedFrameCount <= 0 &&
             this.CanReadMoreFramesOf(this.Container.Components.SeekableMediaType) == false;
 
         /// <summary>
