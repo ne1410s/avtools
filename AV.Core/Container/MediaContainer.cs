@@ -143,7 +143,10 @@ namespace AV.Core.Container
         /// <param name="inputStream">The input stream.</param>
         /// <param name="config">The configuration.</param>
         /// <param name="loggingHandler">The parent.</param>
-        public MediaContainer(IMediaInputStream inputStream, ContainerConfiguration config, ILoggingHandler loggingHandler)
+        public MediaContainer(
+            IMediaInputStream inputStream,
+            ContainerConfiguration config = null,
+            ILoggingHandler loggingHandler = null)
         {
             // Argument Validation
             if (inputStream == null)

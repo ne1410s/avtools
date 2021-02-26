@@ -40,9 +40,9 @@ namespace AV.Core.Common
 
         /// <summary>
         /// Gets or sets the amount of time to wait for a an open or read
-        /// operation to complete before it times out. It is 30 seconds by default.
+        /// operation to complete before it times out. It is 10 seconds by default.
         /// </summary>
-        public TimeSpan ReadTimeout { get; set; } = TimeSpan.FromSeconds(30);
+        public TimeSpan ReadTimeout { get; set; } = TimeSpan.FromSeconds(10);
 
         /// <summary>
         /// Gets global options for the demuxer. For additional info

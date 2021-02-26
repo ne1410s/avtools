@@ -1225,7 +1225,7 @@
         <member name="P:AV.Core.Common.ContainerConfiguration.ReadTimeout">
             <summary>
             Gets or sets the amount of time to wait for a an open or read
-            operation to complete before it times out. It is 30 seconds by default.
+            operation to complete before it times out. It is 10 seconds by default.
             </summary>
         </member>
         <member name="P:AV.Core.Common.ContainerConfiguration.GlobalOptions">
