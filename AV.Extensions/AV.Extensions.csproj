@@ -5,17 +5,15 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>AV.Core.xml</DocumentationFile>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DocumentationFile>AV.Extensions.xml</DocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>AV.Core.xml</DocumentationFile>
+    <DocumentationFile>AV.Extensions.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="AV.Core.xml" />
-    <None Remove="avtools.core.xml" />
+    <None Remove="AV.Extensions.xml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -23,11 +21,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FFmpeg.AutoGen" Version="4.3.1" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="System.Drawing.Common" Version="5.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AV.Core\AV.Core.csproj" />
+    <ProjectReference Include="..\AV.Source\AV.Source.csproj" />
   </ItemGroup>
 
 </Project>

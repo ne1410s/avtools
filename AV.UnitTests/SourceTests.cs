@@ -6,11 +6,11 @@ using Xunit;
 
 namespace AV.UnitTests
 {
-    public class MediaLoadTests
+    public class SourceTests
     {
         private static readonly byte[] TestKey = new byte[] { 3, 44, 201, 0, 6 };
 
-        public MediaLoadTests()
+        public SourceTests()
         {
             Library.FFmpegDirectory = "ffmpeg";
             Library.FFmpegLoadModeFlags = FFmpegLoadMode.FullFeatures;

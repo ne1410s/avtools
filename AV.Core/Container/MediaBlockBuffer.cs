@@ -139,74 +139,114 @@ namespace AV.Core.Container
         /// <summary>
         /// Gets the range of time between the first block and the end time of the last block.
         /// </summary>
-        public TimeSpan RangeDuration { get { lock (this.syncLock)
-{
-    return this.localRangeDuration;
-}
-        } }
+        public TimeSpan RangeDuration
+        {
+            get
+            {
+                lock (this.syncLock)
+                {
+                    return this.localRangeDuration;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the compressed data bit rate from which media blocks were created.
         /// </summary>
-        public long RangeBitRate { get { lock (this.syncLock)
-{
-    return this.localRangeBitRate;
-}
-        } }
+        public long RangeBitRate
+        {
+            get
+            {
+                lock (this.syncLock)
+                {
+                    return this.localRangeBitRate;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the average duration of the currently available playback blocks.
         /// </summary>
-        public TimeSpan AverageBlockDuration { get { lock (this.syncLock)
-{
-    return this.localAverageBlockDuration;
-}
-        } }
+        public TimeSpan AverageBlockDuration
+        {
+            get
+            {
+                lock (this.syncLock)
+                {
+                    return this.localAverageBlockDuration;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets a value indicating whether all the durations of the blocks are equal.
         /// </summary>
-        public bool IsMonotonic { get { lock (this.syncLock)
-{
-    return this.localIsMonotonic;
-}
-        } }
+        public bool IsMonotonic
+        {
+            get
+            {
+                lock (this.syncLock)
+                {
+                    return this.localIsMonotonic;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the duration of the blocks. If the blocks are not monotonic returns zero.
         /// </summary>
-        public TimeSpan MonotonicDuration { get { lock (this.syncLock)
-{
-    return this.localMonotonicDuration;
-}
-        } }
+        public TimeSpan MonotonicDuration
+        {
+            get
+            {
+                lock (this.syncLock)
+                {
+                    return this.localMonotonicDuration;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the number of available playback blocks.
         /// </summary>
-        public int Count { get { lock (this.syncLock)
-{
-    return this.localCount;
-}
-        } }
+        public int Count
+        {
+            get
+            {
+                lock (this.syncLock)
+                {
+                    return this.localCount;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the usage percent from 0.0 to 1.0.
         /// </summary>
-        public double CapacityPercent { get { lock (this.syncLock)
-{
-    return this.localCapacityPercent;
-}
-        } }
+        public double CapacityPercent
+        {
+            get
+            {
+                lock (this.syncLock)
+                {
+                    return this.localCapacityPercent;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets a value indicating whether the playback blocks are all allocated.
         /// </summary>
-        public bool IsFull { get { lock (this.syncLock)
-{
-    return this.localIsFull;
-}
-        } }
+        public bool IsFull
+        {
+            get
+            {
+                lock (this.syncLock)
+                {
+                    return this.localIsFull;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the <see cref="MediaBlock" /> at the specified index.

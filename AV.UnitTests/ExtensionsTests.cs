@@ -1,16 +1,17 @@
 ﻿using AV.Core;
 using AV.Core.Container;
+using AV.Extensions;
 using AV.Source;
 using FFmpeg.AutoGen;
 using Xunit;
 
 namespace AV.UnitTests
 {
-    public class MediaFrameTests
+    public class ExtensionsTests
     {
         private static readonly byte[] TestKey = new byte[] { 3, 44, 201, 0, 6 };
     
-        public MediaFrameTests()
+        public ExtensionsTests()
         {
             Library.FFmpegDirectory = "ffmpeg";
             Library.FFmpegLoadModeFlags = FFmpegLoadMode.FullFeatures;
@@ -39,14 +40,13 @@ namespace AV.UnitTests
             container.Initialize();
             container.Open();
 
-            var snaps = 20;
-            var gap = container.MediaInfo.Duration / snaps;
-            for (var i = 0; i < snaps; i++)
+            // Act
+            container.Snap((data, n) =>
             {
-                var frame = container.Seek(gap * i);
-                //var x = container.Read();
-                
-            }
+                data.Image.Save($"c:\\temp\\vid-test-out\\snap_{n}.jpg");
+            });
+
+            // Assert
         }
     }
 }

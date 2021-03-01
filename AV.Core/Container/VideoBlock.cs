@@ -13,7 +13,7 @@ namespace AV.Core.Container
     /// <summary>
     /// A pre-allocated, scaled video block. The buffer is in BGR, 24-bit format.
     /// </summary>
-    internal sealed class VideoBlock : MediaBlock
+    public sealed class VideoBlock : MediaBlock
     {
         /// <summary>
         /// Initialises a new instance of the <see cref="VideoBlock"/> class.
@@ -35,58 +35,58 @@ namespace AV.Core.Container
         public int PixelHeight { get; private set; }
 
         /// <summary>
-        /// Gets or sets the pixel aspect width.
+        /// Gets the pixel aspect width.
         /// This is NOT the display aspect width.
         /// </summary>
         public int PixelAspectWidth { get; internal set; }
 
         /// <summary>
-        /// Gets or sets the pixel aspect height.
+        /// Gets the pixel aspect height.
         /// This is NOT the display aspect height.
         /// </summary>
         public int PixelAspectHeight { get; internal set; }
 
         /// <summary>
-        /// Gets or sets the SMTPE time code.
+        /// Gets the SMTPE time code.
         /// </summary>
         public string SmtpeTimeCode { get; internal set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this frame was decoded in a hardware context.
+        /// Gets a value indicating whether this frame was decoded in a hardware context.
         /// </summary>
         public bool IsHardwareFrame { get; internal set; }
 
         /// <summary>
-        /// Gets or sets the name of the hardware decoder if the frame was decoded in a hardware context.
+        /// Gets the name of the hardware decoder if the frame was decoded in a hardware context.
         /// </summary>
         public string HardwareAcceleratorName { get; internal set; }
 
         /// <summary>
-        /// Gets or sets the display picture number (frame number).
+        /// Gets the display picture number (frame number).
         /// If not set by the decoder, this attempts to obtain it by dividing the start time by the
         /// frame duration.
         /// </summary>
         public long DisplayPictureNumber { get; internal set; }
 
         /// <summary>
-        /// Gets or sets the coded picture number set by the decoder.
+        /// Gets the coded picture number set by the decoder.
         /// </summary>
         public long CodedPictureNumber { get; internal set; }
 
         /// <summary>
-        /// Gets or sets the picture type.
+        /// Gets the picture type.
         /// </summary>
         public AVPictureType PictureType { get; internal set; }
 
         /// <summary>
-        /// Gets or sets the closed caption packets for this video block.
+        /// Gets the closed caption packets for this video block.
         /// </summary>
         public IReadOnlyList<ClosedCaptionPacket> ClosedCaptions { get; internal set; }
 
         /// <summary>
         /// Gets the picture buffer stride.
         /// </summary>
-        internal int PictureBufferStride { get; private set; }
+        public int PictureBufferStride { get; private set; }
 
         /// <summary>
         /// Allocates a block of memory suitable for a picture buffer
