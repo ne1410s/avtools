@@ -9,7 +9,6 @@ namespace AV.Core
     using System.Reflection;
     using AV.Core.ClosedCaptions;
     using AV.Core.Common;
-    using AV.Core.Engine;
     using FFmpeg.AutoGen;
 
     /// <summary>
@@ -153,48 +152,6 @@ namespace AV.Core
         /// <summary>
         /// Gets the timing period for default scenarios.
         /// </summary>
-        internal static TimeSpan DefaultTimingPeriod => TimeSpan.FromMilliseconds(15);
-
-        /// <summary>
-        /// Gets the maximum blocks to cache for the given component type.
-        /// </summary>
-        /// <param name="t">The t.</param>
-        /// <param name="mediaCore">The media core.</param>
-        /// <returns>The number of blocks to cache.</returns>
-        internal static int GetMaxBlocks(MediaType t, MediaEngine mediaCore)
-        {
-            const int MinVideoBlocks = 8;
-            const int MinAudioBlocks = 48;
-            const int MinSubtitleBlocks = 4;
-
-            var result = 0;
-
-            if (t == MediaType.Video)
-            {
-                result = mediaCore.MediaOptions.VideoBlockCache;
-                if (result < MinVideoBlocks)
-                {
-                    result = MinVideoBlocks;
-                }
-            }
-            else if (t == MediaType.Audio)
-            {
-                result = mediaCore.MediaOptions.AudioBlockCache;
-                if (result < MinAudioBlocks)
-                {
-                    result = MinAudioBlocks;
-                }
-            }
-            else if (t == MediaType.Subtitle)
-            {
-                result = mediaCore.MediaOptions.SubtitleBlockCache;
-                if (result < MinSubtitleBlocks)
-                {
-                    result = MinSubtitleBlocks;
-                }
-            }
-
-            return result;
-        }
+        internal static TimeSpan DefaultTimingPeriod => TimeSpan.FromMilliseconds(15); 
     }
 }

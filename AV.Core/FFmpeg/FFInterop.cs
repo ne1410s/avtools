@@ -13,7 +13,6 @@ namespace FFmpeg.AutoGen
     using AV.Core;
     using AV.Core.Common;
     using AV.Core.Diagnostics;
-    using AV.Core.Engine;
 
     /// <summary>
     /// Provides a set of utilities to perform logging, text formatting,
@@ -38,7 +37,7 @@ namespace FFmpeg.AutoGen
         private static readonly object SyncLock = new object();
         private static readonly List<OptionMetadata> EmptyOptionMetaList = new List<OptionMetadata>(0);
         private static readonly av_log_set_callback_callback FFmpegLogCallback = OnFFmpegMessageLogged;
-        private static readonly ILoggingHandler LoggingHandler = new FFLoggingHandler();
+        private static readonly ILoggingHandler LoggingHandler = null;
         private static bool localIsInitialized;
         private static string localLibrariesPath = string.Empty;
         private static int localLibraryIdentifiers;
@@ -366,17 +365,6 @@ namespace FFmpeg.AutoGen
                 FFmpegLogBuffer.Clear();
                 Logging.Log(LoggingHandler, messageType, Aspects.FFmpegLog, line);
             }
-        }
-
-        /// <summary>
-        /// Handles FFmpeg library messages.
-        /// </summary>
-        /// <seealso cref="ILoggingHandler" />
-        internal class FFLoggingHandler : ILoggingHandler
-        {
-            /// <inheritdoc />
-            void ILoggingHandler.HandleLogMessage(LoggingMessage message) =>
-                MediaEngine.RaiseFFmpegMessageLogged(message);
         }
     }
 }
