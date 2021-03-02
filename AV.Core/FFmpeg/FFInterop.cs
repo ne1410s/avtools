@@ -12,7 +12,6 @@ namespace FFmpeg.AutoGen
     using System.Text;
     using AV.Core;
     using AV.Core.Common;
-    using AV.Core.Diagnostics;
 
     /// <summary>
     /// Provides a set of utilities to perform logging, text formatting,

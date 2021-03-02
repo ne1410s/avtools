@@ -8,7 +8,7 @@ namespace AV.Core.Container
     using System.Runtime.CompilerServices;
     using System.Runtime.InteropServices;
     using AV.Core.Common;
-    using AV.Core.Diagnostics;
+    using AV.Core.Primitives;
     using FFmpeg.AutoGen;
 
     /// <summary>

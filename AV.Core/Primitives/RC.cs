@@ -2,7 +2,7 @@
 // Copyright (c) ne1410s. All rights reserved.
 // </copyright>
 
-namespace AV.Core.Diagnostics
+namespace AV.Core.Primitives
 {
     using System;
     using System.Collections.Generic;

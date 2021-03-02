@@ -9,8 +9,6 @@ namespace AV.Core
     using System.Globalization;
     using System.Runtime.CompilerServices;
     using System.Runtime.InteropServices;
-    using AV.Core.Common;
-    using AV.Core.Container;
     using FFmpeg.AutoGen;
 
     /// <summary>
