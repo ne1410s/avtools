@@ -11,7 +11,6 @@ namespace AV.Core
     using System.Runtime.InteropServices;
     using AV.Core.Common;
     using AV.Core.Container;
-    using AV.Core.Diagnostics;
     using FFmpeg.AutoGen;
 
     /// <summary>

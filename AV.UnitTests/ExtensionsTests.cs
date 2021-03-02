@@ -1,4 +1,5 @@
-﻿using AV.Core;
+﻿using System.Collections.Generic;
+using AV.Core;
 using AV.Core.Container;
 using AV.Extensions;
 using AV.Source;
@@ -41,13 +42,17 @@ namespace AV.UnitTests
             container.Initialize();
             container.Open();
 
+            var frameNums = new List<long>();
+
             // Act
             container.Snap((data, n) =>
             {
-                data.Image.Save($"c:\\temp\\vid-test-out\\snap_{name}_{n}.jpg");
+                frameNums.Add(data.FrameNumber);
+                data.Image.Save($"c:\\temp\\vid-test-out\\snap_{name}_{n}_of_24_FRAME_NO-{data.FrameNumber}.jpg");
             });
 
             // Assert
+            var x = string.Join(',', frameNums);
         }
     }
 }

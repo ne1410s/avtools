@@ -7,6 +7,7 @@ namespace AV.Extensions
     using System;
     using System.Drawing;
     using System.Drawing.Imaging;
+    using System.Linq;
     using AV.Core.Container;
 
     /// <summary>
@@ -52,10 +53,26 @@ namespace AV.Extensions
             TimeSpan position,
             ref MediaBlock mediaBlock)
         {
-            // TODO: Frame position is typically off!
-            // The comments on the Seek() method seem to indicate what to do
-            var frame = container.Seek(position);
-            container.Convert(frame, ref mediaBlock, true, null);
+            var workingFrame = container.Seek(position);
+
+            //TODO! This produces a wonderfully linear frame dist...
+            // BUT alas seems to be pissing memory...
+            // Maybe a better seek index?? (VideoComponent)
+
+            //while (true)
+            //{
+            //    container.Read();
+            //    var receivedFrame = container.Components.Video.ReceiveNextFrame();
+            //    workingFrame = receivedFrame ?? workingFrame;
+            //    if (receivedFrame == null || container.IsAtEndOfStream || workingFrame.StartTime >= position)
+            //    {
+            //        break;
+            //    }
+            //}
+
+            // Commenting-out is beautiful wrt memory, but wobbly dist
+
+            container.Convert(workingFrame, ref mediaBlock, true, null);
 
             var videoBlock = (VideoBlock)mediaBlock;
             var bitmap = new Bitmap(
@@ -69,7 +86,7 @@ namespace AV.Extensions
             {
                 FrameNumber = videoBlock.DisplayPictureNumber,
                 Image = bitmap,
-                TimeStamp = frame.StartTime,
+                TimeStamp = workingFrame.StartTime,
             };
         }
     }
