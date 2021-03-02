@@ -19,65 +19,6 @@ namespace AV.Core
     public static partial class Utilities
     {
         /// <summary>
-        /// Reads all the blocks of the specified media type from the source url.
-        /// </summary>
-        /// <param name="mediaSource">The subtitles URL.</param>
-        /// <param name="sourceType">Type of the source.</param>
-        /// <returns>A buffer containing all the blocks.</returns>
-        internal static MediaBlockBuffer LoadBlocks(string mediaSource, MediaType sourceType)
-        {
-            if (string.IsNullOrWhiteSpace(mediaSource))
-            {
-                throw new ArgumentNullException(nameof(mediaSource));
-            }
-
-            using var tempContainer = new MediaContainer(mediaSource, null);
-            tempContainer.Initialize();
-
-            // Skip reading and decoding unused blocks
-            tempContainer.MediaOptions.IsVideoDisabled = sourceType != MediaType.Video;
-
-            // Open the container
-            tempContainer.Open();
-            if (tempContainer.Components.Seekable == null || tempContainer.Components.SeekableMediaType != sourceType)
-            {
-                throw new MediaContainerException($"Could not find a stream of type '{sourceType}' to load blocks from");
-            }
-
-            // read all the packets and decode them
-            var outputFrames = new List<MediaFrame>(1024 * 8);
-            while (true)
-            {
-                tempContainer.Read();
-                var frames = tempContainer.Decode();
-                foreach (var frame in frames)
-                {
-                    if (frame.MediaType != sourceType)
-                    {
-                        continue;
-                    }
-
-                    outputFrames.Add(frame);
-                }
-
-                if (frames.Count <= 0 && tempContainer.IsAtEndOfStream)
-                {
-                    break;
-                }
-            }
-
-            // Build the result
-            var result = new MediaBlockBuffer(outputFrames.Count, sourceType);
-            foreach (var frame in outputFrames)
-            {
-                result.Add(frame, tempContainer);
-            }
-
-            tempContainer.Close();
-            return result;
-        }
-
-        /// <summary>
         /// Computes the picture number.
         /// </summary>
         /// <param name="streamStartTime">The Stream Start time.</param>
