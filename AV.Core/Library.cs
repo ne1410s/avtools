@@ -345,7 +345,7 @@ namespace AV.Core
         /// <returns>The contents of the media information.</returns>
         public static MediaInfo RetrieveMediaInfo(string mediaSource)
         {
-            using var container = new MediaContainer(mediaSource, null, null);
+            using var container = new MediaContainer(mediaSource, null);
             container.Initialize();
             return container.MediaInfo;
         }
@@ -362,12 +362,10 @@ namespace AV.Core
         {
             var result = new VideoSeekIndex(mediaSource, -1);
 
-            using (var container = new MediaContainer(mediaSource, null, null))
+            using (var container = new MediaContainer(mediaSource, null))
             {
                 container.Initialize();
-                container.MediaOptions.IsAudioDisabled = true;
                 container.MediaOptions.IsVideoDisabled = false;
-                container.MediaOptions.IsSubtitleDisabled = true;
 
                 if (streamIndex >= 0)
                 {

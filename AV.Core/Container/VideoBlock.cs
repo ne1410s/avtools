@@ -4,8 +4,6 @@
 
 namespace AV.Core.Container
 {
-    using System.Collections.Generic;
-    using AV.Core.ClosedCaptions;
     using AV.Core.Common;
     using FFmpeg.AutoGen;
 
@@ -77,11 +75,6 @@ namespace AV.Core.Container
         /// Gets the picture type.
         /// </summary>
         public AVPictureType PictureType { get; internal set; }
-
-        /// <summary>
-        /// Gets the closed caption packets for this video block.
-        /// </summary>
-        public IReadOnlyList<ClosedCaptionPacket> ClosedCaptions { get; internal set; }
 
         /// <summary>
         /// Gets the picture buffer stride.

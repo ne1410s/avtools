@@ -37,7 +37,6 @@ namespace FFmpeg.AutoGen
         private static readonly object SyncLock = new object();
         private static readonly List<OptionMetadata> EmptyOptionMetaList = new List<OptionMetadata>(0);
         private static readonly av_log_set_callback_callback FFmpegLogCallback = OnFFmpegMessageLogged;
-        private static readonly ILoggingHandler LoggingHandler = null;
         private static bool localIsInitialized;
         private static string localLibrariesPath = string.Empty;
         private static int localLibraryIdentifiers;
@@ -363,7 +362,9 @@ namespace FFmpeg.AutoGen
                 line = string.Join(string.Empty, FFmpegLogBuffer);
                 line = line.TrimEnd();
                 FFmpegLogBuffer.Clear();
-                Logging.Log(LoggingHandler, messageType, Aspects.FFmpegLog, line);
+
+                //TODO: Log {messageType}
+                ////{line};
             }
         }
     }

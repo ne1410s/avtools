@@ -6,7 +6,6 @@ namespace AV.Core.Container
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Runtime.CompilerServices;
     using AV.Core.Common;
     using AV.Core.Diagnostics;
@@ -48,9 +47,8 @@ namespace AV.Core.Container
 
             if (this.baseFrameRateQ.den == 0 || this.baseFrameRateQ.num == 0)
             {
-                this.LogWarning(
-                    Aspects.Component,
-                    $"{nameof(VideoComponent)} was unable to extract valid frame rate. Will use 25fps (40ms)");
+                //TODO: Warn
+                ////$"{nameof(VideoComponent)} was unable to extract valid frame rate. Will use 25fps (40ms)");
 
                 this.baseFrameRateQ.num = 25;
                 this.baseFrameRateQ.den = 1;
@@ -186,7 +184,8 @@ namespace AV.Core.Container
             }
             catch (Exception ex)
             {
-                this.LogError(Aspects.Component, "Could not attach hardware decoder.", ex);
+                //TODO: Error
+                ////"Could not attach hardware decoder.", ex);
                 return false;
             }
         }
@@ -319,14 +318,7 @@ namespace AV.Core.Container
             target.CompressedSize = source.CompressedSize;
             target.CodedPictureNumber = source.CodedPictureNumber;
             target.StreamIndex = source.StreamIndex;
-            target.ClosedCaptions = source.ClosedCaptions.ToList();
             target.PictureType = source.PictureType;
-
-            // Update the stream info object if we get Closed Caption Data
-            if (this.StreamInfo.HasClosedCaptions == false && target.ClosedCaptions.Count > 0)
-            {
-                this.StreamInfo.HasClosedCaptions = true;
-            }
 
             // Process the aspect ratio
             var aspectRatio = ffmpeg.av_guess_sample_aspect_ratio(this.Container.InputContext, this.Stream, source.Pointer);
@@ -671,7 +663,8 @@ namespace AV.Core.Container
             }
             catch (Exception ex)
             {
-                this.LogError(Aspects.Component, $"Video filter graph could not be built: {filterString}.", ex);
+                //TODO: Error
+                ////$"Video filter graph could not be built: {filterString}.", ex);
                 this.DestroyFilterGraph();
             }
             finally

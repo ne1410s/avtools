@@ -24,22 +24,19 @@ namespace AV.Core
         /// </summary>
         /// <param name="mediaSource">The subtitles URL.</param>
         /// <param name="sourceType">Type of the source.</param>
-        /// <param name="parent">The parent.</param>
         /// <returns>A buffer containing all the blocks.</returns>
-        internal static MediaBlockBuffer LoadBlocks(string mediaSource, MediaType sourceType, ILoggingHandler parent)
+        internal static MediaBlockBuffer LoadBlocks(string mediaSource, MediaType sourceType)
         {
             if (string.IsNullOrWhiteSpace(mediaSource))
             {
                 throw new ArgumentNullException(nameof(mediaSource));
             }
 
-            using var tempContainer = new MediaContainer(mediaSource, null, parent);
+            using var tempContainer = new MediaContainer(mediaSource, null);
             tempContainer.Initialize();
 
             // Skip reading and decoding unused blocks
-            tempContainer.MediaOptions.IsAudioDisabled = sourceType != MediaType.Audio;
             tempContainer.MediaOptions.IsVideoDisabled = sourceType != MediaType.Video;
-            tempContainer.MediaOptions.IsSubtitleDisabled = sourceType != MediaType.Subtitle;
 
             // Open the container
             tempContainer.Open();

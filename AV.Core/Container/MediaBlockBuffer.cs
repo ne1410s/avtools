@@ -631,16 +631,6 @@ namespace AV.Core.Container
                 return new VideoBlock();
             }
 
-            if (mediaType == MediaType.Audio)
-            {
-                return new AudioBlock();
-            }
-
-            if (mediaType == MediaType.Subtitle)
-            {
-                return new SubtitleBlock();
-            }
-
             throw new InvalidCastException($"No {nameof(MediaBlock)} constructor for {nameof(MediaType)} '{mediaType}'");
         }
 

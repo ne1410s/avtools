@@ -14,19 +14,6 @@ namespace AV.Core
     public static partial class Utilities
     {
         /// <summary>
-        /// Converts the given value to a value that is of the given multiple.
-        /// </summary>
-        /// <param name="value">The value.</param>
-        /// <param name="multiple">The multiple.</param>
-        /// <returns>The value snapped to the given multiple.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static double ToMultipleOf(this double value, double multiple)
-        {
-            var factor = Convert.ToInt32(value / multiple);
-            return factor * multiple;
-        }
-
-        /// <summary>
         /// Converts a byte pointer to a UTF8 encoded string.
         /// </summary>
         /// <param name="stringAddress">The pointer to the starting character.</param>

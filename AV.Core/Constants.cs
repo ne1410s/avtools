@@ -7,8 +7,6 @@ namespace AV.Core
     using System;
     using System.IO;
     using System.Reflection;
-    using AV.Core.ClosedCaptions;
-    using AV.Core.Common;
     using FFmpeg.AutoGen;
 
     /// <summary>
@@ -56,11 +54,6 @@ namespace AV.Core
         /// The default volume.
         /// </summary>
         public static double DefaultVolume => 1.0d;
-
-        /// <summary>
-        /// The default closed captions channel.
-        /// </summary>
-        public static CaptionsChannel DefaultClosedCaptionsChannel => CaptionsChannel.CCP;
 
         /// <summary>
         /// The minimum speed ratio.

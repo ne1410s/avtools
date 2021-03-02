@@ -10,7 +10,6 @@ namespace AV.Core.Container
     using System.Runtime.CompilerServices;
     using System.Runtime.InteropServices;
     using AV.Core.Common;
-    using AV.Core.Diagnostics;
     using AV.Core.Primitives;
     using FFmpeg.AutoGen;
 
@@ -25,17 +24,12 @@ namespace AV.Core.Container
     /// 4. Perform continuous block materialization.
     /// </summary>
     /// <seealso cref="IDisposable" />
-    public sealed unsafe class MediaContainer : IDisposable, ILoggingSource
+    public sealed unsafe class MediaContainer : IDisposable
     {
         /// <summary>
         /// The exception message no input context.
         /// </summary>
         private const string ExceptionMessageNoInputContext = "Stream InputContext has not been initialized.";
-
-        /// <summary>
-        /// The logging handler.
-        /// </summary>
-        private readonly ILoggingHandler localLoggingHandler;
 
         /// <summary>
         /// The read synchronize root.
@@ -107,9 +101,8 @@ namespace AV.Core.Container
         /// </summary>
         /// <param name="mediaSource">The media URL.</param>
         /// <param name="config">The container configuration options.</param>
-        /// <param name="loggingHandler">The logger.</param>
         /// <exception cref="ArgumentNullException">Media Source cannot be null.</exception>
-        public MediaContainer(string mediaSource, ContainerConfiguration config, ILoggingHandler loggingHandler)
+        public MediaContainer(string mediaSource, ContainerConfiguration config)
         {
             // Argument Validation
             if (string.IsNullOrWhiteSpace(mediaSource))
@@ -121,7 +114,6 @@ namespace AV.Core.Container
             FFInterop.Initialize(null, FFmpegLoadMode.FullFeatures);
 
             // Create the options object and setup some initial properties
-            this.localLoggingHandler = loggingHandler;
             this.MediaSource = mediaSource;
             this.Configuration = config ?? new ContainerConfiguration();
             this.streamReadInterruptCallback = this.OnStreamReadInterrupt;
@@ -145,8 +137,7 @@ namespace AV.Core.Container
         /// <param name="loggingHandler">The parent.</param>
         public MediaContainer(
             IMediaInputStream inputStream,
-            ContainerConfiguration config = null,
-            ILoggingHandler loggingHandler = null)
+            ContainerConfiguration config = null)
         {
             // Argument Validation
             if (inputStream == null)
@@ -155,8 +146,8 @@ namespace AV.Core.Container
             }
 
             // Validate the stream pseudo Url
-            var mediaSpurceUrl = inputStream.StreamUri?.ToString();
-            if (string.IsNullOrWhiteSpace(mediaSpurceUrl))
+            var mediaSourceUrl = inputStream.StreamUri?.ToString();
+            if (string.IsNullOrWhiteSpace(mediaSourceUrl))
             {
                 throw new ArgumentNullException($"{nameof(inputStream)}.{nameof(inputStream.StreamUri)}");
             }
@@ -164,15 +155,10 @@ namespace AV.Core.Container
             // Initialize the library (if not already done)
             FFInterop.Initialize(null, FFmpegLoadMode.FullFeatures);
 
-            // Create the options object
-            this.localLoggingHandler = loggingHandler;
-            this.MediaSource = mediaSpurceUrl;
+            this.MediaSource = mediaSourceUrl;
             this.customInputStream = inputStream;
             this.Configuration = config ?? new ContainerConfiguration();
         }
-
-        /// <inheritdoc />
-        ILoggingHandler ILoggingSource.LoggingHandler => this.localLoggingHandler;
 
         /// <summary>
         /// Gets a value indicating whether to detect redundant Dispose calls.
@@ -534,8 +520,6 @@ namespace AV.Core.Container
                     return input.MediaType switch
                     {
                         MediaType.Video => this.Components.HasVideo && this.Components.Video.MaterializeFrame(input, ref output, previousBlock),
-                        MediaType.Audio => this.Components.HasAudio && this.Components.Audio.MaterializeFrame(input, ref output, previousBlock),
-                        MediaType.Subtitle => this.Components.HasSubtitles && this.Components.Subtitles.MaterializeFrame(input, ref output, previousBlock),
                         _ => throw new MediaContainerException($"Unable to materialize frame of {nameof(MediaType)} {input.MediaType}"),
                     };
                 }
@@ -684,9 +668,8 @@ namespace AV.Core.Container
                 inputFormat = ffmpeg.av_find_input_format(this.Configuration.ForcedInputFormat);
                 if (inputFormat == null)
                 {
-                    this.LogWarning(
-                        Aspects.Container,
-                        $"Format '{this.Configuration.ForcedInputFormat}' not found. Will use automatic format detection.");
+                    //TODO: Warn
+                    ////$"Format '{this.Configuration.ForcedInputFormat}' not found. Will use automatic format detection.");
                 }
             }
 
@@ -762,10 +745,8 @@ namespace AV.Core.Container
                     var currentEntry = privateOptions.First();
                     while (currentEntry?.Key != null)
                     {
-                        this.LogWarning(
-                            Aspects.Container,
-                            $"Invalid input option: '{currentEntry.Key}'");
-
+                        //TODO: Warn
+                        ////$"Invalid input option: '{currentEntry.Key}'");
                         currentEntry = privateOptions.Next(currentEntry);
                     }
                 }
@@ -776,9 +757,8 @@ namespace AV.Core.Container
                 // the real frame-rate in case of MPEG-2 repeat frame mode.
                 if (ffmpeg.avformat_find_stream_info(this.InputContext, null) < 0)
                 {
-                    this.LogWarning(
-                        Aspects.Container,
-                        $"{this.MediaSource}: could not read stream information.");
+                    //TODO: Warn
+                    ////$"{this.MediaSource}: could not read stream information.");
                 }
 
                 // HACK: From ffplay.c: maybe should not use avio_feof() to test for the end
@@ -826,14 +806,6 @@ namespace AV.Core.Container
                     {
                         this.MediaOptions.VideoStream = s.Value;
                     }
-                    else if (s.Key == AVMediaType.AVMEDIA_TYPE_AUDIO)
-                    {
-                        this.MediaOptions.AudioStream = s.Value;
-                    }
-                    else if (s.Key == AVMediaType.AVMEDIA_TYPE_SUBTITLE)
-                    {
-                        this.MediaOptions.SubtitleStream = s.Value;
-                    }
                 }
 
                 // Set disabled audio or video if scaling libs not found
@@ -843,16 +815,12 @@ namespace AV.Core.Container
                     this.MediaOptions.IsVideoDisabled = true;
                 }
 
-                if (FFLibrary.LibSWResample.IsLoaded == false)
-                {
-                    this.MediaOptions.IsAudioDisabled = true;
-                }
-
                 this.customInputStream?.OnInitialized?.Invoke(inputFormat, this.InputContext, this.MediaInfo);
             }
             catch (Exception ex)
             {
-                this.LogError(Aspects.Container, $"Fatal error initializing {nameof(MediaContainer)} instance.", ex);
+                //TODO: Error
+                ////$"Fatal error initializing {nameof(MediaContainer)} instance.", ex);
                 this.Close();
                 throw;
             }
@@ -952,14 +920,8 @@ namespace AV.Core.Container
             bool isDisabled;
             switch (t)
             {
-                case MediaType.Audio:
-                    isDisabled = this.MediaOptions.IsAudioDisabled;
-                    break;
                 case MediaType.Video:
                     isDisabled = this.MediaOptions.IsVideoDisabled;
-                    break;
-                case MediaType.Subtitle:
-                    isDisabled = this.MediaOptions.IsSubtitleDisabled;
                     break;
                 default:
                     return MediaType.None;
@@ -976,23 +938,16 @@ namespace AV.Core.Container
                 // Instantiate component
                 if (stream != null && stream.CodecType == (AVMediaType)t && isDisabled == false)
                 {
-                    if (t == MediaType.Audio)
-                    {
-                        this.Components.AddComponent(new AudioComponent(this, stream.StreamIndex));
-                    }
-                    else if (t == MediaType.Video)
+                    if (t == MediaType.Video)
                     {
                         this.Components.AddComponent(new VideoComponent(this, stream.StreamIndex));
-                    }
-                    else if (t == MediaType.Subtitle)
-                    {
-                        this.Components.AddComponent(new SubtitleComponent(this, stream.StreamIndex));
                     }
                 }
             }
             catch (Exception ex)
             {
-                this.LogError(Aspects.Component, $"Unable to initialize {t} component.", ex);
+                //TODO: Error
+                ////$"Unable to initialize {t} component.", ex);
             }
 
             return this.Components[t] != null ? t : MediaType.None;
@@ -1007,14 +962,12 @@ namespace AV.Core.Container
         private MediaType[] StreamCreateComponents()
         {
             // Apply Media Options by selecting the desired components
-            this.StreamCreateComponent(MediaType.Audio, this.MediaOptions.AudioStream);
             this.StreamCreateComponent(MediaType.Video, this.MediaOptions.VideoStream);
-            this.StreamCreateComponent(MediaType.Subtitle, this.MediaOptions.SubtitleStream);
 
             // Verify we have at least 1 stream component to work with.
-            if (this.Components.HasVideo == false && this.Components.HasAudio == false && this.Components.HasSubtitles == false)
+            if (this.Components.HasVideo == false)
             {
-                throw new MediaContainerException($"{this.MediaSource}: No audio, video, or subtitle streams found to decode.");
+                throw new MediaContainerException($"{this.MediaSource}: No video streams found to decode.");
             }
 
             // Initially and depending on the video component, require picture attachments.
@@ -1132,9 +1085,8 @@ namespace AV.Core.Container
             // Check if a forced quit was triggered
             if (this.signalAbortReadsRequested.Value)
             {
-                this.LogInfo(
-                    Aspects.Container,
-                    $"{nameof(this.OnStreamReadInterrupt)} was requested an immediate read exit.");
+                //TODO: Info
+                ////$"{nameof(this.OnStreamReadInterrupt)} was requested an immediate read exit.");
 
                 if (this.signalAbortReadsAutoReset.Value)
                 {
@@ -1155,7 +1107,8 @@ namespace AV.Core.Container
                 return OkResult;
             }
 
-            this.LogError(Aspects.Container, $"{nameof(this.OnStreamReadInterrupt)} timed out with  {timeDifference.Format()}");
+            //TODO: Error
+            ////$"{nameof(this.OnStreamReadInterrupt)} timed out with  {timeDifference.Format()}");
             return ErrorResult;
         }
 
@@ -1200,9 +1153,8 @@ namespace AV.Core.Container
             // Cancel the seek operation if the stream does not support it.
             if (this.IsStreamSeekable == false)
             {
-                this.LogWarning(
-                    Aspects.EngineCommand,
-                    "Unable to seek. Underlying stream does not support seeking.");
+                //TODO: Warn
+                ////"Unable to seek. Underlying stream does not support seeking.");
 
                 return null;
             }
@@ -1225,9 +1177,9 @@ namespace AV.Core.Container
                 if (entryIndex >= 0)
                 {
                     var entry = videoComponent.SeekIndex[entryIndex];
-                    this.LogDebug(
-                        Aspects.Container,
-                        $"SEEK IX: Seek index entry {entryIndex} found. Entry Position: {entry.StartTime.Format()} | Target: {targetPosition.Format()}");
+                    
+                    //TODO: Debug
+                    ////$"SEEK IX: Seek index entry {entryIndex} found. Entry Position: {entry.StartTime.Format()} | Target: {targetPosition.Format()}");
                     indexTimestamp = entry.PresentationTime;
                 }
             }
@@ -1267,9 +1219,9 @@ namespace AV.Core.Container
                     }
 
                     seekResult = ffmpeg.av_seek_frame(this.InputContext, streamIndex, seekTimestamp, seekFlags);
-                    this.LogTrace(
-                        Aspects.Container,
-                        $"SEEK L: Elapsed: {startTime.FormatElapsed()} | Target: {streamSeekRelativeTime.Format()} | Seek: {seekTimestamp.Format()} | P0: {startPos.Format(1024)} | P1: {this.StreamPosition.Format(1024)} ");
+
+                    //TODO: Trace
+                    ////$"SEEK L: Elapsed: {startTime.FormatElapsed()} | Target: {streamSeekRelativeTime.Format()} | Seek: {seekTimestamp.Format()} | P0: {startPos.Format(1024)} | P1: {this.StreamPosition.Format(1024)} ");
                 }
 
                 // Flush the buffered packets and codec on every seek.
@@ -1280,9 +1232,8 @@ namespace AV.Core.Container
                 // Ensure we had a successful seek operation
                 if (seekResult < 0)
                 {
-                    this.LogError(
-                        Aspects.Container,
-                        $"SEEK R: Elapsed: {startTime.FormatElapsed()} | Seek operation failed. Error code {seekResult}, {FFInterop.DecodeMessage(seekResult)}");
+                    //TODO: Error
+                    ////$"SEEK R: Elapsed: {startTime.FormatElapsed()} | Seek operation failed. Error code {seekResult}, {FFInterop.DecodeMessage(seekResult)}");
                     break;
                 }
 
@@ -1305,9 +1256,8 @@ namespace AV.Core.Container
                 break;
             }
 
-            this.LogTrace(
-                Aspects.Container,
-                $"SEEK R: Elapsed: {startTime.FormatElapsed()} | Target: {streamSeekRelativeTime.Format()} | Seek: {default(long).Format()} | P0: {startPos.Format(1024)} | P1: {this.StreamPosition.Format(1024)} ");
+            //TODO: Trace
+            ////$"SEEK R: Elapsed: {startTime.FormatElapsed()} | Target: {streamSeekRelativeTime.Format()} | Seek: {default(long).Format()} | P0: {startPos.Format(1024)} | P1: {this.StreamPosition.Format(1024)} ");
 
             return frame;
         }
@@ -1341,9 +1291,8 @@ namespace AV.Core.Container
                 return this.StreamPositionDecode(main);
             }
 
-            this.LogWarning(
-                Aspects.EngineCommand,
-                $"SEEK 0: {nameof(this.StreamSeekToStart)} operation failed. Error code {seekResult}: {FFInterop.DecodeMessage(seekResult)}");
+            //TODO: Warn
+            ////$"SEEK 0: {nameof(this.StreamSeekToStart)} operation failed. Error code {seekResult}: {FFInterop.DecodeMessage(seekResult)}");
 
             return null;
         }

@@ -5,8 +5,6 @@
 namespace AV.Core.Container
 {
     using System;
-    using System.Collections.Generic;
-    using AV.Core.ClosedCaptions;
     using AV.Core.Common;
     using FFmpeg.AutoGen;
 
@@ -66,37 +64,7 @@ namespace AV.Core.Container
             this.SmtpeTimeCode = Utilities.ComputeSmtpeTimeCode(this.DisplayPictureNumber, frameRate);
             this.IsHardwareFrame = component.IsUsingHardwareDecoding;
             this.HardwareAcceleratorName = component.HardwareAccelerator?.Name;
-
-            // Process side data such as CC packets
-            for (var i = 0; i < frame->nb_side_data; i++)
-            {
-                var sideData = frame->side_data[i];
-
-                // Get the Closed-Caption packets
-                if (sideData->type != AVFrameSideDataType.AV_FRAME_DATA_A53_CC)
-                {
-                    continue;
-                }
-
-                // Parse 3 bytes at a time
-                for (var p = 0; p < sideData->size; p += 3)
-                {
-                    var packet = new ClosedCaptionPacket(TimeSpan.FromTicks(this.StartTime.Ticks + p), sideData->data, p);
-                    if (packet.PacketType == CaptionsPacketType.NullPad || packet.PacketType == CaptionsPacketType.Unrecognized)
-                    {
-                        continue;
-                    }
-
-                    // at this point, we have valid CC data
-                    this.ClosedCaptions.Add(packet);
-                }
-            }
         }
-
-        /// <summary>
-        /// Gets the closed caption data collected from the frame in CEA-708/EAS-608 format.
-        /// </summary>
-        public IList<ClosedCaptionPacket> ClosedCaptions { get; } = new List<ClosedCaptionPacket>(128);
 
         /// <summary>
         /// Gets the display picture number (frame number).

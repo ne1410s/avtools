@@ -18,17 +18,12 @@ namespace AV.Core.Container
     /// logic.
     /// </summary>
     /// <seealso cref="IDisposable" />
-    public abstract unsafe class MediaComponent : IDisposable, ILoggingSource
+    public abstract unsafe class MediaComponent : IDisposable
     {
         /// <summary>
         /// Related to issue 94, looks like FFmpeg requires exclusive access when calling avcodec_open2().
         /// </summary>
         private static readonly object CodecLock = new ();
-
-        /// <summary>
-        /// The logging handler.
-        /// </summary>
-        private readonly ILoggingHandler localLoggingHandler;
 
         /// <summary>
         /// Contains the packets pending to be sent to the decoder.
@@ -71,7 +66,6 @@ namespace AV.Core.Container
         {
             // Ported from: https://github.com/FFmpeg/FFmpeg/blob/master/fftools/ffplay.c#L2559
             this.Container = container ?? throw new ArgumentNullException(nameof(container));
-            this.localLoggingHandler = ((ILoggingSource)this.Container).LoggingHandler;
             this.localCodecContext = new IntPtr(ffmpeg.avcodec_alloc_context3(null));
             RC.Current.Add(this.CodecContext);
             this.StreamIndex = streamIndex;
@@ -87,9 +81,8 @@ namespace AV.Core.Container
 
             if (setCodecParamsResult < 0)
             {
-                this.LogWarning(
-                    Aspects.Component,
-                    $"Could not set codec parameters. Error code: {setCodecParamsResult}");
+                //TODO: Warn
+                ////$"Could not set codec parameters. Error code: {setCodecParamsResult}");
             }
 
             // We set the packet timebase in the same timebase as the stream as opposed to the typical AV_TIME_BASE
@@ -116,10 +109,8 @@ namespace AV.Core.Container
                 forcedCodec = ffmpeg.avcodec_find_decoder_by_name(forcedCodecName);
                 if (forcedCodec == null)
                 {
-                    this.LogWarning(
-                        Aspects.Component,
-                        $"COMP {this.MediaType.ToString().ToUpperInvariant()}: " +
-                        $"Unable to set decoder codec to '{forcedCodecName}' on stream index {this.StreamIndex}");
+                    //TODO: Warn
+                    ////$"COMP {this.MediaType.ToString().ToUpperInvariant()}: Unable to set decoder codec to '{forcedCodecName}' on stream index {this.StreamIndex}");
                 }
             }
 
@@ -193,9 +184,8 @@ namespace AV.Core.Container
                 // Check if the codec opened successfully
                 if (codecOpenResult < 0)
                 {
-                    this.LogWarning(
-                        Aspects.Component,
-                        $"Unable to open codec '{Utilities.PtrToStringUTF8(codec->name)}' on stream {streamIndex}");
+                    //TODO: Warn
+                    ////$"Unable to open codec '{Utilities.PtrToStringUTF8(codec->name)}' on stream {streamIndex}");
 
                     continue;
                 }
@@ -204,9 +194,8 @@ namespace AV.Core.Container
                 var currentEntry = codecOptions.First();
                 while (currentEntry?.Key != null)
                 {
-                    this.LogWarning(
-                        Aspects.Component,
-                        $"Invalid codec option: '{currentEntry.Key}' for codec '{Utilities.PtrToStringUTF8(codec->name)}', stream {streamIndex}");
+                    //TODO: Warn
+                    ////$"Invalid codec option: '{currentEntry.Key}' for codec '{Utilities.PtrToStringUTF8(codec->name)}', stream {streamIndex}");
                     currentEntry = codecOptions.Next(currentEntry);
                 }
 
@@ -226,16 +215,10 @@ namespace AV.Core.Container
 
             switch (this.MediaType)
             {
-                case MediaType.Audio:
                 case MediaType.Video:
                     this.BufferCountThreshold = 25;
                     this.BufferDurationThreshold = TimeSpan.FromSeconds(1);
                     this.decodePacketFunction = this.DecodeNextAVFrame;
-                    break;
-                case MediaType.Subtitle:
-                    this.BufferCountThreshold = 0;
-                    this.BufferDurationThreshold = TimeSpan.Zero;
-                    this.decodePacketFunction = this.DecodeNextAVSubtitle;
                     break;
                 default:
                     throw new NotSupportedException($"A component of MediaType '{this.MediaType}' is not supported");
@@ -267,16 +250,12 @@ namespace AV.Core.Container
             this.CodecId = CodecContext->codec_id;
             this.BitRate = CodecContext->bit_rate < 0 ? 0 : CodecContext->bit_rate;
 
-            this.LogDebug(
-                Aspects.Component,
-                $"{this.MediaType.ToString().ToUpperInvariant()} - Start Time: {this.StartTime.Format()}; Duration: {this.Duration.Format()}");
+            //TODO: Debug
+            ////$"{this.MediaType.ToString().ToUpperInvariant()} - Start Time: {this.StartTime.Format()}; Duration: {this.Duration.Format()}");
 
             // Begin processing with a flush packet
             this.SendFlushPacket();
         }
-
-        /// <inheritdoc />
-        ILoggingHandler ILoggingSource.LoggingHandler => this.localLoggingHandler;
 
         /// <summary>
         /// Gets the pointer to the codec context.
@@ -702,69 +681,12 @@ namespace AV.Core.Container
                 return frame;
             }
 
-            if (this.MediaType == MediaType.Audio && frame is AudioFrame audioFrame)
-            {
-                this.Container.Components.OnFrameDecoded?.Invoke((IntPtr)audioFrame.Pointer, this.MediaType);
-            }
-            else if (this.MediaType == MediaType.Video && frame is VideoFrame videoFrame)
+            if (this.MediaType == MediaType.Video && frame is VideoFrame videoFrame)
             {
                 this.Container.Components.OnFrameDecoded?.Invoke((IntPtr)videoFrame.Pointer, this.MediaType);
             }
 
             return frame;
-        }
-
-        /// <summary>
-        /// Decodes the next subtitle frame.
-        /// </summary>
-        /// <returns>The managed frame.</returns>
-        private MediaFrame DecodeNextAVSubtitle()
-        {
-            // For subtitles we use the old API (new API send_packet/receive_frame) is not yet available
-            // We first try to flush anything we've already sent by using an empty packet.
-            MediaFrame managedFrame = null;
-            var packet = MediaPacket.CreateEmptyPacket(Stream->index);
-            var gotFrame = 0;
-            var outputFrame = MediaFrame.CreateAVSubtitle();
-            var receiveFrameResult = ffmpeg.avcodec_decode_subtitle2(this.CodecContext, outputFrame, &gotFrame, packet.Pointer);
-
-            // If we don't get a frame from flushing. Feed the packet into the decoder and try getting a frame.
-            if (gotFrame == 0)
-            {
-                packet.Dispose();
-
-                // Dequeue the packet and try to decode with it.
-                packet = this.packets.Dequeue();
-
-                if (packet != null)
-                {
-                    this.Container.Components.ProcessPacketQueueChanges(PacketQueueOp.Dequeued, packet, this.MediaType);
-                    receiveFrameResult = ffmpeg.avcodec_decode_subtitle2(this.CodecContext, outputFrame, &gotFrame, packet.Pointer);
-                }
-            }
-
-            // If we got a frame, turn into a managed frame
-            if (gotFrame != 0)
-            {
-                this.Container.Components.OnSubtitleDecoded?.Invoke((IntPtr)outputFrame);
-                managedFrame = this.CreateFrameSource((IntPtr)outputFrame);
-            }
-
-            // Free the packet if we have dequeued it
-            packet?.Dispose();
-
-            // deallocate the subtitle frame if we did not associate it with a managed frame.
-            if (managedFrame == null)
-            {
-                MediaFrame.ReleaseAVSubtitle(outputFrame);
-            }
-
-            if (receiveFrameResult < 0)
-            {
-                this.HasPacketsInCodec = false;
-            }
-
-            return managedFrame;
         }
     }
 }

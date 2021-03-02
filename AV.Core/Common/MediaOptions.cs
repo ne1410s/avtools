@@ -50,24 +50,10 @@ namespace AV.Core.Common
         public HardwareDeviceInfo VideoHardwareDevice { get; set; }
 
         /// <summary>
-        /// Prevent reading from audio stream components.
-        /// Port of audio_disable.
-        /// </summary>
-        public bool IsAudioDisabled { get; set; }
-
-        /// <summary>
         /// Prevent reading from video stream components.
         /// Port of video_disable.
         /// </summary>
         public bool IsVideoDisabled { get; set; }
-
-        /// <summary>
-        /// Prevent reading from subtitle stream components.
-        /// Port of subtitle_disable
-        /// Subtitles are not yet first-class citizens in FFmpeg and
-        /// this is why they are disabled by default.
-        /// </summary>
-        public bool IsSubtitleDisabled { get; set; }
 
         /// <summary>
         /// Allows for a custom video filter string.
@@ -95,50 +81,11 @@ namespace AV.Core.Common
         public VideoSeekIndex VideoSeekIndex { get; set; }
 
         /// <summary>
-        /// Allows for a custom audio filter string.
-        /// Please see: https://ffmpeg.org/ffmpeg-filters.html#Audio-Filters.
-        /// </summary>
-        public string AudioFilter { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Initially contains the best suitable audio stream.
-        /// Can be changed to a different stream reference.
-        /// </summary>
-        public StreamInfo AudioStream { get; set; }
-
-        /// <summary>
-        /// Initially contains the best suitable subtitle stream.
-        /// Can be changed to a different stream reference.
-        /// </summary>
-        public StreamInfo SubtitleStream { get; set; }
-
-        /// <summary>
-        /// Gets or sets the subtitles URL.
-        /// If set, the subtitles will be side-loaded and the loaded media
-        /// subtitles (if any) will be ignored.
-        /// </summary>
-        public string SubtitlesSource { get; set; }
-
-        /// <summary>
         /// Gets or sets the number of video blocks to cache in the decoder.
         /// Leave as -1 for auto. Please note that increasing the amount of
         /// blocks, significantly increases RAM usage.
         /// </summary>
         public int VideoBlockCache { get; set; } = -1;
-
-        /// <summary>
-        /// Gets or sets the number of audio blocks to cache in the decoder.
-        /// Leave as -1 for auto. Please note that increasing the amount of
-        /// blocks, significantly increases RAM usage.
-        /// </summary>
-        public int AudioBlockCache { get; set; } = -1;
-
-        /// <summary>
-        /// Gets or sets the number of audio blocks to cache in the decoder.
-        /// Leave as -1 for auto. Please note that increasing the amount of
-        /// blocks, significantly increases RAM usage.
-        /// </summary>
-        public int SubtitleBlockCache { get; set; } = -1;
 
         /// <summary>
         /// Only recommended for live streams. Gets or sets a value indicating whether each component needs to run

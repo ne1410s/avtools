@@ -38,20 +38,6 @@ namespace AV.Core.Container
         /// </summary>
         /// <param name="pointer">The pointer.</param>
         /// <param name="component">The component.</param>
-        protected MediaFrame(AVSubtitle* pointer, MediaComponent component)
-            : this(pointer, component, MediaType.Subtitle)
-        {
-            // TODO: Compressed size is simply an estimate
-            this.CompressedSize = (int)pointer->num_rects * 256;
-            this.PresentationTime = Convert.ToInt64(pointer->start_display_time);
-            this.DecodingTime = pointer->pts;
-        }
-
-        /// <summary>
-        /// Initialises a new instance of the <see cref="MediaFrame"/> class.
-        /// </summary>
-        /// <param name="pointer">The pointer.</param>
-        /// <param name="component">The component.</param>
         /// <param name="mediaType">Type of the media.</param>
         private MediaFrame(void* pointer, MediaComponent component, MediaType mediaType)
         {

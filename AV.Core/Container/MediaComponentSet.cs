@@ -29,9 +29,7 @@ namespace AV.Core.Container
         private int localCount;
         private MediaType localSeekableMediaType = MediaType.None;
         private MediaComponent localSeekable;
-        private AudioComponent localAudio;
         private VideoComponent localVideo;
-        private SubtitleComponent localSubtitle;
         private PacketBufferState localBufferState;
 
         /// <summary>
@@ -167,36 +165,6 @@ namespace AV.Core.Container
         }
 
         /// <summary>
-        /// Gets the audio component.
-        /// Returns null when there is no such stream component.
-        /// </summary>
-        public AudioComponent Audio
-        {
-            get
-            {
-                lock (this.componentSyncLock)
-                {
-                    return this.localAudio;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets the subtitles component.
-        /// Returns null when there is no such stream component.
-        /// </summary>
-        public SubtitleComponent Subtitles
-        {
-            get
-            {
-                lock (this.componentSyncLock)
-                {
-                    return this.localSubtitle;
-                }
-            }
-        }
-
-        /// <summary>
         /// Gets a value indicating whether this instance has a video component.
         /// </summary>
         public bool HasVideo
@@ -206,34 +174,6 @@ namespace AV.Core.Container
                 lock (this.componentSyncLock)
                 {
                     return this.localVideo != null;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether this instance has an audio component.
-        /// </summary>
-        public bool HasAudio
-        {
-            get
-            {
-                lock (this.componentSyncLock)
-                {
-                    return this.localAudio != null;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether this instance has a subtitles component.
-        /// </summary>
-        public bool HasSubtitles
-        {
-            get
-            {
-                lock (this.componentSyncLock)
-                {
-                    return this.localSubtitle != null;
                 }
             }
         }
@@ -329,9 +269,7 @@ namespace AV.Core.Container
                 {
                     return mediaType switch
                     {
-                        MediaType.Audio => this.localAudio,
                         MediaType.Video => this.localVideo,
-                        MediaType.Subtitle => this.localSubtitle,
                         _ => null,
                     };
                 }
@@ -425,7 +363,7 @@ namespace AV.Core.Container
                     state.HasEnoughPackets = false;
                 }
 
-                if ((c.MediaType == MediaType.Audio || c.MediaType == MediaType.Video) &&
+                if ((c.MediaType == MediaType.Video) &&
                     c.BufferDuration != TimeSpan.MinValue &&
                     c.BufferDuration.Ticks < state.Duration.Ticks)
                 {
@@ -468,14 +406,6 @@ namespace AV.Core.Container
                 var errorMessage = $"A component for '{component.MediaType}' is already registered.";
                 switch (component.MediaType)
                 {
-                    case MediaType.Audio:
-                        if (this.localAudio != null)
-                        {
-                            throw new ArgumentException(errorMessage);
-                        }
-
-                        this.localAudio = component as AudioComponent;
-                        break;
                     case MediaType.Video:
                         if (this.localVideo != null)
                         {
@@ -483,14 +413,6 @@ namespace AV.Core.Container
                         }
 
                         this.localVideo = component as VideoComponent;
-                        break;
-                    case MediaType.Subtitle:
-                        if (this.localSubtitle != null)
-                        {
-                            throw new ArgumentException(errorMessage);
-                        }
-
-                        this.localSubtitle = component as SubtitleComponent;
                         break;
                     default:
                         throw new NotSupportedException($"Unable to register component with {nameof(MediaType)} '{component.MediaType}'");
@@ -511,20 +433,10 @@ namespace AV.Core.Container
             lock (this.componentSyncLock)
             {
                 var component = default(MediaComponent);
-                if (mediaType == MediaType.Audio)
-                {
-                    component = this.localAudio;
-                    this.localAudio = null;
-                }
-                else if (mediaType == MediaType.Video)
+                if (mediaType == MediaType.Video)
                 {
                     component = this.localVideo;
                     this.localVideo = null;
-                }
-                else if (mediaType == MediaType.Subtitle)
-                {
-                    component = this.localSubtitle;
-                    this.localSubtitle = null;
                 }
 
                 component?.Dispose();
@@ -549,55 +461,19 @@ namespace AV.Core.Container
                 allMediaTypes.Add(MediaType.Video);
             }
 
-            if (this.localAudio != null)
-            {
-                allComponents.Add(this.localAudio);
-                allMediaTypes.Add(MediaType.Audio);
-            }
-
-            if (this.localSubtitle != null)
-            {
-                allComponents.Add(this.localSubtitle);
-                allMediaTypes.Add(MediaType.Subtitle);
-            }
-
             this.localAll = allComponents;
             this.localMediaTypes = allMediaTypes;
             this.localCount = allComponents.Count;
 
             // Try for the main component to be the video (if it's not stuff like audio album art, that is)
-            if (this.localVideo != null && this.localAudio != null && !this.localVideo.IsStillPictures)
+            if (this.localVideo != null && !this.localVideo.IsStillPictures)
             {
                 this.localSeekable = this.localVideo;
                 this.localSeekableMediaType = MediaType.Video;
                 return;
             }
 
-            // If it was not video, then it has to be audio (if it has audio)
-            if (this.localAudio != null)
-            {
-                this.localSeekable = this.localAudio;
-                this.localSeekableMediaType = MediaType.Audio;
-                return;
-            }
-
-            // Set it to video even if it's attached pic stuff
-            if (this.localVideo != null)
-            {
-                this.localSeekable = this.localVideo;
-                this.localSeekableMediaType = MediaType.Video;
-                return;
-            }
-
-            // As a last resort, set the main component to be the subtitles
-            if (this.localSubtitle != null)
-            {
-                this.localSeekable = this.localSubtitle;
-                this.localSeekableMediaType = MediaType.Subtitle;
-                return;
-            }
-
-            // We should never really hit this line
+            // We should never really hit this line (unless subtitles or data)
             this.localSeekable = null;
             this.localSeekableMediaType = MediaType.None;
         }
