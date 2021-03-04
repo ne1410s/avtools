@@ -134,7 +134,6 @@ namespace AV.Core.Container
         /// </summary>
         /// <param name="inputStream">The input stream.</param>
         /// <param name="config">The configuration.</param>
-        /// <param name="loggingHandler">The parent.</param>
         public MediaContainer(
             IMediaInputStream inputStream,
             ContainerConfiguration config = null)
@@ -808,11 +807,11 @@ namespace AV.Core.Container
                     }
                 }
 
-                // Set disabled audio or video if scaling libs not found
                 // This prevents the creation of unavailable audio or video components.
                 if (FFLibrary.LibSWScale.IsLoaded == false)
                 {
-                    this.MediaOptions.IsVideoDisabled = true;
+                    //TODO: Error
+                    ////$"We totes need that lib!;
                 }
 
                 this.customInputStream?.OnInitialized?.Invoke(inputFormat, this.InputContext, this.MediaInfo);
@@ -916,17 +915,6 @@ namespace AV.Core.Container
         /// <returns>The media type that was created. None for unsuccessful creation.</returns>
         private MediaType StreamCreateComponent(MediaType t, StreamInfo stream)
         {
-            // Check if the component should be disabled (removed)
-            bool isDisabled;
-            switch (t)
-            {
-                case MediaType.Video:
-                    isDisabled = this.MediaOptions.IsVideoDisabled;
-                    break;
-                default:
-                    return MediaType.None;
-            }
-
             try
             {
                 // Remove the existing component if it exists already
@@ -936,7 +924,7 @@ namespace AV.Core.Container
                 }
 
                 // Instantiate component
-                if (stream != null && stream.CodecType == (AVMediaType)t && isDisabled == false)
+                if (stream != null && stream.CodecType == (AVMediaType)t)
                 {
                     if (t == MediaType.Video)
                     {
@@ -944,7 +932,7 @@ namespace AV.Core.Container
                     }
                 }
             }
-            catch (Exception ex)
+            catch
             {
                 //TODO: Error
                 ////$"Unable to initialize {t} component.", ex);
@@ -1177,7 +1165,7 @@ namespace AV.Core.Container
                 if (entryIndex >= 0)
                 {
                     var entry = videoComponent.SeekIndex[entryIndex];
-                    
+
                     //TODO: Debug
                     ////$"SEEK IX: Seek index entry {entryIndex} found. Entry Position: {entry.StartTime.Format()} | Target: {targetPosition.Format()}");
                     indexTimestamp = entry.PresentationTime;

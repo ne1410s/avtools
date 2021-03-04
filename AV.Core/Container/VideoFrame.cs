@@ -12,7 +12,7 @@ namespace AV.Core.Container
     /// Represents a wrapper for an unmanaged ffmpeg video frame.
     /// </summary>
     /// <seealso cref="MediaFrame" />
-    internal sealed unsafe class VideoFrame : MediaFrame
+    public sealed unsafe class VideoFrame : MediaFrame
     {
         private readonly object disposeLock = new object();
         private bool isDisposed;

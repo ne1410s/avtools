@@ -76,11 +76,6 @@ namespace AV.Core.Container
             var aspectRatio = ffmpeg.av_d2q((double)this.FrameWidth / this.FrameHeight, int.MaxValue);
             this.DisplayAspectWidth = aspectRatio.num;
             this.DisplayAspectHeight = aspectRatio.den;
-
-            var seekIndex = container.MediaOptions.VideoSeekIndex;
-            this.SeekIndex = seekIndex != null && seekIndex.StreamIndex == this.StreamIndex ?
-                seekIndex.Entries :
-                new List<VideoSeekIndexEntry>(0);
         }
 
         /// <summary>
@@ -140,9 +135,8 @@ namespace AV.Core.Container
 
         /// <summary>
         /// Gets the video seek index for this component.
-        /// Returns null if it was not set in the media options.
         /// </summary>
-        public IList<VideoSeekIndexEntry> SeekIndex { get; }
+        public List<VideoSeekIndexEntry> SeekIndex { get; } = new ();
 
         /// <summary>
         /// Gets access to the VideoFilter string of the container's MediaOptions.

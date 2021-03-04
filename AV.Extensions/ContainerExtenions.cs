@@ -5,8 +5,10 @@
 namespace AV.Extensions
 {
     using System;
+    using System.Collections.Generic;
     using System.Drawing;
     using System.Drawing.Imaging;
+    using AV.Core.Common;
     using AV.Core.Container;
 
     /// <summary>
@@ -14,6 +16,52 @@ namespace AV.Extensions
     /// </summary>
     public static class ContainerExtenions
     {
+        public static void BuildIndex(this MediaContainer container)
+        {
+            if (!container.IsOpen)
+            {
+                throw new ArgumentException("Container must be open");
+            }
+
+            var vComponent = container.Components.Video;
+
+            // Reset the index and position
+            vComponent.SeekIndex.Clear();
+            container.Seek(TimeSpan.MinValue);
+
+            var indices = new SortedDictionary<long, VideoSeekIndexEntry>();
+            while (container.IsStreamSeekable)
+            {
+                container.Read();
+                var frames = container.Decode();
+                foreach (var frame in frames)
+                {
+                    try
+                    {
+                        if (frame.MediaType == MediaType.Video
+                            && frame is VideoFrame vFrame
+                            && vFrame.PictureType == FFmpeg.AutoGen.AVPictureType.AV_PICTURE_TYPE_I
+                            && !indices.ContainsKey(frame.StartTime.Ticks))
+                        {
+                            indices[frame.StartTime.Ticks] = new VideoSeekIndexEntry(vFrame);
+                        }
+                    }
+                    finally
+                    {
+                        frame.Dispose();
+                    }
+                }
+
+                // We have reached the end of the stream.
+                if (frames.Count <= 0 && container.IsAtEndOfStream)
+                {
+                    break;
+                }
+            }
+
+            vComponent.SeekIndex.AddRange(indices.Values);
+        }
+
         /// <summary>
         /// Obtains images from evenly-distributed positions in the contained
         /// media. The container must have already been initialised and opened
@@ -70,6 +118,11 @@ namespace AV.Extensions
             //}
 
             // Commenting-out is beautiful wrt memory, but wobbly dist
+
+
+            // IDEA!: Can we do a Seek() pass with several x granular iterations
+            // to build up a set of frame numbers and times.. so then a second
+            // pass can simply re-seek?...
 
             container.Convert(workingFrame, ref mediaBlock, true, null);
 

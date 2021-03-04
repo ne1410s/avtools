@@ -42,6 +42,11 @@ namespace AV.UnitTests
             container.Initialize();
             container.Open();
 
+            // TODO: We wont want to call this for larger files:
+            // A] the accuracy may not matter so much ...?
+            // B] there'll be sooo many reads!... Which
+            container.BuildIndex();
+
             var frameNums = new List<long>();
 
             // Act

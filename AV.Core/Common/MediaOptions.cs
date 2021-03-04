@@ -41,12 +41,6 @@ namespace AV.Core.Common
         public HardwareDeviceInfo VideoHardwareDevice { get; set; }
 
         /// <summary>
-        /// Prevent reading from video stream components.
-        /// Port of video_disable.
-        /// </summary>
-        public bool IsVideoDisabled { get; set; }
-
-        /// <summary>
         /// Allows for a custom video filter string.
         /// Please see: https://ffmpeg.org/ffmpeg-filters.html#Video-Filters.
         /// </summary>
@@ -62,14 +56,6 @@ namespace AV.Core.Common
         /// Can be changed to a different stream reference.
         /// </summary>
         public StreamInfo VideoStream { get; set; }
-
-        /// <summary>
-        /// Gets or sets the video seek index.
-        /// Use <see cref="Library.CreateVideoSeekIndex(string)"/> or
-        /// <see cref="Library.CreateVideoSeekIndex(string, int)"/> and set this
-        /// field while loading the options.
-        /// </summary>
-        public VideoSeekIndex VideoSeekIndex { get; set; }
 
         /// <summary>
         /// Only recommended for live streams. Gets or sets a value indicating whether each component needs to run

@@ -19,6 +19,19 @@ namespace AV.Core.Common
         /// <summary>
         /// Initialises a new instance of the <see cref="VideoSeekIndexEntry"/> class.
         /// </summary>
+        /// <param name="frame">The frame.</param>
+        public VideoSeekIndexEntry(VideoFrame frame)
+        {
+            this.StreamIndex = frame.StreamIndex;
+            this.StreamTimeBase = frame.StreamTimeBase;
+            this.StartTime = frame.StartTime;
+            this.PresentationTime = frame.PresentationTime;
+            this.DecodingTime = frame.DecodingTime;
+        }
+
+        /// <summary>
+        /// Initialises a new instance of the <see cref="VideoSeekIndexEntry"/> class.
+        /// </summary>
         /// <param name="streamIndex">Index of the stream.</param>
         /// <param name="timeBaseNum">The time base numerator.</param>
         /// <param name="timeBaseDen">The time base deonominator.</param>
@@ -32,19 +45,6 @@ namespace AV.Core.Common
             this.PresentationTime = presentationTime;
             this.DecodingTime = decodingTime;
             this.StreamTimeBase = new AVRational { num = timeBaseNum, den = timeBaseDen };
-        }
-
-        /// <summary>
-        /// Initialises a new instance of the <see cref="VideoSeekIndexEntry"/> class.
-        /// </summary>
-        /// <param name="frame">The frame.</param>
-        internal VideoSeekIndexEntry(VideoFrame frame)
-        {
-            this.StreamIndex = frame.StreamIndex;
-            this.StreamTimeBase = frame.StreamTimeBase;
-            this.StartTime = frame.StartTime;
-            this.PresentationTime = frame.PresentationTime;
-            this.DecodingTime = frame.DecodingTime;
         }
 
         /// <summary>

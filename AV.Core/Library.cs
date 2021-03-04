@@ -6,8 +6,6 @@ namespace AV.Core
 {
     using System;
     using System.Diagnostics;
-    using AV.Core.Common;
-    using AV.Core.Container;
     using FFmpeg.AutoGen;
 
     /// <summary>
@@ -140,72 +138,5 @@ namespace AV.Core
             FFmpegVersionInfo = ffmpeg.av_version_info();
             return true;
         }
-
-
-        /// <summary>
-        /// Creates a viedo seek index object by decoding video frames and obtaining the intra-frames that are valid for index positions.
-        /// </summary>
-        /// <param name="mediaSource">The source URL.</param>
-        /// <param name="streamIndex">Index of the stream. Use -1 for automatic stream selection.</param>
-        /// <returns>
-        /// The seek index object.
-        /// </returns>
-        public static VideoSeekIndex CreateVideoSeekIndex(string mediaSource, int streamIndex)
-        {
-            var result = new VideoSeekIndex(mediaSource, -1);
-
-            using (var container = new MediaContainer(mediaSource, null))
-            {
-                container.Initialize();
-                container.MediaOptions.IsVideoDisabled = false;
-
-                if (streamIndex >= 0)
-                {
-                    container.MediaOptions.VideoStream = container.MediaInfo.Streams[streamIndex];
-                }
-
-                container.Open();
-                result.StreamIndex = container.Components.Video.StreamIndex;
-                while (container.IsStreamSeekable)
-                {
-                    container.Read();
-                    var frames = container.Decode();
-                    foreach (var frame in frames)
-                    {
-                        try
-                        {
-                            if (frame.MediaType != MediaType.Video)
-                            {
-                                continue;
-                            }
-
-                            // Check if the frame is a key frame and add it to the index.
-                            result.TryAdd(frame as VideoFrame);
-                        }
-                        finally
-                        {
-                            frame.Dispose();
-                        }
-                    }
-
-                    // We have reached the end of the stream.
-                    if (frames.Count <= 0 && container.IsAtEndOfStream)
-                    {
-                        break;
-                    }
-                }
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Creates a viedo seek index object of the default video stream.
-        /// </summary>
-        /// <param name="mediaSource">The source URL.</param>
-        /// <returns>
-        /// The seek index object.
-        /// </returns>
-        public static VideoSeekIndex CreateVideoSeekIndex(string mediaSource) => CreateVideoSeekIndex(mediaSource, -1);
     }
 }
