@@ -55,6 +55,9 @@ namespace AV.Core.Container
             }
 
             this.BaseFrameRate = this.baseFrameRateQ.ToDouble();
+            this.FrameCount = this.Stream->nb_frames > 0
+                ? this.Stream->nb_frames
+                : (long)Math.Ceiling(this.BaseFrameRate * this.Duration.TotalSeconds);
 
             if (Stream->avg_frame_rate.den > 0 && Stream->avg_frame_rate.num > 0)
             {
@@ -84,6 +87,11 @@ namespace AV.Core.Container
         /// we don't change the dimensions of the image. We only do color conversion.
         /// </summary>
         public static int ScalerFlags { get; internal set; } = ffmpeg.SWS_POINT;
+
+        /// <summary>
+        /// Gets the total number of frames.
+        /// </summary>
+        public long FrameCount { get; }
 
         /// <summary>
         /// Gets the base frame rate as reported by the stream component.
