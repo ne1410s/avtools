@@ -50,7 +50,7 @@ namespace AV.UnitTests
             {
                 frameNums.Add(data.FrameNumber);
                 data.Image.Save($"c:\\temp\\vid-test-out\\snap_{name}_{n}_of_24_FRAME_NO-{data.FrameNumber}.jpg");
-            });
+            }, true);
 
             // Assert
             var x = string.Join(',', frameNums);

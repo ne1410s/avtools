@@ -21,17 +21,21 @@ namespace AV.Extensions
         /// </summary>
         /// <param name="container">The container.</param>
         /// <param name="callback">The callback.</param>
+        /// <param name="accuracy">If true, each seek is immediately
+        /// followed by a series of read + decode cycles in order to make a slow
+        /// but careful approach to the specified position.</param>
         /// <param name="count">The count.</param>
         public static void Snap(
             this MediaContainer container,
             Action<ThumbnailData, int> callback,
+            bool accuracy,
             int count = 24)
         {
             var gap = container.MediaInfo.Duration / count;
             var mediaBlock = (MediaBlock)null;
             for (var i = 0; i < count; i++)
             {
-                var data = container.SnapAt(gap * i, ref mediaBlock);
+                var data = container.SnapAt(gap * i, accuracy, ref mediaBlock);
                 callback(data, i + 1);
             }
         }
@@ -43,6 +47,9 @@ namespace AV.Extensions
         /// </summary>
         /// <param name="container">The container.</param>
         /// <param name="position">The position.</param>
+        /// <param name="accuracy">If true, each seek is immediately
+        /// followed by a series of read + decode cycles in order to make a slow
+        /// but careful approach to the specified position.</param>
         /// <param name="mediaBlock">A reference to a media block. It is fine to
         /// pass a null value on the first call. For subsequent calls it is
         /// recommended to re-use the same reference to aid performance.</param>
@@ -50,33 +57,28 @@ namespace AV.Extensions
         public static ThumbnailData SnapAt(
             this MediaContainer container,
             TimeSpan position,
+            bool accuracy,
             ref MediaBlock mediaBlock)
         {
-            var workingFrame = container.Seek(position);
-
-            //TODO! This produces a wonderfully linear frame dist...
-            // BUT alas seems to be pissing memory...
-            // Maybe a better seek index?? (VideoComponent)
-
-            while (true)
+            var curFrame = container.Seek(position);
+            if (accuracy)
             {
-                container.Read();
-                var receivedFrame = container.Components.Video.ReceiveNextFrame();
-                if (receivedFrame == null || container.IsAtEndOfStream || receivedFrame.StartTime >= position)
+                while (true)
                 {
-                    workingFrame = receivedFrame ?? workingFrame;
-                    break;
-                }
-                else
-                {
-                    receivedFrame.Dispose();
+                    container.Read();
+                    var receivedFrame = container.Components.Video.ReceiveNextFrame();
+                    if (container.IsAtEndOfStream || receivedFrame?.StartTime >= position)
+                    {
+                        curFrame?.Dispose();
+                        curFrame = receivedFrame;
+                        break;
+                    }
+
+                    receivedFrame?.Dispose();
                 }
             }
 
-            // Commenting-out is beautiful wrt memory, but wobbly dist
-
-            container.Convert(workingFrame, ref mediaBlock, true, null);
-
+            container.Convert(curFrame, ref mediaBlock, true, null);
             var videoBlock = (VideoBlock)mediaBlock;
             var bitmap = new Bitmap(
                 videoBlock.PixelWidth,
@@ -89,7 +91,7 @@ namespace AV.Extensions
             {
                 FrameNumber = videoBlock.DisplayPictureNumber,
                 Image = bitmap,
-                TimeStamp = workingFrame.StartTime,
+                TimeStamp = curFrame.StartTime,
             };
         }
     }
