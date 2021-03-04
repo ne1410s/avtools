@@ -58,16 +58,20 @@ namespace AV.Extensions
             // BUT alas seems to be pissing memory...
             // Maybe a better seek index?? (VideoComponent)
 
-            //while (true)
-            //{
-            //    container.Read();
-            //    var receivedFrame = container.Components.Video.ReceiveNextFrame();
-            //    workingFrame = receivedFrame ?? workingFrame;
-            //    if (receivedFrame == null || container.IsAtEndOfStream || workingFrame.StartTime >= position)
-            //    {
-            //        break;
-            //    }
-            //}
+            while (true)
+            {
+                container.Read();
+                var receivedFrame = container.Components.Video.ReceiveNextFrame();
+                if (receivedFrame == null || container.IsAtEndOfStream || receivedFrame.StartTime >= position)
+                {
+                    workingFrame = receivedFrame ?? workingFrame;
+                    break;
+                }
+                else
+                {
+                    receivedFrame.Dispose();
+                }
+            }
 
             // Commenting-out is beautiful wrt memory, but wobbly dist
 

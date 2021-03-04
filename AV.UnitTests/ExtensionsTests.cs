@@ -33,6 +33,7 @@ namespace AV.UnitTests
         [InlineData(@"C:\temp\vid-test\1.vob")]
         [InlineData(@"C:\temp\vid-test\1.webm")]
         [InlineData(@"C:\temp\vid-test\1.wmv")]
+        [InlineData(@"C:\temp\vid-test\4k.mp4")]
         public void FileSource_LoadsMediaInfo(string path)
         {
             // Arrange
