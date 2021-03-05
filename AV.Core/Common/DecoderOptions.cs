@@ -17,7 +17,8 @@ namespace AV.Core.Common
         private readonly Dictionary<int, Dictionary<string, string>> privateOptions = new ();
 
         /// <summary>
-        /// Initialises a new instance of the <see cref="DecoderOptions"/> class.
+        /// Initialises a new instance of the <see cref="DecoderOptions"/>
+        /// class.
         /// </summary>
         internal DecoderOptions()
         {
@@ -81,7 +82,9 @@ namespace AV.Core.Common
         /// <returns>The value of the option.</returns>
         public string this[string globalOptionName]
         {
-            get => this.globalOptions.ContainsKey(globalOptionName) ? this.globalOptions[globalOptionName] : null;
+            get => this.globalOptions.ContainsKey(globalOptionName)
+                ? this.globalOptions[globalOptionName]
+                : null;
             set => this.globalOptions[globalOptionName] = value;
         }
 
@@ -117,7 +120,8 @@ namespace AV.Core.Common
         }
 
         /// <summary>
-        /// Gets the combined global and private stream codec options as a dictionary.
+        /// Gets the combined global and private stream codec options as a
+        /// dictionary.
         /// </summary>
         /// <param name="streamIndex">Index of the stream.</param>
         /// <returns>An options dictionary.</returns>

@@ -82,9 +82,10 @@ namespace AV.Core.Container
         }
 
         /// <summary>
-        /// Gets the video scaler flags used to perform color space conversion (if needed).
-        /// Point / nearest-neighbor is the default and it is the cheapest. This is by design as
-        /// we don't change the dimensions of the image. We only do color conversion.
+        /// Gets the video scaler flags used to perform color space conversion
+        /// (if needed).  Point / nearest-neighbor is the default and it is the
+        /// cheapest. This is by design as we don't change the dimensions of the
+        /// image. We only do color conversion.
         /// </summary>
         public static int ScalerFlags { get; internal set; } = ffmpeg.SWS_POINT;
 
@@ -137,12 +138,13 @@ namespace AV.Core.Container
         public HardwareAccelerator HardwareAccelerator { get; private set; }
 
         /// <summary>
-        /// Gets a value indicating whether this component is using hardware-assisted decoding.
+        /// Gets a value indicating whether this component is using hardware
+        /// assisted decoding.
         /// </summary>
         public bool IsUsingHardwareDecoding { get; private set; }
 
         /// <summary>
-        /// Gets access to the VideoFilter string of the container's MediaOptions.
+        /// Gets access to VideoFilter string of the container's MediaOptions.
         /// </summary>
         private string FilterString => this.Container?.MediaOptions?.VideoFilter;
 
@@ -240,8 +242,9 @@ namespace AV.Core.Container
                 RC.Current.Add(this.scaler);
             }
 
-            // Reassign to the new scaler and remove the reference to the existing one
-            // The get cached context function automatically frees the existing scaler.
+            // Reassign to the new scaler and remove the reference to the
+            // existing one. The get cached context function automatically frees
+            // the existing scaler.
             if (this.scaler != newScaler)
             {
                 RC.Current.Remove(this.scaler);
@@ -279,12 +282,12 @@ namespace AV.Core.Container
                 return false;
             }
 
-            // After scaling, we need to copy and guess some of the block properties
-            // Flag the block if we have to
+            // After scaling, we need to copy and guess some of the block
+            // properties. Flag the block if we have to
             target.IsStartTimeGuessed = source.HasValidStartTime == false;
             target.PresentationTime = source.PresentationTime;
 
-            // Try to fix the start time, duration and End time if we don't have valid data
+            // Try fix start, duration and End time if we don't have valid data
             if (source.HasValidStartTime == false && previousBlock != null)
             {
                 // Get timing information from the previous block
@@ -370,8 +373,8 @@ namespace AV.Core.Container
 
                 if (outputFrame->width <= 0 || outputFrame->height <= 0)
                 {
-                    // If we don't have a valid output frame simply release it and
-                    // return the original input frame
+                    // If we don't have a valid output frame simply release it
+                    // and return the original input frame
                     MediaFrame.ReleaseAVFrame(outputFrame);
                     outputFrame = frame;
                 }
@@ -495,7 +498,8 @@ namespace AV.Core.Container
         private static double ComputeHypotenuse(double a, double b) => Math.Sqrt((a * a) + (b * b));
 
         /// <summary>
-        /// Computes the frame filter arguments that are appropriate for the video filtering chain.
+        /// Computes the frame filter arguments that are appropriate for the
+        /// video filtering chain.
         /// </summary>
         /// <param name="frame">The frame.</param>
         /// <returns>The base filter arguments.</returns>
@@ -516,7 +520,8 @@ namespace AV.Core.Container
         }
 
         /// <summary>
-        /// If necessary, disposes the existing filter graph and creates a new one based on the frame arguments.
+        /// If necessary, disposes the existing filter graph and creates a new
+        /// one based on the frame arguments.
         /// </summary>
         /// <param name="frame">The frame.</param>
         /// <exception cref="MediaContainerException">

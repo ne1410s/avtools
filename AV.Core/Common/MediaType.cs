@@ -7,8 +7,8 @@ namespace AV.Core.Common
     using FFmpeg.AutoGen;
 
     /// <summary>
-    /// Enumerates the different Media Types compatible with AVMEDIATYPE_* constants
-    /// defined by FFmpeg.
+    /// Enumerates the different Media Types compatible with AVMEDIATYPE_*
+    /// constants defined by FFmpeg.
     /// </summary>
     public enum MediaType
     {

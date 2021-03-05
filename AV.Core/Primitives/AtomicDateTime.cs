@@ -12,7 +12,8 @@ namespace AV.Core.Primitives
     internal sealed class AtomicDateTime : AtomicTypeBase<DateTime>
     {
         /// <summary>
-        /// Initialises a new instance of the <see cref="AtomicDateTime"/> class.
+        /// Initialises a new instance of the <see cref="AtomicDateTime"/>
+        /// class.
         /// </summary>
         /// <param name="initialValue">The initial value.</param>
         public AtomicDateTime(DateTime initialValue)

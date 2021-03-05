@@ -209,7 +209,8 @@ namespace FFmpeg.AutoGen
         /// </summary>
         /// <param name="key">The key.</param>
         /// <param name="value">The value.</param>
-        /// <param name="preventOverwrite">if set to <c>true</c> don't overwrite existing value.</param>
+        /// <param name="preventOverwrite">if set to <c>true</c> don't overwrite
+        /// existing value.</param>
         public void Set(string key, string value, bool preventOverwrite)
         {
             var flags = 0;

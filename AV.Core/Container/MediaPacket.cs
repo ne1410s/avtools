@@ -10,7 +10,7 @@ namespace AV.Core.Container
     using FFmpeg.AutoGen;
 
     /// <summary>
-    /// Represents a managed packet wrapper for the <see cref="AVPacket"/> struct.
+    /// A managed packet wrapper for the <see cref="AVPacket"/> struct.
     /// </summary>
     /// <seealso cref="IDisposable" />
     public sealed unsafe class MediaPacket : IDisposable
@@ -63,7 +63,7 @@ namespace AV.Core.Container
         public long Duration => this.localIsDisposed.Value ? -1 : ((AVPacket*)this.localPointer)->duration;
 
         /// <summary>
-        /// Gets a value indicating whether the specified packet is a flush packet.
+        /// Gets a value indicating whether the packet is a flush packet.
         /// These flush packets are used to clear the internal decoder buffers.
         /// </summary>
         public bool IsFlushPacket => !this.localIsDisposed.Value && (IntPtr)((AVPacket*)this.localPointer)->data == FlushPacketData;
@@ -90,10 +90,8 @@ namespace AV.Core.Container
         /// <summary>
         /// Creates the empty packet.
         /// </summary>
-        /// <param name="streamIndex">The stream index this packet belongs to.</param>
-        /// <returns>
-        /// The special empty packet that instructs the decoder to enter draining mode.
-        /// </returns>
+        /// <param name="streamIndex">The stream index of the packet.</param>
+        /// <returns>Special packet to enter decoder's draining mode.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static MediaPacket CreateEmptyPacket(int streamIndex)
         {
@@ -109,8 +107,8 @@ namespace AV.Core.Container
         /// <summary>
         /// Creates a flush packet.
         /// </summary>
-        /// <param name="streamIndex">The stream index this packet belongs to.</param>
-        /// <returns>A special packet that makes the decoder flush its buffers.</returns>
+        /// <param name="streamIndex">The stream index of the packet.</param>
+        /// <returns>A special packet to flush decoder buffers.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static MediaPacket CreateFlushPacket(int streamIndex)
         {

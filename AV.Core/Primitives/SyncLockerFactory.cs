@@ -55,7 +55,8 @@ namespace AV.Core.Primitives
         /// <summary>
         /// Creates a reader-writer lock.
         /// </summary>
-        /// <param name="useSlim">if set to <c>true</c> it uses the Slim version of a reader-writer lock.</param>
+        /// <param name="useSlim">if set to <c>true</c> it uses the Slim version
+        /// of a reader-writer lock.</param>
         /// <returns>The Sync Locker.</returns>
         public static ISyncLocker Create(bool useSlim) => useSlim ? CreateSlim() : Create();
 
@@ -67,7 +68,8 @@ namespace AV.Core.Primitives
             private bool isDisposed;
 
             /// <summary>
-            /// Initialises a new instance of the <see cref="SyncLockReleaser"/> class.
+            /// Initialises a new instance of the <see cref="SyncLockReleaser"/>
+            /// class.
             /// </summary>
             /// <param name="parent">The parent.</param>
             /// <param name="operation">The operation.</param>
@@ -174,7 +176,7 @@ namespace AV.Core.Primitives
             /// <summary>
             /// Acquires the writer lock.
             /// </summary>
-            /// <param name="timeoutMilliseconds">The timeout milliseconds.</param>
+            /// <param name="timeoutMilliseconds">The timeout.</param>
             /// <param name="releaser">The releaser.</param>
             /// <returns>Success.</returns>
             private bool AcquireWriterLock(int timeoutMilliseconds, out IDisposable releaser)
@@ -204,7 +206,7 @@ namespace AV.Core.Primitives
             /// <summary>
             /// Acquires the reader lock.
             /// </summary>
-            /// <param name="timeoutMilliseconds">The timeout milliseconds.</param>
+            /// <param name="timeoutMilliseconds">The timeout.</param>
             /// <param name="releaser">The releaser.</param>
             /// <returns>Success.</returns>
             private bool AcquireReaderLock(int timeoutMilliseconds, out IDisposable releaser)
@@ -290,7 +292,7 @@ namespace AV.Core.Primitives
             /// <summary>
             /// Acquires the writer lock.
             /// </summary>
-            /// <param name="timeoutMilliseconds">The timeout milliseconds.</param>
+            /// <param name="timeoutMilliseconds">The timeout.</param>
             /// <param name="releaser">The releaser.</param>
             /// <returns>Success.</returns>
             private bool AcquireWriterLock(int timeoutMilliseconds, out IDisposable releaser)
@@ -326,7 +328,7 @@ namespace AV.Core.Primitives
             /// <summary>
             /// Acquires the reader lock.
             /// </summary>
-            /// <param name="timeoutMilliseconds">The timeout milliseconds.</param>
+            /// <param name="timeoutMilliseconds">The timeout.</param>
             /// <param name="releaser">The releaser.</param>
             /// <returns>Success.</returns>
             private bool AcquireReaderLock(int timeoutMilliseconds, out IDisposable releaser)

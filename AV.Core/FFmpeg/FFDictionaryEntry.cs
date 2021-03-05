@@ -16,7 +16,8 @@ namespace FFmpeg.AutoGen
         private readonly IntPtr localPointer;
 
         /// <summary>
-        /// Initialises a new instance of the <see cref="FFDictionaryEntry"/> class.
+        /// Initialises a new instance of the <see cref="FFDictionaryEntry"/>
+        /// class.
         /// </summary>
         /// <param name="entryPointer">The entry pointer.</param>
         public FFDictionaryEntry(AVDictionaryEntry* entryPointer)

@@ -24,8 +24,9 @@ namespace AV.Core
 
         /// <summary>
         /// Gets or sets the FFmpeg path from which to load the FFmpeg binaries.
-        /// You must set this path before setting the Source property for the first time on any instance of this control.
-        /// Setting this property when FFmpeg binaries have been registered will have no effect.
+        /// You must set this path before setting the Source property for the
+        /// first time on any instance of this control. Setting this property
+        /// when FFmpeg binaries have been registered will have no effect.
         /// </summary>
         public static string FFmpegDirectory
         {
@@ -94,14 +95,15 @@ namespace AV.Core
         }
 
         /// <summary>
-        /// Gets a value indicating whether the FFmpeg library has been initialized.
+        /// Gets a value indicating whether FFmpeg library has been initialised.
         /// </summary>
         public static bool IsInitialized => FFInterop.IsInitialized;
 
         /// <summary>
         /// Gets all registered encoder and decoder codecs.
         /// </summary>
-        /// <exception cref="InvalidOperationException">When the MediaEngine has not been initialized.</exception>
+        /// <exception cref="InvalidOperationException">When the MediaEngine has
+        /// not been initialized.</exception>
         internal static unsafe AVCodec*[] AllCodecs
         {
             get
@@ -119,12 +121,14 @@ namespace AV.Core
         }
 
         /// <summary>
-        /// Forces the pre-loading of the FFmpeg libraries according to the values of the
+        /// Forces the pre-loading of the FFmpeg libraries according to the
+        /// values of the
         /// <see cref="FFmpegDirectory"/> and <see cref="FFmpegLoadModeFlags"/>
-        /// Also, sets the <see cref="FFmpegVersionInfo"/> property. Throws an exception
-        /// if the libraries cannot be loaded.
+        /// Also, sets the <see cref="FFmpegVersionInfo"/> property. Throws an
+        /// exception if the libraries cannot be loaded.
         /// </summary>
-        /// <returns>true if libraries were loaded, false if libraries were already loaded.</returns>
+        /// <returns>true if libraries were loaded, false if libraries were
+        /// already loaded.</returns>
         public static bool LoadFFmpeg()
         {
             if (!FFInterop.Initialize(FFmpegDirectory, FFmpegLoadModeFlags))

@@ -11,11 +11,11 @@ namespace AV.Core.Container
     using FFmpeg.AutoGen;
 
     /// <summary>
-    /// A base class for blocks of the different MediaTypes.
-    /// Blocks are the result of decoding and scaling a frame.
-    /// Blocks have pre-allocated buffers which makes them memory and CPU efficient.
-    /// Reuse blocks as much as possible. Once you create a block from a frame,
-    /// you don't need the frame anymore so make sure you dispose the frame.
+    /// A base class for blocks of the different MediaTypes. Blocks are the
+    /// result of decoding and scaling a frame. Blocks have pre-allocated
+    /// buffers which makes them memory and CPU efficient. Reuse blocks as much
+    /// as possible. Once you create a block from a frame, you don't need the
+    /// frame anymore so make sure you dispose the frame.
     /// </summary>
     public abstract class MediaBlock
         : IComparable<MediaBlock>, IComparable<TimeSpan>, IComparable<long>, IEquatable<MediaBlock>, IDisposable
@@ -51,8 +51,8 @@ namespace AV.Core.Container
         public int CompressedSize { get; internal set; }
 
         /// <summary>
-        /// Gets a value indicating whether the start time was guessed from siblings
-        /// or the source frame PTS comes from a NO PTS value.
+        /// Gets a value indicating whether the start time was guessed from
+        /// siblings or the source frame PTS comes from a NO PTS value.
         /// </summary>
         public bool IsStartTimeGuessed { get; internal set; }
 
@@ -72,8 +72,8 @@ namespace AV.Core.Container
         public TimeSpan EndTime { get; internal set; }
 
         /// <summary>
-        /// Gets the unadjusted, original presentation timestamp (PTS) of the frame given in
-        /// the stream's Time Base units.
+        /// Gets the unadjusted, original presentation timestamp (PTS) of the
+        /// frame given in the stream's Time Base units.
         /// </summary>
         public long PresentationTime { get; internal set; }
 
@@ -111,7 +111,8 @@ namespace AV.Core.Container
         }
 
         /// <summary>
-        /// Gets a value indicating whether an unmanaged buffer has been allocated.
+        /// Gets a value indicating whether an unmanaged buffer has been
+        /// allocated.
         /// </summary>
         public bool IsAllocated
         {
@@ -351,7 +352,9 @@ namespace AV.Core.Container
         /// <summary>
         /// Releases unmanaged and - optionally - managed resources.
         /// </summary>
-        /// <param name="alsoManaged"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
+        /// <param name="alsoManaged"><c>true</c> to release both managed and
+        /// unmanaged resources; <c>false</c> to release only unmanaged
+        /// resources.</param>
         protected virtual void Dispose(bool alsoManaged)
         {
             lock (this.localSyncLock)
@@ -363,7 +366,8 @@ namespace AV.Core.Container
 
                 this.IsDisposed = true;
 
-                // Free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // Free unmanaged resources (unmanaged objects) and override a
+                // finalizer below.
                 using (this.localLocker.AcquireWriterLock())
                 {
                     this.Deallocate();
@@ -378,7 +382,8 @@ namespace AV.Core.Container
         }
 
         /// <summary>
-        /// De-allocates the picture buffer and resets the related buffer properties.
+        /// De-allocates the picture buffer and resets the related buffer
+        /// properties.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected virtual unsafe void Deallocate()

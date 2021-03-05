@@ -58,46 +58,46 @@ namespace AV.Core.Container
         public int CompressedSize { get; }
 
         /// <summary>
-        /// Gets the unadjusted, original presentation timestamp (PTS) of the frame.
+        /// Gets the unadjusted presentation timestamp (PTS) of the frame.
         /// This is in <see cref="StreamTimeBase"/> units.
         /// </summary>
         public long PresentationTime { get; }
 
         /// <summary>
-        /// Gets the unadjusted, original presentation timestamp (PTS) of the packet.
+        /// Gets the unadjusted presentation timestamp (PTS) of the packet.
         /// This is in <see cref="StreamTimeBase"/> units.
         /// </summary>
         public long DecodingTime { get; }
 
         /// <summary>
-        /// Gets the start time of the frame.
+        /// Gets or sets the start time of the frame.
         /// </summary>
         public TimeSpan StartTime { get; protected set; }
 
         /// <summary>
-        /// Gets the end time of the frame.
+        /// Gets or sets the end time of the frame.
         /// </summary>
         public TimeSpan EndTime { get; protected set; }
 
         /// <summary>
-        /// Gets the index of the stream from which this frame was decoded.
+        /// Gets or sets the stream index from which this frame was decoded.
         /// </summary>
         public int StreamIndex { get; protected set; }
 
         /// <summary>
-        /// Gets the amount of time this data has to be presented.
+        /// Gets or sets the amount of time this data has to be presented.
         /// </summary>
         public TimeSpan Duration { get; protected set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this frame obtained its start time
-        /// form a valid frame pts value.
+        /// Gets or sets a value indicating whether this frame obtained its
+        /// start time form a valid frame pts value.
         /// </summary>
         public bool HasValidStartTime { get; protected set; } = true;
 
         /// <summary>
-        /// When the unmanaged frame is released (freed from unmanaged memory)
-        /// this property will return true.
+        /// Gets a value indicating whether the unmanaged frame is released from
+        /// unmanaged memory.
         /// </summary>
         public bool IsStale => this.InternalPointer == IntPtr.Zero;
 

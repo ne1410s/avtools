@@ -16,7 +16,7 @@ namespace AV.Core
         /// <summary>
         /// Converts a byte pointer to a UTF8 encoded string.
         /// </summary>
-        /// <param name="stringAddress">The pointer to the starting character.</param>
+        /// <param name="stringAddress">Pointer to the first character.</param>
         /// <returns>The string.</returns>
         public static unsafe string PtrToStringUTF8(byte* stringAddress)
         {
@@ -62,11 +62,12 @@ namespace AV.Core
 #endif
 
         /// <summary>
-        /// Determines if the string contains the search term in ordinal (binary) comparison.
+        /// Determines if the string contains the search term in ordinal
+        /// (binary) comparison.
         /// </summary>
         /// <param name="source">The string to search.</param>
         /// <param name="find">The search term.</param>
-        /// <returns>Thether the search term is contained in the string.</returns>
+        /// <returns>Whether the search term is found in the string.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool ContainsOrdinal(this string source, string find) =>
             source != null && source.IndexOf(find, StringComparison.Ordinal) > -1;

@@ -64,12 +64,14 @@ namespace AV.Core.Container
         public OnPacketQueueChangedDelegate OnPacketQueueChanged { get; set; }
 
         /// <summary>
-        /// Gets or sets a method that gets called when an audio or video frame gets decoded.
+        /// Gets or sets a method that gets called when an audio or video frame
+        /// gets decoded.
         /// </summary>
         public OnFrameDecodedDelegate OnFrameDecoded { get; set; }
 
         /// <summary>
-        /// Gets or sets a method that gets called when a subtitle frame gets decoded.
+        /// Gets or sets a method that gets called when a subtitle frame gets
+        /// decoded.
         /// </summary>
         public OnSubtitleDecodedDelegate OnSubtitleDecoded { get; set; }
 
@@ -121,7 +123,8 @@ namespace AV.Core.Container
         }
 
         /// <summary>
-        /// Gets the type of the component on which seek and frame stepping is performed.
+        /// Gets the type of the component on which seek and frame stepping is
+        /// performed.
         /// </summary>
         public MediaType SeekableMediaType
         {
@@ -135,8 +138,9 @@ namespace AV.Core.Container
         }
 
         /// <summary>
-        /// Gets the media component of the stream on which seeking and frame stepping is performed.
-        /// By order of priority, first Video (not containing picture attachments), then audio.
+        /// Gets the media component of the stream on which seeking and frame
+        /// stepping is performed. By order of priority, first Video (not
+        /// containing picture attachments), then audio.
         /// </summary>
         public MediaComponent Seekable
         {
@@ -179,8 +183,8 @@ namespace AV.Core.Container
         }
 
         /// <summary>
-        /// Gets the current length in bytes of the packet buffer for all components.
-        /// These packets are the ones that have not been yet decoded.
+        /// Gets the current length in bytes of the packet buffer for all
+        /// components. These packets are the ones not yet decoded.
         /// </summary>
         public long BufferLength
         {
@@ -194,7 +198,7 @@ namespace AV.Core.Container
         }
 
         /// <summary>
-        /// Gets the total number of packets in the packet buffer for all components.
+        /// Gets the total packets in the packet buffer for all components.
         /// </summary>
         public int BufferCount
         {
@@ -208,8 +212,9 @@ namespace AV.Core.Container
         }
 
         /// <summary>
-        /// Gets the the least duration between the buffered audio and video packets.
-        /// If no duration information is encoded in neither, this property will return
+        /// Gets the the least duration between the buffered audio and video
+        /// packets. If no duration information is encoded in neither, this
+        /// property will return.
         /// <see cref="TimeSpan.MinValue"/>.
         /// </summary>
         public TimeSpan BufferDuration
@@ -224,7 +229,8 @@ namespace AV.Core.Container
         }
 
         /// <summary>
-        /// Gets the minimum number of packets to read before <see cref="HasEnoughPackets"/> is able to return true.
+        /// Gets the minimum number of packets to read before
+        /// <see cref="HasEnoughPackets"/> is able to return true.
         /// </summary>
         public int BufferCountThreshold
         {
@@ -238,8 +244,8 @@ namespace AV.Core.Container
         }
 
         /// <summary>
-        /// Gets a value indicating whether all packet queues contain enough packets.
-        /// Port of ffplay.c stream_has_enough_packets.
+        /// Gets a value indicating whether all packet queues contain enough
+        /// packets. Port of ffplay.c stream_has_enough_packets.
         /// </summary>
         public bool HasEnoughPackets
         {
@@ -253,13 +259,14 @@ namespace AV.Core.Container
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="MediaComponent"/> with the specified media type.
-        /// Setting a new component on an existing media type component will throw.
-        /// Getting a non existing media component fro the given media type will return null.
+        /// Gets or sets the <see cref="MediaComponent"/> with the specified
+        /// media type. Setting a new component on an existing media type
+        /// component will throw. Getting a non existing media component from
+        /// the given media type will return null.
         /// </summary>
         /// <param name="mediaType">Type of the media.</param>
         /// <returns>The media component.</returns>
-        /// <exception cref="ArgumentException">When the media type is invalid.</exception>
+        /// <exception cref="ArgumentException">Bad media type.</exception>
         /// <exception cref="ArgumentNullException">MediaComponent.</exception>
         public MediaComponent this[MediaType mediaType]
         {
@@ -280,9 +287,10 @@ namespace AV.Core.Container
         public void Dispose() => this.Dispose(true);
 
         /// <summary>
-        /// Sends the specified packet to the correct component by reading the stream index
-        /// of the packet that is being sent. No packet is sent if the provided packet is set to null.
-        /// Returns the media type of the component that accepted the packet.
+        /// Sends the specified packet to the correct component by reading the
+        /// stream index of the packet that is being sent. No packet is sent if
+        /// the provided packet is set to null. Returns the media type of the
+        /// component that accepted the packet.
         /// </summary>
         /// <param name="packet">The packet.</param>
         /// <returns>The media type.</returns>
@@ -326,7 +334,8 @@ namespace AV.Core.Container
         /// This is useful after a seek operation is performed or a stream
         /// index is changed.
         /// </summary>
-        /// <param name="flushBuffers">if set to <c>true</c> flush codec buffers.</param>
+        /// <param name="flushBuffers">if set to <c>true</c> flush codec
+        /// buffers.</param>
         public void ClearQueuedPackets(bool flushBuffers)
         {
             foreach (var component in this.All)
@@ -336,13 +345,17 @@ namespace AV.Core.Container
         }
 
         /// <summary>
-        /// Updates queue properties and invokes the on packet queue changed callback.
+        /// Updates queue properties and invokes the on packet queue changed
+        /// callback.
         /// </summary>
         /// <param name="operation">The operation.</param>
         /// <param name="packet">The packet.</param>
         /// <param name="mediaType">Type of the media.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal void ProcessPacketQueueChanges(PacketQueueOp operation, MediaPacket packet, MediaType mediaType)
+        internal void ProcessPacketQueueChanges(
+            PacketQueueOp operation,
+            MediaPacket packet,
+            MediaType mediaType)
         {
             if (this.OnPacketQueueChanged == null)
             {
@@ -390,9 +403,11 @@ namespace AV.Core.Container
         /// Registers the component in this component set.
         /// </summary>
         /// <param name="component">The component.</param>
-        /// <exception cref="ArgumentNullException">When component of the same type is already registered.</exception>
-        /// <exception cref="NotSupportedException">When MediaType is not supported.</exception>
-        /// <exception cref="ArgumentException">When the component is null.</exception>
+        /// <exception cref="ArgumentException">When component of the same
+        /// type is already registered.</exception>
+        /// <exception cref="NotSupportedException">When MediaType is not
+        /// supported.</exception>
+        /// <exception cref="ArgumentNullException">Component is null.</exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void AddComponent(MediaComponent component)
         {
@@ -465,7 +480,8 @@ namespace AV.Core.Container
             this.localMediaTypes = allMediaTypes;
             this.localCount = allComponents.Count;
 
-            // Try for the main component to be the video (if it's not stuff like audio album art, that is)
+            // Try for the main component to be the video (if it's not stuff
+            // like audio album art, that is)
             if (this.localVideo != null && !this.localVideo.IsStillPictures)
             {
                 this.localSeekable = this.localVideo;
@@ -481,7 +497,8 @@ namespace AV.Core.Container
         /// <summary>
         /// Releases unmanaged and - optionally - managed resources.
         /// </summary>
-        /// <param name="alsoManaged"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
+        /// <param name="alsoManaged"><c>true</c> to release both managed and
+        /// unmanaged resources; <c>false</c> releases unmanaged only.</param>
         private void Dispose(bool alsoManaged)
         {
             lock (this.componentSyncLock)

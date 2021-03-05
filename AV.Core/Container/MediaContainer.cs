@@ -8,15 +8,15 @@ namespace AV.Core.Container
     using System.Collections.Generic;
     using System.Linq;
     using System.Runtime.CompilerServices;
-    using System.Runtime.InteropServices;
     using AV.Core.Common;
     using AV.Core.Primitives;
     using FFmpeg.AutoGen;
 
     /// <summary>
     /// A container capable of opening an input url,
-    /// reading packets from it, decoding frames, seeking, and pausing and resuming network streams
-    /// Code based on https://raw.githubusercontent.com/FFmpeg/FFmpeg/release/3.2/ffplay.c
+    /// reading packets from it, decoding frames, seeking, and pausing and
+    /// resuming network streams based on
+    /// https://raw.githubusercontent.com/FFmpeg/FFmpeg/release/3.2/ffplay.c
     /// The method pipeline should be:
     /// 1. Set Options (or don't, for automatic options) and Initialize,
     /// 2. Perform continuous packet reads,
@@ -120,7 +120,8 @@ namespace AV.Core.Container
 
             // drop the protocol prefix if it is redundant
             var protocolPrefix = this.Configuration.ProtocolPrefix;
-            if (string.IsNullOrWhiteSpace(this.MediaSource) == false && string.IsNullOrWhiteSpace(protocolPrefix) == false
+            if (string.IsNullOrWhiteSpace(this.MediaSource) == false
+                && string.IsNullOrWhiteSpace(protocolPrefix) == false
                 && this.MediaSource.Trim().StartsWith($"{protocolPrefix}:", StringComparison.OrdinalIgnoreCase))
             {
                 protocolPrefix = null;
@@ -171,17 +172,18 @@ namespace AV.Core.Container
         public string MediaSource { get; }
 
         /// <summary>
-        /// Gets the container and demuxer initialization and configuration options.
-        /// Options are applied when creating an instance of the container.
-        /// After container creation, changing the configuration options passed in
-        /// the constructor has no effect.
+        /// Gets the container and demuxer initialization and configuration
+        /// options, applied when creating an instance of the container.
+        /// After container creation, changing the configuration options passed
+        /// in the constructor has no effect.
         /// </summary>
         public ContainerConfiguration Configuration { get; }
 
         /// <summary>
-        /// Gets options that applied before initializing media components and their corresponding
-        /// codecs. Once the container has created the media components, changing these options may produce unintended side effects
-        /// and is not supported or recommended.
+        /// Gets options that applied before initializing media components and
+        /// their corresponding codecs. Once the container has created the media
+        /// components, changing these options may produce side effects and is
+        /// not supported or recommended.
         /// </summary>
         public MediaOptions MediaOptions { get; } = new MediaOptions();
 
@@ -197,7 +199,7 @@ namespace AV.Core.Container
         public string MediaFormatName { get; private set; }
 
         /// <summary>
-        /// Gets the media bit rate (bits per second). Returns 0 if not available.
+        /// Gets the media bit rate (bits / second). Returns 0 if not available.
         /// </summary>
         public long MediaBitRate => this.MediaInfo?.BitRate ?? 0;
 
@@ -207,7 +209,7 @@ namespace AV.Core.Container
         public IReadOnlyDictionary<string, string> Metadata { get; private set; }
 
         /// <summary>
-        /// Gets a value indicating whether an Input Context has been initialize.
+        /// Gets a value indicating whether Input Context has been initialised.
         /// </summary>
         public bool IsInitialized => this.InputContext != null;
 
@@ -219,9 +221,6 @@ namespace AV.Core.Container
         /// <summary>
         /// Gets a value indicating whether End Of File situation is reached.
         /// </summary>
-        /// <value>
-        ///   <c>true</c> if this instance is at end of stream; otherwise, <c>false</c>.
-        /// </value>
         public bool IsAtEndOfStream { get; private set; }
 
         /// <summary>
@@ -267,24 +266,25 @@ namespace AV.Core.Container
 
         /// <summary>
         /// Gets a value indicating whether this container represents live media.
-        /// If the stream is classified as a network stream and it is not seekable, then this property will return true.
+        /// If the stream is classified as a network stream and it is not
+        /// seekable, then this property will return true.
         /// </summary>
-        public bool IsLiveStream => this.IsNetworkStream && this.IsStreamSeekable == false;
+        public bool IsLiveStream => this.IsNetworkStream && !this.IsStreamSeekable;
 
         /// <summary>
         /// Gets a value indicating whether the input stream is a network stream.
-        /// If the format name is rtp, rtsp, or sdp or if the url starts with udp:, http:, https:, tcp:, or rtp:
-        /// then this property will be set to true.
+        /// If the format name is rtp, rtsp, or sdp or if the url starts with
+        /// udp:, http:, https:, tcp:, or rtp: then this property is true.
         /// </summary>
         public bool IsNetworkStream { get; private set; }
 
         /// <summary>
-        /// Gets direct access to the individual Media components of the input stream.
+        /// Gets direct access to the stream individual Media components.
         /// </summary>
         public MediaComponentSet Components { get; } = new MediaComponentSet();
 
         /// <summary>
-        /// Gets direct access to the infrastructure necessary to handle non-media packets.
+        /// Gets direct access to that necessary to handle non-media packets.
         /// </summary>
         public DataComponentSet Data { get; } = new DataComponentSet();
 
@@ -325,9 +325,9 @@ namespace AV.Core.Container
         }
 
         /// <summary>
-        /// Initializes the container and its input context, extracting stream information.
-        /// Container configuration passed on the constructor is applied.
-        /// This method must be called to make the container usable.
+        /// Initializes the container and its input context, extracting stream
+        /// information. ontainer configuration passed on the constructor is
+        /// applied. This method must be called to make the container usable.
         /// </summary>
         public void Initialize()
         {
@@ -340,8 +340,9 @@ namespace AV.Core.Container
         }
 
         /// <summary>
-        /// Opens the individual stream components on the existing input context in order to start reading packets.
-        /// Any Media Options must be set before this method is called.
+        /// Opens the individual stream components on the existing input context
+        /// in order to start reading packets. Any Media Options must be set
+        /// before this method is called.
         /// </summary>
         public void Open()
         {
@@ -368,15 +369,16 @@ namespace AV.Core.Container
 
         /// <summary>
         /// Seeks to the specified position in the main stream component.
-        /// Returns the keyframe on or before the specified position. Most of the times
-        /// you will need to keep reading packets and receiving frames to reach the exact position.
-        /// Pass TimeSpan.MinValue to seek to the beginning of the stream.
+        /// Returns the keyframe on or before the specified position. Most of
+        /// the time you will need to keep reading packets and receiving frames
+        /// to reach the exact position. Pass TimeSpan.MinValue to seek to the
+        /// beginning of the stream.
         /// </summary>
         /// <param name="position">The position.</param>
         /// <returns>
         /// The list of media frames.
         /// </returns>
-        /// <exception cref="InvalidOperationException">No input context initialized.</exception>
+        /// <exception cref="InvalidOperationException">No inited input context.</exception>
         public MediaFrame Seek(TimeSpan position)
         {
             lock (this.readSyncRoot)
@@ -396,16 +398,17 @@ namespace AV.Core.Container
         }
 
         /// <summary>
-        /// Reads the next available packet, sending the packet to the corresponding
+        /// Reads the next available packet, sending the packet to the
         /// internal media component. It also sets IsAtEndOfStream property.
-        /// Returns the media type if the packet was accepted by any of the media components.
-        /// Returns None if the packet was not accepted by any of the media components
-        /// or if reading failed (i.e. End of stream already or read error).
-        /// Packets are queued internally. To dequeue them you need to call the receive frames
-        /// method of each component until the packet buffer count becomes 0.
+        /// Returns the media type if the packet was accepted by any of the
+        /// components. Returns None if the packet was not accepted by any of
+        /// the media components or if reading failed (i.e. End of stream
+        /// already or read error). Packets are queued internally. To dequeue
+        /// them you need to call the receive frames method of each component
+        /// until the packet buffer count becomes 0.
         /// </summary>
         /// <returns>The media type of the packet that was read.</returns>
-        /// <exception cref="InvalidOperationException">No input context initialized.</exception>
+        /// <exception cref="InvalidOperationException">No inited input context.</exception>
         /// <exception cref="MediaContainerException">When a read error occurs.</exception>
         public MediaType Read()
         {
@@ -426,15 +429,16 @@ namespace AV.Core.Container
         }
 
         /// <summary>
-        /// Decodes the next available packet in the packet queue for each of the components.
-        /// Returns the list of decoded frames.
-        /// The list of 0 or more decoded frames is returned in ascending StartTime order.
-        /// A Packet may contain 0 or more frames. Once the frame source objects are returned, you
-        /// are responsible for calling the Dispose method on them to free the underlying FFmpeg frame.
-        /// Note that even after releasing them you can still use the managed properties.
-        /// If you intend on Converting the frames to usable media frames (with Convert) you must not
-        /// release the frame. Specify the release input argument as true and the frame will be automatically
-        /// freed from memory.
+        /// Decodes the next available packet in the packet queue for each of
+        /// the components. Returns the list of decoded frames. The list of 0 or
+        /// more decoded frames is returned in ascending StartTime order. Packet
+        /// may contain 0 or more frames. Once the frame source objects are
+        /// returned, you are responsible for calling the Dispose method on them
+        /// to free the underlying FFmpeg frame. Note that even after releasing
+        /// them you can still use the managed properties. If you intend on
+        /// Converting the frames to usable media frames (with Convert) you must
+        /// not release the frame. Specify the release input argument as true
+        /// and the frame will be automatically freed from memory.
         /// </summary>
         /// <returns>The list of media frames.</returns>
         public IList<MediaFrame> Decode()
@@ -468,27 +472,32 @@ namespace AV.Core.Container
         }
 
         /// <summary>
-        /// Performs audio, video and subtitle conversions on the decoded input frame so data
-        /// can be used as a Frame. Please note that if the output is passed as a reference.
-        /// This works as follows: if the output reference is null it will be automatically instantiated
-        /// and returned by this function. This enables to  either instantiate or reuse a previously allocated Frame.
-        /// This is important because buffer allocations are expensive operations and this allows you
-        /// to perform the allocation once and continue reusing the same buffer.
+        /// Performs audio, video and subtitle conversions on the decoded input
+        /// frame so data can be used as a Frame. Please note that if the output
+        /// is passed as a reference. This works as follows: if the output
+        /// reference is null it will be automatically instantiated and returned
+        /// by this function. This enables to  either instantiate or reuse a
+        /// previously allocated Frame. This is important because buffer
+        /// allocations are expensive operations and this allows you to perform
+        /// the allocation once and continue reusing the same buffer.
         /// </summary>
-        /// <param name="input">The raw frame source. Has to be compatible with the target. (e.g. use VideoFrameSource to convert to VideoFrame).</param>
+        /// <param name="input">The raw frame source. Has to be compatible with
+        /// the target. (e.g. use VideoFrameSource to convert to VideoFrame).</param>
         /// <param name="output">The target frame. Has to be compatible with the source.</param>
-        /// <param name="releaseInput">if set to <c>true</c> releases the raw frame source from unmanaged memory.</param>
-        /// <param name="previousBlock">The previous block from which to extract timing information in case it is missing.</param>
-        /// <returns>
-        /// True if successful. False otherwise.
-        /// </returns>
-        /// <exception cref="InvalidOperationException">No input context initialized.</exception>
+        /// <param name="releaseInput">if set to <c>true</c> releases the raw
+        /// frame source from unmanaged memory.</param>
+        /// <param name="previousBlock">The previous block from which to extract
+        /// timing information in case it is missing.</param>
+        /// <returns>True if successful. False otherwise. </returns>
+        /// <exception cref="InvalidOperationException">No inited input context.</exception>
         /// <exception cref="MediaContainerException">MediaType.</exception>
-        /// <exception cref="ArgumentNullException">input.</exception>
-        /// <exception cref="ArgumentException">input
-        /// or
-        /// input.</exception>
-        public bool Convert(MediaFrame input, ref MediaBlock output, bool releaseInput, MediaBlock previousBlock)
+        /// <exception cref="ArgumentNullException">input null.</exception>
+        /// <exception cref="ArgumentException">input.</exception>
+        public bool Convert(
+            MediaFrame input,
+            ref MediaBlock output,
+            bool releaseInput,
+            MediaBlock previousBlock)
         {
             lock (this.convertSyncRoot)
             {
@@ -535,7 +544,8 @@ namespace AV.Core.Container
         /// <summary>
         /// Signals the packet reading operations to abort immediately.
         /// </summary>
-        /// <param name="reset">if set to true, the read interrupt will reset the aborted state automatically.</param>
+        /// <param name="reset">if set to true, the read interrupt will reset
+        /// the aborted state automatically.</param>
         public void SignalAbortReads(bool reset)
         {
             if (this.IsDisposed)
@@ -548,23 +558,18 @@ namespace AV.Core.Container
         }
 
         /// <summary>
-        /// Signals the state for read operations to stop being in the aborted state.
+        /// Signals the state for read operations to stop being aborted.
         /// </summary>
         public void SignalResumeReads()
         {
             throw new NotSupportedException("The Container does not support resuming the InputContext from aborted reads yet.");
-
-            // if (IsDisposed) throw new ObjectDisposedException(nameof(MediaContainer));
-            // if (InputContext == null) throw new InvalidOperationException(ExceptionMessageNoInputContext);
-
-            // SignalAbortReadsRequested.Value = false;
-            // SignalAbortReadsAutoReset.Value = true;
         }
 
         /// <summary>
-        /// Recreates the components using the selected streams in <see cref="MediaOptions" />.
-        /// If the newly set streams are null these components are removed and disposed.
-        /// All selected stream components are recreated.
+        /// Recreates the components using the selected streams in
+        /// <see cref="MediaOptions" />. If the newly set streams are null these
+        /// components are removed and disposed. All selected stream components
+        /// are recreated.
         /// </summary>
         /// <returns>The registered component types.</returns>
         public MediaType[] UpdateComponents()
@@ -648,11 +653,13 @@ namespace AV.Core.Container
 
         /// <summary>
         /// Initializes the input context to start read operations.
-        /// This does NOT create the stream components and therefore, there needs to be a call
-        /// to the Open method.
+        /// This does NOT create the stream components and therefore, there
+        /// needs to be a call to the Open method.
         /// </summary>
-        /// <exception cref="InvalidOperationException">The input context has already been initialized.</exception>
-        /// <exception cref="MediaContainerException">When an error initializing the stream occurs.</exception>
+        /// <exception cref="InvalidOperationException">The input context has
+        /// already been initialized.</exception>
+        /// <exception cref="MediaContainerException">When an error initialising
+        /// the stream occurs.</exception>
         private void StreamInitialize()
         {
             if (this.IsInitialized)
@@ -674,7 +681,8 @@ namespace AV.Core.Container
 
             try
             {
-                // Create the input format context, and open the input based on the provided format options.
+                // Create the input format context, and open the input based on
+                // the provided format options.
                 using (var privateOptions = new FFDictionary(this.Configuration.PrivateOptions))
                 {
                     if (privateOptions.HasKey(ContainerConfiguration.ScanAllPmts) == false)
@@ -699,7 +707,7 @@ namespace AV.Core.Container
                     // If there is a custom input stream, set it up.
                     if (this.customInputStream != null)
                     {
-                        // we don't want to pass a Url because it will be a custom stream
+                        // don't pass a Url because it will be a custom stream
                         openUrl = string.Empty;
 
                         // Setup the necessary context callbacks
@@ -718,8 +726,9 @@ namespace AV.Core.Container
                         inputContextPtr->pb = this.customInputStreamContext;
                     }
 
-                    // We set the start of the read operation time so timeouts can be detected
-                    // and we open the URL so the input context can be initialized.
+                    // We set the start of the read operation time so timeouts
+                    // can be detected and we open the URL so the input context
+                    // can be initialized.
                     this.streamReadInterruptStartTime.Value = DateTime.UtcNow;
                     var privateOptionsRef = privateOptions.Pointer;
 
@@ -738,7 +747,8 @@ namespace AV.Core.Container
                     // Set some general properties
                     this.MediaFormatName = Utilities.PtrToStringUTF8(InputContext->iformat->name);
 
-                    // If there are any options left in the dictionary, it means they did not get used (invalid options).
+                    // If there are any options left in the dictionary, it means
+                    // they did not get used (invalid options).
                     // Output the invalid options as warnings
                     privateOptions.Remove(ContainerConfiguration.ScanAllPmts);
                     var currentEntry = privateOptions.First();
@@ -752,8 +762,9 @@ namespace AV.Core.Container
 
                 ffmpeg.av_format_inject_global_side_data(this.InputContext);
 
-                // This is useful for file formats with no headers such as MPEG. This function also computes
-                // the real frame-rate in case of MPEG-2 repeat frame mode.
+                // This is useful for file formats with no headers such as MPEG.
+                // This function also computes the real frame-rate in case of
+                // MPEG-2 repeat frame mode.
                 if (ffmpeg.avformat_find_stream_info(this.InputContext, null) < 0)
                 {
                     //TODO: Warn
@@ -776,13 +787,18 @@ namespace AV.Core.Container
                     this.IsNetworkStream = true;
 
                     // The following line seems to have negative or no effect.
-                    // Safe to comment out as the read thread will always try to read packets depending on the state
-                    // of the buffer and not the state of the playback itself.
-                    // It also has caused problems with RTSP streams. See #431 and possibly the root cause of #415
+                    // Safe to comment out as the read thread will always try to
+                    // read packets depending on the state of the buffer and not
+                    // the state of the playback itself.
+                    // It also has caused problems with RTSP streams. See #43
+                    // and possibly the root cause of #415
                     // ffmpeg.av_read_play(InputContext)
                 }
 
-                if (this.IsNetworkStream == false && Uri.TryCreate(this.MediaSource, UriKind.RelativeOrAbsolute, out var uri))
+                if (this.IsNetworkStream == false && Uri.TryCreate(
+                    this.MediaSource,
+                    UriKind.RelativeOrAbsolute,
+                    out var uri))
                 {
                     try
                     {
@@ -807,14 +823,17 @@ namespace AV.Core.Container
                     }
                 }
 
-                // This prevents the creation of unavailable audio or video components.
+                // Prevent creation of unavailable audio or video components
                 if (FFLibrary.LibSWScale.IsLoaded == false)
                 {
                     //TODO: Error
                     ////$"We totes need that lib!;
                 }
 
-                this.customInputStream?.OnInitialized?.Invoke(inputFormat, this.InputContext, this.MediaInfo);
+                this.customInputStream?.OnInitialized?.Invoke(
+                    inputFormat,
+                    this.InputContext,
+                    this.MediaInfo);
             }
             catch (Exception ex)
             {
@@ -892,17 +911,19 @@ namespace AV.Core.Container
         /// </summary>
         private void StreamOpen()
         {
-            // Open the best suitable streams. Throw if no audio and/or video streams are found
+            // Open the best suitable streams. Throw if no audio and/or video
+            // streams are found
             this.StreamCreateComponents();
         }
 
         /// <summary>
-        /// Creates and assigns a component of the given type using the specified stream information.
-        /// If stream information is null, or the component is disabled, then the component is removed.
+        /// Creates and assigns a component of the given type using the
+        /// specified stream information. If stream information is null, or the
+        /// component is disabled, then the component is removed.
         /// </summary>
         /// <param name="t">The Media Type.</param>
-        /// <param name="stream">The stream information. Set to null to remove.</param>
-        /// <returns>The media type that was created. None for unsuccessful creation.</returns>
+        /// <param name="stream">The stream info. Set to null to remove.</param>
+        /// <returns>The media type created; None for failed creation.</returns>
         private MediaType StreamCreateComponent(MediaType t, StreamInfo stream)
         {
             try
@@ -932,11 +953,12 @@ namespace AV.Core.Container
         }
 
         /// <summary>
-        /// Creates the stream components according to the specified streams in the current media options.
-        /// Then it initializes the components of the correct type each.
+        /// Creates the stream components according to the specified streams in
+        /// the current media options. Then it initializes the components of the
+        /// correct type each.
         /// </summary>
         /// <returns>The component media types that are available.</returns>
-        /// <exception cref="MediaContainerException">The exception information.</exception>
+        /// <exception cref="MediaContainerException">Info.</exception>
         private MediaType[] StreamCreateComponents()
         {
             // Apply Media Options by selecting the desired components
@@ -948,8 +970,9 @@ namespace AV.Core.Container
                 throw new MediaContainerException($"{this.MediaSource}: No video streams found to decode.");
             }
 
-            // Initially and depending on the video component, require picture attachments.
-            // Picture attachments are only required after the first read or after a seek.
+            // Initially and depending on the video component, require picture
+            // attachments. Picture attachments are only required after the
+            // first read or after a seek.
             this.StateRequiresPictureAttachments = true;
 
             // Return the registered component types
@@ -957,12 +980,13 @@ namespace AV.Core.Container
         }
 
         /// <summary>
-        /// Reads the next packet in the underlying stream and queues in the corresponding media component.
-        /// Returns None of no packet was read.
+        /// Reads the next packet in the underlying stream and queues in the
+        /// corresponding media component. Returns None of no packet was read.
         /// </summary>
         /// <returns>The type of media packet that was read.</returns>
         /// <exception cref="InvalidOperationException">Initialize.</exception>
-        /// <exception cref="MediaContainerException">Raised when an error reading from the stream occurs.</exception>
+        /// <exception cref="MediaContainerException">Raised when an error
+        /// reading from the stream occurs.</exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private MediaType StreamRead()
         {
@@ -996,11 +1020,11 @@ namespace AV.Core.Container
 
             if (readResult < 0)
             {
-                // Handle failed packet reads. We don't need the allocated packet anymore
+                // Handle failed packet reads. We don't need the packet anymore
                 readPacket.Dispose();
                 readPacket = null;
 
-                // Detect an end of file situation (makes the readers enter draining mode)
+                // Detect end of file (makes the readers enter draining mode)
                 if (readResult == ffmpeg.AVERROR_EOF || ffmpeg.avio_feof(InputContext->pb) != 0)
                 {
                     // Send the decoders empty packets at the EOF
@@ -1023,7 +1047,7 @@ namespace AV.Core.Container
                 this.IsAtEndOfStream = false;
             }
 
-            // Check if we were able to feed the packet. If not, simply discard it
+            // Check if able to feed the packet. If not, simply discard it
             if (readPacket == null)
             {
                 return MediaType.None;
@@ -1063,9 +1087,6 @@ namespace AV.Core.Container
             // Check if a forced quit was triggered
             if (this.signalAbortReadsRequested.Value)
             {
-                //TODO: Info
-                ////$"{nameof(this.OnStreamReadInterrupt)} was requested an immediate read exit.");
-
                 if (this.signalAbortReadsAutoReset.Value)
                 {
                     this.signalAbortReadsRequested.Value = false;
@@ -1091,7 +1112,7 @@ namespace AV.Core.Container
         }
 
         /// <summary>
-        /// Seeks to the closest and lesser or equal key frame on the main component.
+        /// Seeks to the closest lesser / equal key frame on the main component.
         /// </summary>
         /// <param name="requestedPosition">The target time.</param>
         /// <returns>The seeked media frame.</returns>
@@ -1104,7 +1125,6 @@ namespace AV.Core.Container
             {
                 //TODO: Warn
                 ////"Unable to seek. Underlying stream does not support seeking.");
-                ///
                 return null;
             }
 
@@ -1120,27 +1140,28 @@ namespace AV.Core.Container
             }
 
             // Stream seeking by seeking component
-            // The backward flag means that we want to seek to at MOST the target position
+            // The backward flag means seek to at MOST the target position
             var timeBase = comp.Stream->time_base;
 
             // The relative target time keeps track of where to seek.
-            // if the seeking ends up AFTER the target, we decrement this time and try the seek
-            // again by subtracting 1 second from it.
+            // if the seeking ends up AFTER the target, we decrement this time
+            // and try the seek again by subtracting 1 second from it.
             var streamSeekRelativeTime = requestedPosition;
 
-            // Perform long seeks until we end up with a relative target time where decoding
-            // of frames before or on target time is possible.
+            // Perform long seeks until we end up with a relative target time
+            // where decoding of frames before or on target time is possible.
             var isAtStartOfStream = false;
             int seekResult;
             MediaFrame frame = null;
             while (isAtStartOfStream == false)
             {
-                // Compute the seek target, mostly based on the relative Target Time
+                // Compute seek target, mostly based on the relative Target Time
                 var seekTimestamp = streamSeekRelativeTime.ToLong(timeBase);
 
-                // Perform the seek. There is also avformat_seek_file which is the older version of av_seek_frame
-                // Check if we are seeking before the start of the stream in this cycle. If so, simply seek to the
-                // beginning of the stream. Otherwise, seek normally.
+                // Perform the seek. There is also avformat_seek_file which is
+                // the older version of av_seek_frame. Check if we are seeking
+                // before the start of the stream in this cycle. If so, simply
+                // seek to the beginning of the stream. Otherwise, seek normally.
                 if (this.IsReadAborted)
                 {
                     seekResult = ffmpeg.AVERROR_EXIT;

@@ -39,7 +39,7 @@ namespace AV.Core
         public static string FFmpegSearchPath { get; }
 
         /// <summary>
-        /// The video pixel format. BGRA, 32bit.
+        /// Gets the video pixel format. BGRA, 32bit.
         /// </summary>
         public static AVPixelFormat VideoPixelFormat => AVPixelFormat.AV_PIX_FMT_BGRA;
     }

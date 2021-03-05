@@ -36,8 +36,7 @@ namespace AV.Core.Container
         }
 
         /// <summary>
-        /// Gets the sum of all the packet sizes contained
-        /// by this queue.
+        /// Gets the sum of all the packet sizes contained by this queue.
         /// </summary>
         public long BufferLength
         {
@@ -144,7 +143,9 @@ namespace AV.Core.Container
         /// <summary>
         /// Releases unmanaged and - optionally - managed resources.
         /// </summary>
-        /// <param name="alsoManaged"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
+        /// <param name="alsoManaged"><c>true</c> to release both managed and
+        /// unmanaged resources; <c>false</c> to release only unmanaged
+        /// resources.</param>
         private void Dispose(bool alsoManaged)
         {
             if (alsoManaged == false)

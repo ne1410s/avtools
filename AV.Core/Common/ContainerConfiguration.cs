@@ -8,8 +8,9 @@ namespace AV.Core.Common
     using System.Collections.Generic;
 
     /// <summary>
-    /// Represents a set of options that are used to initialize a media container before opening the stream.
-    /// This includes both, demuxer and decoder options.
+    /// Represents a set of options that are used to initialize a media
+    /// container before opening the stream. This includes both, demuxer and
+    /// decoder options.
     /// </summary>
     public sealed class ContainerConfiguration
     {
@@ -19,11 +20,11 @@ namespace AV.Core.Common
         internal const string ScanAllPmts = "scan_all_pmts";
 
         /// <summary>
-        /// Initialises a new instance of the <see cref="ContainerConfiguration"/> class.
+        /// Initialises a new instance of the
+        /// <see cref="ContainerConfiguration"/> class.
         /// </summary>
         internal ContainerConfiguration()
         {
-            // placeholder
         }
 
         /// <summary>
@@ -40,7 +41,7 @@ namespace AV.Core.Common
 
         /// <summary>
         /// Gets or sets the amount of time to wait for a an open or read
-        /// operation to complete before it times out. It is 10 seconds by default.
+        /// operation to complete before it times out. 10 seconds, by default.
         /// </summary>
         public TimeSpan ReadTimeout { get; set; } = TimeSpan.FromSeconds(10);
 

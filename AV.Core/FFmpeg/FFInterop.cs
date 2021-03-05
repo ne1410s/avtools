@@ -88,12 +88,15 @@ namespace FFmpeg.AutoGen
         /// This method is thread-safe.
         /// </summary>
         /// <param name="overridePath">The override path.</param>
-        /// <param name="libIdentifiers">The bit-wise flag identifiers corresponding to the libraries.</param>
+        /// <param name="libIdentifiers">The bit-wise flag identifiers
+        /// corresponding to the libraries.</param>
         /// <returns>
-        /// Returns true if it was a new initialization and it succeeded. False if there was no need to initialize
-        /// as there is already a valid initialization.
+        /// Returns true if it was a new initialization and it succeeded. False
+        /// if there was no need to initialize as there is already a valid
+        /// initialization.
         /// </returns>
-        /// <exception cref="FileNotFoundException">When ffmpeg libraries are not found.</exception>
+        /// <exception cref="FileNotFoundException">When ffmpeg libraries are
+        /// not found.</exception>
         public static bool Initialize(string overridePath, int libIdentifiers)
         {
             lock (SyncLock)
@@ -157,7 +160,8 @@ namespace FFmpeg.AutoGen
         }
 
         /// <summary>
-        /// Copies the contents of a managed string to an unmanaged, UTF8 encoded string.
+        /// Copies the contents of a managed string to an unmanaged, UTF8
+        /// encoded string.
         /// </summary>
         /// <param name="source">The string to copy.</param>
         /// <returns>A pointer to a string in unmanaged memory.</returns>

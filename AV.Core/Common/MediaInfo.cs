@@ -11,7 +11,8 @@ namespace AV.Core.Common
     using FFmpeg.AutoGen;
 
     /// <summary>
-    /// Holds media information about the input, its chapters, programs and individual stream components.
+    /// Holds media information about the input, its chapters, programs and
+    /// individual stream components.
     /// </summary>
     public unsafe class MediaInfo
     {
@@ -21,8 +22,9 @@ namespace AV.Core.Common
         /// <param name="container">The container.</param>
         internal MediaInfo(MediaContainer container)
         {
-            // The below logic was implemented using the same ideas conveyed by the following code:
-            // Reference: https://ffmpeg.org/doxygen/3.2/dump_8c_source.html --
+            // The below logic was implemented using the same ideas conveyed by
+            // the following code:
+            // Reference: https://ffmpeg.org/doxygen/3.2/dump_8c_source.html
             var ic = container.InputContext;
             this.MediaSource = container.MediaSource;
             this.Format = Utilities.PtrToStringUTF8(ic->iformat->name);
@@ -30,15 +32,12 @@ namespace AV.Core.Common
             this.StartTime = ic->start_time != ffmpeg.AV_NOPTS_VALUE ? ic->start_time.ToTimeSpan() : TimeSpan.MinValue;
             this.Duration = ic->duration != ffmpeg.AV_NOPTS_VALUE ? ic->duration.ToTimeSpan() : TimeSpan.MinValue;
             this.BitRate = ic->bit_rate < 0 ? 0 : ic->bit_rate;
-
             this.Streams = ExtractStreams(ic).ToDictionary(k => k.StreamIndex, v => v);
-            this.Chapters = ExtractChapters(ic);
-            this.Programs = ExtractPrograms(ic, this.Streams);
             this.BestStreams = FindBestStreams(ic, this.Streams);
         }
 
         /// <summary>
-        /// Gets the input URL string used to access and create the media container.
+        /// Gets the input URL used to access and create the media container.
         /// </summary>
         public string MediaSource { get; }
 
@@ -48,22 +47,23 @@ namespace AV.Core.Common
         public string Format { get; }
 
         /// <summary>
-        /// Gets the metadata for the input. This may include stuff like title, creation date, company name, etc.
-        /// Individual stream components, chapters and programs may contain additional metadata.
+        /// Gets the metadata for the input. This may include stuff like title,
+        /// creation date, company name, etc. Individual stream components,
+        /// chapters and programs may contain additional metadata.
         /// </summary>
         public IReadOnlyDictionary<string, string> Metadata { get; }
 
         /// <summary>
         /// Gets the duration of the input as reported by the container format.
-        /// Individual stream components may have different values.
-        /// Returns TimeSpan.MinValue if unknown.
+        /// Individual stream components may have different values. Returns
+        /// TimeSpan.MinValue if unknown.
         /// </summary>
         public TimeSpan Duration { get; }
 
         /// <summary>
-        /// Gets the start timestamp of the input as reported by the container format.
-        /// Individual stream components may have different values.
-        /// Returns TimeSpan.MinValue if unknown.
+        /// Gets the start of the input as reported by the container format.
+        /// Individual stream components may have different values. Returns
+        /// TimeSpan.MinValue if unknown.
         /// </summary>
         public TimeSpan StartTime { get; }
 
@@ -73,23 +73,13 @@ namespace AV.Core.Common
         public long BitRate { get; }
 
         /// <summary>
-        /// Gets a list of chapters.
-        /// </summary>
-        public IReadOnlyList<ChapterInfo> Chapters { get; }
-
-        /// <summary>
-        /// Gets a list of programs with their associated streams.
-        /// </summary>
-        public IReadOnlyList<ProgramInfo> Programs { get; }
-
-        /// <summary>
-        /// Gets the dictionary of stream information components by stream index.
+        /// Gets the dictionary of stream info components by stream index.
         /// </summary>
         public IReadOnlyDictionary<int, StreamInfo> Streams { get; }
 
         /// <summary>
-        /// Gets access to the best streams of each media type found in the container.
-        /// This uses some internal FFmpeg heuristics.
+        /// Gets access to the best streams of each media type found in the
+        /// container. This uses some internal FFmpeg heuristics.
         /// </summary>
         public IReadOnlyDictionary<AVMediaType, StreamInfo> BestStreams { get; }
 
@@ -168,9 +158,6 @@ namespace AV.Core.Common
                 stream.HardwareDevices = HardwareAccelerator.GetCompatibleDevices(stream.Codec);
                 stream.HardwareDecoders = GetHardwareDecoders(stream.Codec);
 
-                // TODO: I chose not to include Side data but I could easily do so
-                // https://ffmpeg.org/doxygen/3.2/dump_8c_source.html
-                // See function: dump_sidedata
                 ffmpeg.avcodec_free_context(&codecContext);
 
                 result.Add(stream);
@@ -185,7 +172,9 @@ namespace AV.Core.Common
         /// <param name="ic">The ic.</param>
         /// <param name="streams">The streams.</param>
         /// <returns>The star infos.</returns>
-        private static Dictionary<AVMediaType, StreamInfo> FindBestStreams(AVFormatContext* ic, IReadOnlyDictionary<int, StreamInfo> streams)
+        private static Dictionary<AVMediaType, StreamInfo> FindBestStreams(
+            AVFormatContext* ic,
+            IReadOnlyDictionary<int, StreamInfo> streams)
         {
             // Initialize and clear all the stream indexes.
             var streamIndexes = new Dictionary<AVMediaType, int>();
@@ -195,9 +184,9 @@ namespace AV.Core.Common
                 streamIndexes[(AVMediaType)i] = -1;
             }
 
-            // Find best streams for each component
-            // if we passed null instead of the requestedCodec pointer, then
-            // find_best_stream would not validate whether a valid decoder is registered.
+            // Find best streams for each component. If we passed null instead
+            // of the requestedCodec pointer, then find_best_stream would not
+            // validate whether a valid decoder is registered.
             AVCodec* requestedCodec = null;
 
             streamIndexes[AVMediaType.AVMEDIA_TYPE_VIDEO] =
@@ -218,17 +207,6 @@ namespace AV.Core.Common
                     &requestedCodec,
                     0);
 
-            streamIndexes[AVMediaType.AVMEDIA_TYPE_SUBTITLE] =
-                ffmpeg.av_find_best_stream(
-                    ic,
-                    AVMediaType.AVMEDIA_TYPE_SUBTITLE,
-                    streamIndexes[AVMediaType.AVMEDIA_TYPE_SUBTITLE],
-                    streamIndexes[AVMediaType.AVMEDIA_TYPE_AUDIO] >= 0 ?
-                        streamIndexes[AVMediaType.AVMEDIA_TYPE_AUDIO] :
-                        streamIndexes[AVMediaType.AVMEDIA_TYPE_VIDEO],
-                    &requestedCodec,
-                    0);
-
             var result = new Dictionary<AVMediaType, StreamInfo>();
             foreach (var kvp in streamIndexes.Where(n => n.Value >= 0))
             {
@@ -239,82 +217,7 @@ namespace AV.Core.Common
         }
 
         /// <summary>
-        /// Extracts the chapters from the input.
-        /// </summary>
-        /// <param name="ic">The ic.</param>
-        /// <returns>The chapters.</returns>
-        private static List<ChapterInfo> ExtractChapters(AVFormatContext* ic)
-        {
-            var result = new List<ChapterInfo>(128);
-            if (ic->chapters == null)
-            {
-                return result;
-            }
-
-            for (var i = 0; i < ic->nb_chapters; i++)
-            {
-                var c = ic->chapters[i];
-
-                var chapter = new ChapterInfo
-                {
-                    StartTime = c->start.ToTimeSpan(c->time_base),
-                    EndTime = c->end.ToTimeSpan(c->time_base),
-                    Index = i,
-                    ChapterId = c->id,
-                    Metadata = FFDictionary.ToDictionary(c->metadata),
-                };
-
-                result.Add(chapter);
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Extracts the programs from the input and creates associations between programs and streams.
-        /// </summary>
-        /// <param name="ic">The ic.</param>
-        /// <param name="streams">The streams.</param>
-        /// <returns>The program information.</returns>
-        private static List<ProgramInfo> ExtractPrograms(AVFormatContext* ic, IReadOnlyDictionary<int, StreamInfo> streams)
-        {
-            var result = new List<ProgramInfo>(128);
-            if (ic->programs == null)
-            {
-                return result;
-            }
-
-            for (var i = 0; i < ic->nb_programs; i++)
-            {
-                var p = ic->programs[i];
-
-                var program = new ProgramInfo
-                {
-                    Metadata = FFDictionary.ToDictionary(p->metadata),
-                    ProgramId = p->id,
-                    ProgramNumber = p->program_num,
-                };
-
-                var associatedStreams = new List<StreamInfo>(32);
-                for (var s = 0; s < p->nb_stream_indexes; s++)
-                {
-                    var streamIndex = Convert.ToInt32(p->stream_index[s]);
-                    if (streams.ContainsKey(streamIndex))
-                    {
-                        associatedStreams.Add(streams[streamIndex]);
-                    }
-                }
-
-                program.Streams = associatedStreams;
-
-                result.Add(program);
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Gets the available hardware decoder codecs for the given codec id (codec family).
+        /// Gets the available hardware decoder codecs for the given codec id.
         /// </summary>
         /// <param name="codecFamily">The codec family.</param>
         /// <returns>A list of hardware-enabled decoder codec names.</returns>
@@ -343,275 +246,5 @@ namespace AV.Core.Common
 
             return result;
         }
-    }
-
-    /// <summary>
-    /// Represents media stream information.
-    /// </summary>
-    public class StreamInfo
-    {
-        /// <summary>
-        /// Gets the stream identifier. This is different from the stream index.
-        /// Typically this value is not very useful.
-        /// </summary>
-        public int StreamId { get; internal set; }
-
-        /// <summary>
-        /// Gets the index of the stream.
-        /// </summary>
-        public int StreamIndex { get; internal set; }
-
-        /// <summary>
-        /// Gets the type of the codec.
-        /// </summary>
-        public AVMediaType CodecType { get; internal set; }
-
-        /// <summary>
-        /// Gets the name of the codec type. Audio, Video, Subtitle, Data, etc.
-        /// </summary>
-        public string CodecTypeName { get; internal set; }
-
-        /// <summary>
-        /// Gets the codec identifier.
-        /// </summary>
-        public AVCodecID Codec { get; internal set; }
-
-        /// <summary>
-        /// Gets the name of the codec.
-        /// </summary>
-        public string CodecName { get; internal set; }
-
-        /// <summary>
-        /// Gets the codec profile. Only valid for H.264 or
-        /// video codecs that use profiles. Otherwise empty.
-        /// </summary>
-        public string CodecProfile { get; internal set; }
-
-        /// <summary>
-        /// Gets the codec tag. Not very useful except for fixing bugs with
-        /// some demuxer scenarios.
-        /// </summary>
-        public uint CodecTag { get; internal set; }
-
-        /// <summary>
-        /// Gets a value indicating whether this stream has closed captions.
-        /// Typically this is set for video streams.
-        /// </summary>
-        public bool HasClosedCaptions { get; internal set; }
-
-        /// <summary>
-        /// Gets a value indicating whether this stream contains lossless compressed data.
-        /// </summary>
-        public bool IsLossless { get; internal set; }
-
-        /// <summary>
-        /// Gets the pixel format. Only valid for Video streams.
-        /// </summary>
-        public AVPixelFormat PixelFormat { get; internal set; }
-
-        /// <summary>
-        /// Gets the width of the video frames.
-        /// </summary>
-        public int PixelWidth { get; internal set; }
-
-        /// <summary>
-        /// Gets the height of the video frames.
-        /// </summary>
-        public int PixelHeight { get; internal set; }
-
-        /// <summary>
-        /// Gets the field order. This is useful to determine
-        /// if the video needs de-interlacing.
-        /// </summary>
-        public AVFieldOrder FieldOrder { get; internal set; }
-
-        /// <summary>
-        /// Gets a value indicating whether the video frames are interlaced.
-        /// </summary>
-        public bool IsInterlaced { get; internal set; }
-
-        /// <summary>
-        /// Gets the video color range.
-        /// </summary>
-        public AVColorRange ColorRange { get; internal set; }
-
-        /// <summary>
-        /// Gets the number of audio channels.
-        /// </summary>
-        public int Channels { get; internal set; }
-
-        /// <summary>
-        /// Gets the audio sample rate.
-        /// </summary>
-        public int SampleRate { get; internal set; }
-
-        /// <summary>
-        /// Gets the audio sample format.
-        /// </summary>
-        public AVSampleFormat SampleFormat { get; internal set; }
-
-        /// <summary>
-        /// Gets the stream time base unit in seconds.
-        /// </summary>
-        public AVRational TimeBase { get; internal set; }
-
-        /// <summary>
-        /// Gets the sample aspect ratio.
-        /// </summary>
-        public AVRational SampleAspectRatio { get; internal set; }
-
-        /// <summary>
-        /// Gets the display aspect ratio.
-        /// </summary>
-        public AVRational DisplayAspectRatio { get; internal set; }
-
-        /// <summary>
-        /// Gets the reported bit rate. 9 for unavailable.
-        /// </summary>
-        public long BitRate { get; internal set; }
-
-        /// <summary>
-        /// Gets the maximum bit rate for variable bit rate streams. 0 if unavailable.
-        /// </summary>
-        public long MaxBitRate { get; internal set; }
-
-        /// <summary>
-        /// Gets the number of frames that were read to obtain the stream's information.
-        /// </summary>
-        public int InfoFrameCount { get; internal set; }
-
-        /// <summary>
-        /// Gets the number of reference frames.
-        /// </summary>
-        public int ReferenceFrameCount { get; internal set; }
-
-        /// <summary>
-        /// Gets the average FPS reported by the stream.
-        /// </summary>
-        public double FPS { get; internal set; }
-
-        /// <summary>
-        /// Gets the real (base) frame rate of the stream.
-        /// </summary>
-        public double TBR { get; internal set; }
-
-        /// <summary>
-        /// Gets the fundamental unit of time in 1/seconds used to represent timestamps in the stream, according to the stream data.
-        /// </summary>
-        public double TBN { get; internal set; }
-
-        /// <summary>
-        /// Gets the fundamental unit of time in 1/seconds used to represent timestamps in the stream ,according to the codec.
-        /// </summary>
-        public double TBC { get; internal set; }
-
-        /// <summary>
-        /// Gets the disposition flags.
-        /// Please see ffmpeg.AV_DISPOSITION_* fields.
-        /// </summary>
-        public int Disposition { get; internal set; }
-
-        /// <summary>
-        /// Gets the start time.
-        /// </summary>
-        public TimeSpan StartTime { get; internal set; }
-
-        /// <summary>
-        /// Gets the duration.
-        /// </summary>
-        public TimeSpan Duration { get; internal set; }
-
-        /// <summary>
-        /// Gets the stream's metadata.
-        /// </summary>
-        public IReadOnlyDictionary<string, string> Metadata { get; internal set; }
-
-        /// <summary>
-        /// Gets the compatible hardware device configurations for the stream's codec.
-        /// </summary>
-        public IReadOnlyList<HardwareDeviceInfo> HardwareDevices { get; internal set; }
-
-        /// <summary>
-        /// Gets a list of compatible hardware decoder names.
-        /// </summary>
-        public IReadOnlyList<string> HardwareDecoders { get; internal set; }
-
-        /// <summary>
-        /// Gets the language string from the stream's metadata.
-        /// </summary>
-        public string Language => this.Metadata.ContainsKey("language") ?
-            this.Metadata["language"] : string.Empty;
-
-        /// <summary>
-        /// Gets a value indicating whether the stream contains data that is not considered to be
-        /// audio, video, or subtitles.
-        /// </summary>
-        public bool IsNonMedia =>
-            this.CodecType == AVMediaType.AVMEDIA_TYPE_DATA ||
-            this.CodecType == AVMediaType.AVMEDIA_TYPE_ATTACHMENT ||
-            this.CodecType == AVMediaType.AVMEDIA_TYPE_UNKNOWN;
-    }
-
-    /// <summary>
-    /// Represents a chapter within a container.
-    /// </summary>
-    public class ChapterInfo
-    {
-        /// <summary>
-        /// Gets the chapter index.
-        /// </summary>
-        public int Index { get; internal set; }
-
-        /// <summary>
-        /// Gets the chapter identifier.
-        /// </summary>
-        public int ChapterId { get; internal set; }
-
-        /// <summary>
-        /// Gets the start time of the chapter.
-        /// </summary>
-        public TimeSpan StartTime { get; internal set; }
-
-        /// <summary>
-        /// Gets the end time of the chapter.
-        /// </summary>
-        public TimeSpan EndTime { get; internal set; }
-
-        /// <summary>
-        /// Gets the chapter metadata.
-        /// </summary>
-        public IReadOnlyDictionary<string, string> Metadata { get; internal set; }
-    }
-
-    /// <summary>
-    /// Represents a program and its associated streams within a container.
-    /// </summary>
-    public class ProgramInfo
-    {
-        /// <summary>
-        /// Gets the program number.
-        /// </summary>
-        public int ProgramNumber { get; internal set; }
-
-        /// <summary>
-        /// Gets the program identifier.
-        /// </summary>
-        public int ProgramId { get; internal set; }
-
-        /// <summary>
-        /// Gets the program metadata.
-        /// </summary>
-        public IReadOnlyDictionary<string, string> Metadata { get; internal set; }
-
-        /// <summary>
-        /// Gets the associated program streams.
-        /// </summary>
-        public IReadOnlyList<StreamInfo> Streams { get; internal set; }
-
-        /// <summary>
-        /// Gets the name of the program. Empty if unavailable.
-        /// </summary>
-        public string Name => this.Metadata.ContainsKey("name") ?
-            this.Metadata["name"] : string.Empty;
     }
 }

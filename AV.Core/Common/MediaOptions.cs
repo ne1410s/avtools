@@ -7,8 +7,9 @@ namespace AV.Core.Common
     using System.Collections.Generic;
 
     /// <summary>
-    /// Represents options that applied creating the individual media stream components.
-    /// Once the container has created the media components, changing these options will have no effect.
+    /// Represents options that applied creating the individual media stream
+    /// components. Once the container has created the media components,
+    /// changing these options will have no effect.
     /// See: https://www.ffmpeg.org/ffmpeg-all.html#Main-options
     /// Partly a port of https://github.com/FFmpeg/FFmpeg/blob/master/fftools/ffmpeg_opt.c.
     /// </summary>
@@ -35,32 +36,33 @@ namespace AV.Core.Common
         public Dictionary<int, string> DecoderCodec { get; } = new Dictionary<int, string>(32);
 
         /// <summary>
-        /// Use Stream's HardwareDevices property to get a list of
+        /// Gets or sets stream's HardwareDevices property to get a list of
         /// compatible hardware accelerators.
         /// </summary>
         public HardwareDeviceInfo VideoHardwareDevice { get; set; }
 
         /// <summary>
-        /// Allows for a custom video filter string.
+        /// Gets or sets a custom video filter string.
         /// Please see: https://ffmpeg.org/ffmpeg-filters.html#Video-Filters.
         /// </summary>
         public string VideoFilter { get; set; } = string.Empty;
 
         /// <summary>
-        /// Specifies a forced FPS value for the input video stream.
+        /// Gets or sets a forced FPS value for the input video stream.
         /// </summary>
         public double VideoForcedFps { get; set; }
 
         /// <summary>
-        /// Initially contains the best suitable video stream.
+        /// Gets or sets the best suitable video stream.
         /// Can be changed to a different stream reference.
         /// </summary>
         public StreamInfo VideoStream { get; set; }
 
         /// <summary>
-        /// Only recommended for live streams. Gets or sets a value indicating whether each component needs to run
-        /// its timing independently. This property is useful when for example when
-        /// the audio and the video components of the stream have no timing relationship or when you don't need the
+        /// Gets or sets a value indicating whether (for live streams) each
+        /// component needs to run its timing independently. This property is
+        /// useful when for example when the audio and the video components of
+        /// the stream have no timing relationship or when you don't need the
         /// components to be synchronized between them.
         /// </summary>
         public bool IsTimeSyncDisabled { get; set; }

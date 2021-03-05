@@ -9,7 +9,7 @@ namespace AV.Core.Container
 
     /// <inheritdoc />
     /// <summary>
-    /// A pre-allocated, scaled video block. The buffer is in BGR, 24-bit format.
+    /// A pre-allocated, scaled video block. The buffer is BGR, 24-bit format.
     /// </summary>
     public sealed class VideoBlock : MediaBlock
     {
@@ -50,19 +50,21 @@ namespace AV.Core.Container
         public string SmtpeTimeCode { get; internal set; }
 
         /// <summary>
-        /// Gets a value indicating whether this frame was decoded in a hardware context.
+        /// Gets a value indicating whether this frame was decoded in a hardware
+        /// context.
         /// </summary>
         public bool IsHardwareFrame { get; internal set; }
 
         /// <summary>
-        /// Gets the name of the hardware decoder if the frame was decoded in a hardware context.
+        /// Gets the name of the hardware decoder if the frame was decoded in a
+        /// hardware context.
         /// </summary>
         public string HardwareAcceleratorName { get; internal set; }
 
         /// <summary>
         /// Gets the display picture number (frame number).
-        /// If not set by the decoder, this attempts to obtain it by dividing the start time by the
-        /// frame duration.
+        /// If not set by the decoder, this attempts to obtain it by dividing
+        /// the start time by the frame duration.
         /// </summary>
         public long DisplayPictureNumber { get; internal set; }
 
@@ -91,8 +93,9 @@ namespace AV.Core.Container
         internal unsafe bool Allocate(VideoFrame source, AVPixelFormat pixelFormat)
         {
             // Ensure proper allocation of the buffer
-            // If there is a size mismatch between the wanted buffer length and the existing one,
-            // then let's reallocate the buffer and set the new size (dispose of the existing one if any)
+            // If there is a size mismatch between the wanted buffer length and
+            // the existing one, then let's reallocate the buffer and set the
+            // new size (dispose of the existing one if any)
             var targetLength = ffmpeg.av_image_get_buffer_size(pixelFormat, source.Pointer->width, source.Pointer->height, 1);
             if (!this.Allocate(targetLength))
             {

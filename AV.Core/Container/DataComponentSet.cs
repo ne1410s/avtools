@@ -20,18 +20,22 @@ namespace AV.Core.Container
         /// </summary>
         /// <param name="dataPacket">The data packet.</param>
         /// <param name="stream">The stream.</param>
-        public delegate void OnDataPacketReceivedDelegate(MediaPacket dataPacket, StreamInfo stream);
+        public delegate void OnDataPacketReceivedDelegate(
+            MediaPacket dataPacket,
+            StreamInfo stream);
 
         /// <summary>
-        /// Gets or sets a method that gets called when a data packet is received from the input stream.
+        /// Gets or sets a method that gets called when a data packet is
+        /// received from the input stream.
         /// </summary>
         public OnDataPacketReceivedDelegate OnDataPacketReceived { get; set; }
 
         /// <summary>
-        /// Tries to handle processing of a data packet. If the packet is in fact a data packet, it is
-        /// automatically disposed after executing the appropriate callbacks and returns true.
-        /// If the packet is not a data packet, this method returns false and does not dispose of the
-        /// packet so that the media component set tries to handle it.
+        /// Tries to handle processing of a data packet. If the packet is in
+        /// fact a data packet, it is automatically disposed after executing the
+        /// appropriate callbacks and returns true. If the packet is not a data
+        /// packet, this method returns false and does not dispose of the packet
+        /// so that the media component set tries to handle it.
         /// </summary>
         /// <param name="container">The container.</param>
         /// <param name="packet">The packet.</param>

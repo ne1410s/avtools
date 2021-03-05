@@ -25,7 +25,8 @@ namespace FFmpeg.AutoGen
         /// </summary>
         static FFLibrary()
         {
-            // Populate libraries in order of dependency (from least dependent to more dependent)
+            // Populate libraries in order of dependency (from least dependent
+            // to more dependent)
             All = new List<FFLibrary>(16)
             {
                 LibAVUtil,
@@ -138,7 +139,8 @@ namespace FFmpeg.AutoGen
         /// </summary>
         /// <param name="basePath">The base path.</param>
         /// <returns>True if the registration was successful.</returns>
-        /// <exception cref="InvalidOperationException">When library has already been loaded.</exception>
+        /// <exception cref="InvalidOperationException">When library has already
+        /// been loaded.</exception>
         public bool Load(string basePath)
         {
             lock (LoadLock)

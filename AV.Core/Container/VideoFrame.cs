@@ -33,8 +33,8 @@ namespace AV.Core.Container
                 repeatFactor.ToTimeSpan(frameTimeBase) :
                 Convert.ToInt64(repeatFactor * frame->pkt_duration).ToTimeSpan(this.StreamTimeBase);
 
-            // for video frames, we always get the best effort timestamp as dts and pts might
-            // contain different times.
+            // for video frames, we always get the best effort timestamp as dts
+            // and pts might contain different times.
             frame->pts = frame->best_effort_timestamp;
             var previousFramePts = component.LastFramePts;
             component.LastFramePts = frame->pts;
@@ -68,8 +68,8 @@ namespace AV.Core.Container
 
         /// <summary>
         /// Gets the display picture number (frame number).
-        /// If not set by the decoder, this attempts to obtain it by dividing the start time by the
-        /// frame duration.
+        /// If not set by the decoder, this attempts to obtain it by dividing
+        /// the start time by the frame duration.
         /// </summary>
         public long DisplayPictureNumber { get; }
 
@@ -89,12 +89,14 @@ namespace AV.Core.Container
         public string SmtpeTimeCode { get; }
 
         /// <summary>
-        /// Gets a value indicating whether this frame was decoded in a hardware context.
+        /// Gets a value indicating whether this frame was decoded in a hardware
+        /// context.
         /// </summary>
         public bool IsHardwareFrame { get; }
 
         /// <summary>
-        /// Gets the name of the hardware decoder if the frame was decoded in a hardware context.
+        /// Gets the name of the hardware decoder if the frame was decoded in a
+        /// hardware context.
         /// </summary>
         public string HardwareAcceleratorName { get; }
 

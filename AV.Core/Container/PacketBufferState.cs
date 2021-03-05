@@ -22,7 +22,8 @@ namespace AV.Core.Container
         public int Count;
 
         /// <summary>
-        /// The minimum number of packets so <see cref="HasEnoughPackets"/> is set to true.
+        /// The minimum number of packets so <see cref="HasEnoughPackets"/> is
+        /// set to true.
         /// </summary>
         public int CountThreshold;
 
@@ -32,7 +33,8 @@ namespace AV.Core.Container
         public bool HasEnoughPackets;
 
         /// <summary>
-        /// The duration of the packets. An invalid value will return <see cref="TimeSpan.MinValue"/>.
+        /// The duration of the packets. An invalid value will return
+        /// <see cref="TimeSpan.MinValue"/>.
         /// </summary>
         public TimeSpan Duration;
 

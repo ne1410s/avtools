@@ -12,7 +12,8 @@ namespace AV.Core.Common
     public sealed unsafe class HardwareDeviceInfo
     {
         /// <summary>
-        /// Initialises a new instance of the <see cref="HardwareDeviceInfo"/> class.
+        /// Initialises a new instance of the <see cref="HardwareDeviceInfo"/>
+        /// class.
         /// </summary>
         /// <param name="config">The source configuration.</param>
         internal HardwareDeviceInfo(AVCodecHWConfig* config)

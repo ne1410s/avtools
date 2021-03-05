@@ -249,9 +249,6 @@ namespace AV.Core.Container
             this.CodecId = CodecContext->codec_id;
             this.BitRate = CodecContext->bit_rate < 0 ? 0 : CodecContext->bit_rate;
 
-            //TODO: Debug
-            ////$"{this.MediaType.ToString().ToUpperInvariant()} - Start Time: {this.StartTime.Format()}; Duration: {this.Duration.Format()}");
-
             // Begin processing with a flush packet
             this.SendFlushPacket();
         }
@@ -332,7 +329,7 @@ namespace AV.Core.Container
         public TimeSpan BufferDurationThreshold { get; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the packet queue contains enough packets.
+        /// Gets a value indicating whether the packet queue contains enough packets.
         /// Port of ffplay.c stream_has_enough_packets.
         /// </summary>
         public bool HasEnoughPackets
@@ -384,7 +381,8 @@ namespace AV.Core.Container
         public bool IsStillPictures { get; }
 
         /// <summary>
-        /// Gets whether packets have been fed into the codec and frames can be decoded.
+        /// Gets a value indicating whether packets have been fed into the codec
+        /// and frames can be decoded.
         /// </summary>
         public bool HasPacketsInCodec
         {

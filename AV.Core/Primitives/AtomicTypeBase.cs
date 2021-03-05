@@ -11,14 +11,15 @@ namespace AV.Core.Primitives
     /// <summary>
     /// Provides a generic implementation of an Atomic (interlocked) type.
     /// </summary>
-    /// <typeparam name="T">The structure type backed by a 64-bit value.</typeparam>
+    /// <typeparam name="T">The structure backed by a 64-bit value.</typeparam>
     internal abstract class AtomicTypeBase<T> : IComparable, IComparable<T>, IComparable<AtomicTypeBase<T>>, IEquatable<T>, IEquatable<AtomicTypeBase<T>>
         where T : struct, IComparable, IComparable<T>, IEquatable<T>
     {
         private long backingValue;
 
         /// <summary>
-        /// Initialises a new instance of the <see cref="AtomicTypeBase{T}"/> class.
+        /// Initialises a new instance of the <see cref="AtomicTypeBase{T}"/>
+        /// class.
         /// </summary>
         /// <param name="initialValue">The initial value.</param>
         protected AtomicTypeBase(long initialValue)

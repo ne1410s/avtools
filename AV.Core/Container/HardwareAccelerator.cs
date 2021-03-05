@@ -15,11 +15,14 @@ namespace AV.Core.Container
     public sealed unsafe class HardwareAccelerator
     {
         /// <summary>
-        /// Initialises a new instance of the <see cref="HardwareAccelerator"/> class.
+        /// Initialises a new instance of the <see cref="HardwareAccelerator"/>
+        /// class.
         /// </summary>
-        /// <param name="component">The component this accelerator is attached to.</param>
-        /// <param name="selectedConfig">The selected hardware device configuration.</param>
-        public HardwareAccelerator(VideoComponent component, HardwareDeviceInfo selectedConfig)
+        /// <param name="component">The component of the accelerator.</param>
+        /// <param name="selectedConfig">The hardware configuration.</param>
+        public HardwareAccelerator(
+            VideoComponent component,
+            HardwareDeviceInfo selectedConfig)
         {
             this.Component = component;
             this.Name = selectedConfig.DeviceTypeName;
@@ -94,17 +97,23 @@ namespace AV.Core.Container
         }
 
         /// <summary>
-        /// Downloads the frame from the hardware into a software frame if possible.
-        /// The input hardware frame gets freed and the return value will point to the new software frame.
+        /// Downloads the frame from the hardware into a software frame if
+        /// possible. The input hardware frame gets freed and the return value
+        /// will point to the new software frame.
         /// </summary>
         /// <param name="codecContext">The codec context.</param>
-        /// <param name="input">The input frame coming from the decoder (may or may not be hardware).</param>
-        /// <param name="isHardwareFrame">if set to <c>true</c> [comes from hardware] otherwise, hardware decoding was not performed.</param>
+        /// <param name="input">The input frame coming from the decoder (may or
+        /// may not be hardware).</param>
+        /// <param name="isHardwareFrame">if set to <c>true</c> [comes from
+        /// hardware] otherwise, hardware decoding was not performed.</param>
         /// <returns>
         /// The frame downloaded from the device into RAM.
         /// </returns>
-        /// <exception cref="Exception">Failed to transfer data to output frame.</exception>
-        public AVFrame* ExchangeFrame(AVCodecContext* codecContext, AVFrame* input, out bool isHardwareFrame)
+        /// <exception cref="Exception">Frame data transfer.</exception>
+        public AVFrame* ExchangeFrame(
+            AVCodecContext* codecContext,
+            AVFrame* input,
+            out bool isHardwareFrame)
         {
             isHardwareFrame = false;
 
@@ -141,8 +150,10 @@ namespace AV.Core.Container
         /// </summary>
         /// <param name="context">The codec context.</param>
         /// <param name="pixelFormats">The pixel formats.</param>
-        /// <returns>The real pixel format that the codec will be using.</returns>
-        private AVPixelFormat GetPixelFormat(AVCodecContext* context, AVPixelFormat* pixelFormats)
+        /// <returns>The pixel format that the codec will be using.</returns>
+        private AVPixelFormat GetPixelFormat(
+            AVCodecContext* context,
+            AVPixelFormat* pixelFormats)
         {
             // The default output is the first pixel format found.
             var output = *pixelFormats;

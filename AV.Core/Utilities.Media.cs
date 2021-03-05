@@ -5,7 +5,6 @@
 namespace AV.Core
 {
     using System;
-    using System.Collections.Generic;
     using System.Runtime.CompilerServices;
     using System.Runtime.InteropServices;
     using FFmpeg.AutoGen;
@@ -20,7 +19,7 @@ namespace AV.Core
         /// </summary>
         /// <param name="streamStartTime">The Stream Start time.</param>
         /// <param name="pictureStartTime">The picture Start Time.</param>
-        /// <param name="frameRate">The stream's average framerate (not time base).</param>
+        /// <param name="frameRate">Average framerate (not time base).</param>
         /// <returns>
         /// The serial picture number.
         /// </returns>
