@@ -1,16 +1,16 @@
-﻿// <copyright file="ThumbnailData.cs" company="ne1410s">
+﻿// <copyright file="ImageFrameInfo.cs" company="ne1410s">
 // Copyright (c) ne1410s. All rights reserved.
 // </copyright>
 
 namespace AV.Extensions
 {
-    using System;
     using System.Drawing;
+    using AV.Core.Common;
 
     /// <summary>
-    /// Thumbnail data.
+    /// Image frame info.
     /// </summary>
-    public record ThumbnailData
+    public class ImageFrameInfo : FrameInfo
     {
         /// <summary>
         /// Gets the frame number.
@@ -21,10 +21,5 @@ namespace AV.Extensions
         /// Gets the image.
         /// </summary>
         public Bitmap Image { get; init; }
-
-        /// <summary>
-        /// Gets the timestamp.
-        /// </summary>
-        public TimeSpan TimeStamp { get; init; }
     }
 }

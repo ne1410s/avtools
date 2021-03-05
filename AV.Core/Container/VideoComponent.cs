@@ -142,11 +142,6 @@ namespace AV.Core.Container
         public bool IsUsingHardwareDecoding { get; private set; }
 
         /// <summary>
-        /// Gets the video seek index for this component.
-        /// </summary>
-        public List<VideoSeekIndexEntry> SeekIndex { get; } = new ();
-
-        /// <summary>
         /// Gets access to the VideoFilter string of the container's MediaOptions.
         /// </summary>
         private string FilterString => this.Container?.MediaOptions?.VideoFilter;

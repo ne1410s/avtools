@@ -14,26 +14,6 @@ namespace AV.Core
     public static partial class Utilities
     {
         /// <summary>
-        /// Returns a formatted string, dividing by the specified
-        /// factor. Useful for debugging longs with byte positions or sizes.
-        /// </summary>
-        /// <param name="ts">The timestamp.</param>
-        /// <param name="divideBy">The divide by.</param>
-        /// <returns>The formatted string.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static string Format(this long ts, double divideBy) =>
-            Math.Abs(divideBy - 1d) <= double.Epsilon ? $"{ts,10:#,##0}" : $"{ts / divideBy,10:#,##0.000}";
-
-        /// <summary>
-        /// Returns a formatted string.
-        /// Useful for debugging longs with byte positions or sizes.
-        /// </summary>
-        /// <param name="ts">The timestamp.</param>
-        /// <returns>The formatted string.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static string Format(this long ts) => Format(ts, 1);
-
-        /// <summary>
         /// Gets a timespan given a timestamp and a timebase.
         /// </summary>
         /// <param name="pts">The PTS.</param>

@@ -2,21 +2,23 @@
 // Copyright (c) ne1410s. All rights reserved.
 // </copyright>
 
-namespace AV.Extensions
+namespace AV.Core.Common
 {
+    using System;
+
     /// <summary>
-    /// Frame info.
+    /// Frame information.
     /// </summary>
     public class FrameInfo
     {
         /// <summary>
         /// Gets the start time of the frame.
         /// </summary>
-        public long StartTimeTicks { get; }
+        public TimeSpan StartTime { get; init; }
 
         /// <summary>
         /// Gets the original, unadjusted presentation time.
         /// </summary>
-        public long PresentationTime { get; }
+        public long PresentationTime { get; init; }
     }
 }

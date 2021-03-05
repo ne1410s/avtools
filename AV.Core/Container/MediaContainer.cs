@@ -1094,9 +1094,7 @@ namespace AV.Core.Container
         /// Seeks to the closest and lesser or equal key frame on the main component.
         /// </summary>
         /// <param name="requestedPosition">The target time.</param>
-        /// <returns>
-        /// The seeked media frame.
-        /// </returns>
+        /// <returns>The seeked media frame.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private MediaFrame StreamSeek(TimeSpan requestedPosition)
         {
@@ -1111,7 +1109,7 @@ namespace AV.Core.Container
             }
 
             // Adjust the requested position
-            if (requestedPosition <= comp.StartTime || requestedPosition <= TimeSpan.Zero)
+            if (requestedPosition < comp.StartTime || requestedPosition < TimeSpan.Zero)
             {
                 return this.StreamSeekToStart();
             }
@@ -1119,18 +1117,6 @@ namespace AV.Core.Container
             if (requestedPosition > comp.EndTime)
             {
                 requestedPosition = comp.EndTime;
-            }
-
-            // Help the initial position seek time.
-            var indexTimestamp = ffmpeg.AV_NOPTS_VALUE;
-            if (comp is VideoComponent videoComponent && videoComponent.SeekIndex.Count > 0)
-            {
-                var entryIndex = videoComponent.SeekIndex.StartIndexOf(requestedPosition);
-                if (entryIndex >= 0)
-                {
-                    var entry = videoComponent.SeekIndex[entryIndex];
-                    indexTimestamp = entry.PresentationTime;
-                }
             }
 
             // Stream seeking by seeking component
@@ -1151,13 +1137,6 @@ namespace AV.Core.Container
             {
                 // Compute the seek target, mostly based on the relative Target Time
                 var seekTimestamp = streamSeekRelativeTime.ToLong(timeBase);
-
-                // If we have an index timestamp, then use it.
-                if (indexTimestamp != ffmpeg.AV_NOPTS_VALUE)
-                {
-                    seekTimestamp = indexTimestamp;
-                    indexTimestamp = ffmpeg.AV_NOPTS_VALUE;
-                }
 
                 // Perform the seek. There is also avformat_seek_file which is the older version of av_seek_frame
                 // Check if we are seeking before the start of the stream in this cycle. If so, simply seek to the
