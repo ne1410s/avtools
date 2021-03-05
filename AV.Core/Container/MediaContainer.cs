@@ -881,16 +881,6 @@ namespace AV.Core.Container
                     System.Convert.ToInt64(opts.MaxAnalyzeDuration.TotalSeconds * ffmpeg.AV_TIME_BASE);
             }
 
-            if (!string.IsNullOrEmpty(opts.CryptoKey))
-            {
-                var keyText = opts.CryptoKey.Trim();
-                var keyBytes = keyText.HexToBytes();
-                var decryptionKey = (byte*)ffmpeg.av_mallocz((ulong)keyBytes.Length);
-                Marshal.Copy(keyBytes, 0, new IntPtr(decryptionKey), keyBytes.Length);
-                InputContext->key = decryptionKey;
-                InputContext->keylen = keyBytes.Length;
-            }
-
             if (!string.IsNullOrWhiteSpace(opts.ProtocolWhitelist))
             {
                 InputContext->protocol_whitelist = FFInterop.StringToBytePointerUTF8(opts.ProtocolWhitelist);
@@ -1103,78 +1093,60 @@ namespace AV.Core.Container
         /// <summary>
         /// Seeks to the closest and lesser or equal key frame on the main component.
         /// </summary>
-        /// <param name="desiredTargetTime">The target time.</param>
+        /// <param name="requestedPosition">The target time.</param>
         /// <returns>
         /// The seeked media frame.
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private MediaFrame StreamSeek(TimeSpan desiredTargetTime)
+        private MediaFrame StreamSeek(TimeSpan requestedPosition)
         {
             // Select the seeking component
             var comp = this.Components.Seekable;
-            if (comp == null)
+            if (comp == null || !this.IsStreamSeekable)
             {
+                //TODO: Warn
+                ////"Unable to seek. Underlying stream does not support seeking.");
+                ///
                 return null;
             }
 
-            MediaFrame frame = null;
-
-            // Stream seeking by seeking component
-            // The backward flag means that we want to seek to at MOST the target position
-            var seekFlags = ffmpeg.AVSEEK_FLAG_BACKWARD;
-            var streamIndex = comp.StreamIndex;
-            var timeBase = comp.Stream->time_base;
-
-            // Compute the absolute maximum 0-based target time which is simply the duration.
-            var maxTargetTimeTicks = comp.EndTime.Ticks;
-            var minTargetTimeTicks = comp.StartTime.Ticks;
-
-            // Adjust 0-based target time and clamp it
-            var targetPosition = TimeSpan.FromTicks(desiredTargetTime.Ticks.Clamp(minTargetTimeTicks, maxTargetTimeTicks));
-
-            // A special kind of seek is the zero seek. Execute it if requested.
-            if (targetPosition.Ticks <= minTargetTimeTicks || desiredTargetTime == TimeSpan.MinValue)
+            // Adjust the requested position
+            if (requestedPosition <= comp.StartTime || requestedPosition <= TimeSpan.Zero)
             {
                 return this.StreamSeekToStart();
             }
 
-            // Cancel the seek operation if the stream does not support it.
-            if (this.IsStreamSeekable == false)
+            if (requestedPosition > comp.EndTime)
             {
-                //TODO: Warn
-                ////"Unable to seek. Underlying stream does not support seeking.");
-
-                return null;
+                requestedPosition = comp.EndTime;
             }
 
-            // Perform the stream seek
-            int seekResult;
-            var startPos = this.StreamPosition;
-
-            // The relative target time keeps track of where to seek.
-            // if the seeking ends up AFTER the target, we decrement this time and try the seek
-            // again by subtracting 1 second from it.
-            var startTime = DateTime.UtcNow;
-            var streamSeekRelativeTime = targetPosition;
-            var indexTimestamp = ffmpeg.AV_NOPTS_VALUE;
-
             // Help the initial position seek time.
+            var indexTimestamp = ffmpeg.AV_NOPTS_VALUE;
             if (comp is VideoComponent videoComponent && videoComponent.SeekIndex.Count > 0)
             {
-                var entryIndex = videoComponent.SeekIndex.StartIndexOf(targetPosition);
+                var entryIndex = videoComponent.SeekIndex.StartIndexOf(requestedPosition);
                 if (entryIndex >= 0)
                 {
                     var entry = videoComponent.SeekIndex[entryIndex];
-
-                    //TODO: Debug
-                    ////$"SEEK IX: Seek index entry {entryIndex} found. Entry Position: {entry.StartTime.Format()} | Target: {targetPosition.Format()}");
                     indexTimestamp = entry.PresentationTime;
                 }
             }
 
+            // Stream seeking by seeking component
+            // The backward flag means that we want to seek to at MOST the target position
+            var timeBase = comp.Stream->time_base;
+
+            // The relative target time keeps track of where to seek.
+            // if the seeking ends up AFTER the target, we decrement this time and try the seek
+            // again by subtracting 1 second from it.
+            var streamSeekRelativeTime = requestedPosition;
+
             // Perform long seeks until we end up with a relative target time where decoding
             // of frames before or on target time is possible.
             var isAtStartOfStream = false;
+            int seekResult;
+            MediaFrame frame = null;
             while (isAtStartOfStream == false)
             {
                 // Compute the seek target, mostly based on the relative Target Time
@@ -1206,10 +1178,7 @@ namespace AV.Core.Container
                         isAtStartOfStream = true;
                     }
 
-                    seekResult = ffmpeg.av_seek_frame(this.InputContext, streamIndex, seekTimestamp, seekFlags);
-
-                    //TODO: Trace
-                    ////$"SEEK L: Elapsed: {startTime.FormatElapsed()} | Target: {streamSeekRelativeTime.Format()} | Seek: {seekTimestamp.Format()} | P0: {startPos.Format(1024)} | P1: {this.StreamPosition.Format(1024)} ");
+                    seekResult = ffmpeg.av_seek_frame(this.InputContext, comp.StreamIndex, seekTimestamp, ffmpeg.AVSEEK_FLAG_BACKWARD);
                 }
 
                 // Flush the buffered packets and codec on every seek.
@@ -1231,7 +1200,7 @@ namespace AV.Core.Container
                 // If we could not read a frame from the main component or
                 // if the first decoded frame is past the target time
                 // try again with a lower relative time.
-                if (frame == null || frame.StartTime.Ticks > targetPosition.Ticks)
+                if (frame == null || frame.StartTime.Ticks > requestedPosition.Ticks)
                 {
                     streamSeekRelativeTime = streamSeekRelativeTime.Subtract(TimeSpan.FromSeconds(1));
                     frame?.Dispose();
@@ -1243,9 +1212,6 @@ namespace AV.Core.Container
                 // prior keyframe to the seek target
                 break;
             }
-
-            //TODO: Trace
-            ////$"SEEK R: Elapsed: {startTime.FormatElapsed()} | Target: {streamSeekRelativeTime.Format()} | Seek: {default(long).Format()} | P0: {startPos.Format(1024)} | P1: {this.StreamPosition.Format(1024)} ");
 
             return frame;
         }
@@ -1261,13 +1227,11 @@ namespace AV.Core.Container
             var seekTarget = main.StartTime == TimeSpan.MinValue
                 ? ffmpeg.AV_NOPTS_VALUE
                 : main.StartTime.ToLong(main.Stream->time_base);
-            var streamIndex = main.StreamIndex;
-            var seekFlags = ffmpeg.AVSEEK_FLAG_BACKWARD;
 
             this.streamReadInterruptStartTime.Value = DateTime.UtcNow;
 
             // Execute the seek to start of main component
-            var seekResult = ffmpeg.av_seek_frame(this.InputContext, streamIndex, seekTarget, seekFlags);
+            var seekResult = ffmpeg.av_seek_frame(this.InputContext, main.StreamIndex, seekTarget, ffmpeg.AVSEEK_FLAG_BACKWARD);
 
             // Flush packets, state, and codec buffers
             this.Components.ClearQueuedPackets(flushBuffers: true);

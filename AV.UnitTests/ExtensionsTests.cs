@@ -20,20 +20,21 @@ namespace AV.UnitTests
         }
 
         [Theory]
-        [InlineData(@"C:\temp\vid-test\1.3gp")]
-        [InlineData(@"C:\temp\vid-test\1.avi")]
-        [InlineData(@"C:\temp\vid-test\1.flv")]
-        [InlineData(@"C:\temp\vid-test\1.m4v")]
-        [InlineData(@"C:\temp\vid-test\1.mkv")]
-        [InlineData(@"C:\temp\vid-test\1.mov")]
-        [InlineData(@"C:\temp\vid-test\1.mp4")]
-        [InlineData(@"C:\temp\vid-test\1.mpeg")]
-        [InlineData(@"C:\temp\vid-test\1.mpg")]
-        [InlineData(@"C:\temp\vid-test\1.mts")]
-        [InlineData(@"C:\temp\vid-test\1.vob")]
-        [InlineData(@"C:\temp\vid-test\1.webm")]
-        [InlineData(@"C:\temp\vid-test\1.wmv")]
-        [InlineData(@"C:\temp\vid-test\4k.mp4")]
+        //[InlineData(@"C:\temp\vid-test\1.3gp")]
+        //[InlineData(@"C:\temp\vid-test\1.avi")]
+        //[InlineData(@"C:\temp\vid-test\1.flv")]
+        //[InlineData(@"C:\temp\vid-test\1.m4v")]
+        //[InlineData(@"C:\temp\vid-test\1.mkv")]
+        //[InlineData(@"C:\temp\vid-test\1.mov")]
+        //[InlineData(@"C:\temp\vid-test\1.mp4")]
+        //[InlineData(@"C:\temp\vid-test\1.mpeg")]
+        //[InlineData(@"C:\temp\vid-test\1.mpg")]
+        //[InlineData(@"C:\temp\vid-test\1.mts")]
+        //[InlineData(@"C:\temp\vid-test\1.vob")]
+        //[InlineData(@"C:\temp\vid-test\1.webm")]
+        //[InlineData(@"C:\temp\vid-test\1.wmv")]
+        //[InlineData(@"C:\temp\vid-test\4k.mp4")]
+        [InlineData(@"C:\temp\vid-test\xl.wmv")]
         public void FileSource_LoadsMediaInfo(string path)
         {
             // Arrange
@@ -47,9 +48,14 @@ namespace AV.UnitTests
             // A] the accuracy may not matter so much ...?
             // B] there'll be sooo many reads!... Which
 
-            var frames = container.Components.Video.FrameCount;
-            container.BuildIndex();
+            //TODO: Test time and accuracy for:
+            // 0|0, 0|1, 1|0, 1|1 
+            // wrt building index and using 'accuracy'
 
+            //TODO: Also, the 4k sample non-accurate seek is woeful...
+            // Are the indexes being built appropriately in this case?
+
+            var frames = container.Components.Video.FrameCount;
             var frameNums = new List<long>();
 
             // Act
@@ -57,7 +63,7 @@ namespace AV.UnitTests
             {
                 frameNums.Add(data.FrameNumber);
                 data.Image.Save($"c:\\temp\\vid-test-out\\snap_{name}_{n}_of_24_FRAME_NO-{data.FrameNumber}.jpg");
-            }, false);
+            }, true);
 
             // Assert
             var x = string.Join(',', frameNums);

@@ -70,78 +70,6 @@ namespace AV.Core
         }
 
         /// <summary>
-        /// Clamps the specified value between the minimum and the maximum.
-        /// </summary>
-        /// <typeparam name="T">The type of value to clamp.</typeparam>
-        /// <param name="value">The value.</param>
-        /// <param name="min">The minimum.</param>
-        /// <param name="max">The maximum.</param>
-        /// <returns>A value that indicates the relative order of the objects being compared.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static T Clamp<T>(this T value, T min, T max)
-            where T : struct, IComparable
-        {
-            switch (value)
-            {
-                case TimeSpan v:
-                    {
-                        var minT = (TimeSpan)(object)min;
-                        var maxT = (TimeSpan)(object)max;
-
-                        if (v.Ticks > maxT.Ticks)
-                        {
-                            return max;
-                        }
-
-                        if (v.Ticks < minT.Ticks)
-                        {
-                            return min;
-                        }
-
-                        return value;
-                    }
-
-                default:
-                    {
-                        if (value.CompareTo(min) < 0)
-                        {
-                            return min;
-                        }
-
-                        return value.CompareTo(max) > 0 ? max : value;
-                    }
-            }
-        }
-
-        /// <summary>
-        /// Determines whether the specified value is between the minimum and maximum.
-        /// </summary>
-        /// <typeparam name="T">The implicit value type to compare.</typeparam>
-        /// <param name="value">The value.</param>
-        /// <param name="min">The minimum.</param>
-        /// <param name="max">The maximum.</param>
-        /// <returns>
-        ///   <c>true</c> if the specified value is between the min and max; otherwise, <c>false</c>.
-        /// </returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static bool IsBetween<T>(this T value, T min, T max)
-            where T : struct, IComparable
-        {
-            switch (value)
-            {
-                case TimeSpan v:
-                    {
-                        var minT = (TimeSpan)(object)min;
-                        var maxT = (TimeSpan)(object)max;
-                        return v.Ticks >= minT.Ticks && v.Ticks <= maxT.Ticks;
-                    }
-
-                default:
-                    return value.CompareTo(min) >= 0 && value.CompareTo(max) <= 0;
-            }
-        }
-
-        /// <summary>
         /// Finds the index of the item that is on or greater than the specified search value.
         /// </summary>
         /// <typeparam name="TItem">The generic collection type.</typeparam>
@@ -205,28 +133,6 @@ namespace AV.Core
             }
 
             return -1;
-        }
-
-        /// <summary>
-        /// Converts a hexadecimal string to a byte array.
-        /// </summary>
-        /// <param name="hexString">The hexadecimal string to convert.</param>
-        /// <returns>The byte array with the data of the hexadecimal string.</returns>
-        internal static byte[] HexToBytes(this string hexString)
-        {
-            if (hexString.Length % 2 != 0)
-            {
-                throw new ArgumentException($"The binary key cannot have an odd number of digits: {hexString}");
-            }
-
-            var data = new byte[hexString.Length / 2];
-            for (int index = 0; index < data.Length; index++)
-            {
-                var byteValue = hexString.Substring(index * 2, 2);
-                data[index] = byte.Parse(byteValue, NumberStyles.HexNumber, CultureInfo.InvariantCulture);
-            }
-
-            return data;
         }
     }
 }
