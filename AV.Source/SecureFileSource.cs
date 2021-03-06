@@ -4,6 +4,7 @@
 
 namespace AV.Source
 {
+    using System;
     using System.IO;
     using System.Security.Cryptography;
     using FullStack.Crypto;
@@ -25,7 +26,7 @@ namespace AV.Source
         /// <param name="key">The decryption key.</param>
         /// <param name="bufferLength">The buffer length.</param>
         public SecureFileSource(string path, byte[] key, int bufferLength = 32768)
-            : base(path, bufferLength, "secure")
+            : base(path, bufferLength)
         {
             var fi = new FileInfo(path);
             this.srcBuffer = new byte[bufferLength];
@@ -35,5 +36,12 @@ namespace AV.Source
         /// <inheritdoc/>
         protected override int ReadNext(byte[] buf) =>
             this.aes.DecryptBlock(this.FileStream, false, this.srcBuffer, this.macBuffer, buf);
+
+        /// <inheritdoc/>
+        protected override long NormaliseOffset(long offset)
+        {
+            var chunkSize = this.ReadBufferLength;
+            return chunkSize * (long)Math.Floor((double)offset / chunkSize);
+        }
     }
 }

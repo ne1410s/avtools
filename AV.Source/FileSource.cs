@@ -78,7 +78,8 @@ namespace AV.Source
         public unsafe long Seek(void* opaque, long offset, int whence) =>
             this.TryManipulateStream(EOF, () => whence == SeekSize
                 ? this.FileStream.Length
-                : this.FileStream.Seek(offset, SeekOrigin.Begin));
+                : this.FileStream.Seek(
+                    this.NormaliseOffset(offset), SeekOrigin.Begin));
 
         /// <summary>
         /// Reads the stream at its current position into the supplied buffer up
@@ -87,6 +88,13 @@ namespace AV.Source
         /// <param name="buf">The buffer.</param>
         /// <returns>The number of bytes read.</returns>
         protected virtual int ReadNext(byte[] buf) => this.FileStream.Read(buf, 0, buf.Length);
+
+        /// <summary>
+        /// Obtains a normalised offset; pre-seek adjustment.
+        /// </summary>
+        /// <param name="offset">The initial offset.</param>
+        /// <returns>The normalised value.</returns>
+        protected virtual long NormaliseOffset(long offset) => offset;
 
         private T TryManipulateStream<T>(T fallback, Func<T> operation)
         {

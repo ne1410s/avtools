@@ -6,6 +6,7 @@ namespace FFmpeg.AutoGen
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.IO;
     using System.Linq;
     using System.Runtime.InteropServices;
@@ -250,6 +251,7 @@ namespace FFmpeg.AutoGen
 
                 //TODO: Log {messageType}
                 ////{line};
+                Debug.Write($"{messageType} ({nameof(FFInterop)}): {line}");
             }
         }
     }

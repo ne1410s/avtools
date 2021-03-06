@@ -54,6 +54,13 @@
             <param name="buf">The buffer.</param>
             <returns>The number of bytes read.</returns>
         </member>
+        <member name="M:AV.Source.FileSource.NormaliseOffset(System.Int64)">
+            <summary>
+            Obtains a normalised offset; pre-seek adjustment.
+            </summary>
+            <param name="offset">The initial offset.</param>
+            <returns>The normalised value.</returns>
+        </member>
         <member name="T:AV.Source.SecureFileSource">
             <summary>
             A media source backed by a cryptographically secure file.
@@ -69,6 +76,9 @@
             <param name="bufferLength">The buffer length.</param>
         </member>
         <member name="M:AV.Source.SecureFileSource.ReadNext(System.Byte[])">
+            <inheritdoc/>
+        </member>
+        <member name="M:AV.Source.SecureFileSource.NormaliseOffset(System.Int64)">
             <inheritdoc/>
         </member>
     </members>

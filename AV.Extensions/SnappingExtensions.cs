@@ -40,7 +40,10 @@ namespace AV.Extensions
 
             striveForExact ??= container.Components.Video.FrameCount <= 2000;
             var delta = container.MediaInfo.Duration / (count - 1);
-            var start = container.MediaInfo.StartTime;
+            var start = container.MediaInfo.StartTime > TimeSpan.Zero
+                ? container.MediaInfo.StartTime
+                : TimeSpan.Zero;
+
             var block = (MediaBlock)null;
             for (var i = 0; i < count; i++)
             {
