@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using AV.Common.Source;
+using AV.Common.Sources;
 using AV.Core;
 using AV.Core.Container;
 using AV.Extensions;
-using AV.Extensions.Source;
 using FFmpeg.AutoGen;
 using FullStack.Crypto;
 using Xunit;

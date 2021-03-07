@@ -2,12 +2,12 @@
 // Copyright (c) ne1410s. All rights reserved.
 // </copyright>
 
-namespace AV.Extensions.Source
+namespace AV.Extensions
 {
     using System;
     using System.IO;
     using System.Security.Cryptography;
-    using AV.Common.Source;
+    using AV.Common.Sources;
     using FullStack.Crypto;
 
     /// <summary>

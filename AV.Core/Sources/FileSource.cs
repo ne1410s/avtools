@@ -2,7 +2,7 @@
 // Copyright (c) ne1410s. All rights reserved.
 // </copyright>
 
-namespace AV.Common.Source
+namespace AV.Common.Sources
 {
     using System;
     using System.IO;

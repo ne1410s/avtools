@@ -11,6 +11,7 @@ namespace AV.Core.Container
     using AV.Abstractions;
     using AV.Core.Common;
     using AV.Core.Primitives;
+    using AV.Core.Sources;
     using FFmpeg.AutoGen;
 
     /// <summary>

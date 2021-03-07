@@ -2,7 +2,7 @@
 // Copyright (c) ne1410s. All rights reserved.
 // </copyright>
 
-namespace AV.Core.Common
+namespace AV.Core.Sources
 {
     using System;
     using System.Runtime.InteropServices;
