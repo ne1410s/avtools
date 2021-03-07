@@ -30,4 +30,8 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\AV.Abstractions\AV.Abstractions.csproj" />
+  </ItemGroup>
+
 </Project>

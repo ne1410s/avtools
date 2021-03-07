@@ -8,6 +8,7 @@ namespace AV.Core.Container
     using System.Collections.Generic;
     using System.Linq;
     using System.Runtime.CompilerServices;
+    using AV.Abstractions;
     using AV.Core.Common;
     using AV.Core.Primitives;
     using FFmpeg.AutoGen;
@@ -69,9 +70,9 @@ namespace AV.Core.Container
         private readonly AVIOInterruptCB_callback streamReadInterruptCallback;
 
         /// <summary>
-        /// The custom media input stream.
+        /// The custom media input stream wrapper.
         /// </summary>
-        private IMediaInputStream customInputStream;
+        private InternalSource internalSource;
 
         /// <summary>
         /// The custom input stream read callback.
@@ -133,30 +134,30 @@ namespace AV.Core.Container
         /// <summary>
         /// Initialises a new instance of the <see cref="MediaContainer"/> class.
         /// </summary>
-        /// <param name="inputStream">The input stream.</param>
+        /// <param name="source">The input stream.</param>
         /// <param name="config">The configuration.</param>
         public MediaContainer(
-            IMediaInputStream inputStream,
+            IMediaInputStream source,
             ContainerConfiguration config = null)
         {
             // Argument Validation
-            if (inputStream == null)
+            if (source == null)
             {
-                throw new ArgumentNullException($"{nameof(inputStream)}");
+                throw new ArgumentNullException($"{nameof(source)}");
             }
 
             // Validate the stream pseudo Url
-            var mediaSourceUrl = inputStream.StreamUri?.ToString();
+            var mediaSourceUrl = source.StreamUri?.ToString();
             if (string.IsNullOrWhiteSpace(mediaSourceUrl))
             {
-                throw new ArgumentNullException($"{nameof(inputStream)}.{nameof(inputStream.StreamUri)}");
+                throw new ArgumentNullException($"{nameof(source)}.{nameof(source.StreamUri)}");
             }
 
             // Initialize the library (if not already done)
             FFInterop.Initialize(null, FFmpegLoadMode.FullFeatures);
 
             this.MediaSource = mediaSourceUrl;
-            this.customInputStream = inputStream;
+            this.internalSource = new InternalSource(source);
             this.Configuration = config ?? new ContainerConfiguration();
         }
 
@@ -262,7 +263,7 @@ namespace AV.Core.Container
         /// <summary>
         /// Gets a value indicating whether the underlying media is seekable.
         /// </summary>
-        public bool IsStreamSeekable => this.customInputStream?.CanSeek ?? (this.Components?.Seekable?.Duration.Ticks ?? 0) > 0;
+        public bool IsStreamSeekable => this.internalSource?.CanSeek ?? (this.Components?.Seekable?.Duration.Ticks ?? 0) > 0;
 
         /// <summary>
         /// Gets a value indicating whether this container represents live media.
@@ -637,8 +638,8 @@ namespace AV.Core.Container
                             // Clear Custom Input fields
                             this.customInputStreamRead = null;
                             this.customInputStreamSeek = null;
-                            this.customInputStream?.Dispose();
-                            this.customInputStream = null;
+                            this.internalSource?.Dispose();
+                            this.internalSource = null;
 
                             // Clear the input context
                             this.InputContext = null;
@@ -704,22 +705,22 @@ namespace AV.Core.Container
                     var openUrl = $"{prefix}{this.MediaSource}";
 
                     // If there is a custom input stream, set it up.
-                    if (this.customInputStream != null)
+                    if (this.internalSource != null)
                     {
                         // don't pass a Url because it will be a custom stream
                         openUrl = string.Empty;
 
                         // Setup the necessary context callbacks
-                        this.customInputStreamRead = this.customInputStream.Read;
-                        this.customInputStreamSeek = this.customInputStream.Seek;
+                        this.customInputStreamRead = this.internalSource.ReadUnsafe;
+                        this.customInputStreamSeek = this.internalSource.SeekUnsafe;
 
                         // Allocate the read buffer
-                        var inputBuffer = (byte*)ffmpeg.av_malloc((ulong)this.customInputStream.ReadBufferLength);
+                        var inputBuffer = (byte*)ffmpeg.av_malloc((ulong)this.internalSource.BufferLength);
                         this.customInputStreamContext = ffmpeg.avio_alloc_context(
-                            inputBuffer, this.customInputStream.ReadBufferLength, 0, null, this.customInputStreamRead, null, this.customInputStreamSeek);
+                            inputBuffer, this.internalSource.BufferLength, 0, null, this.customInputStreamRead, null, this.customInputStreamSeek);
 
                         // Set the seekable flag based on the custom input stream implementation
-                        customInputStreamContext->seekable = this.customInputStream.CanSeek ? 1 : 0;
+                        customInputStreamContext->seekable = this.internalSource.CanSeek ? 1 : 0;
 
                         // Assign the AVIOContext to the input context
                         inputContextPtr->pb = this.customInputStreamContext;

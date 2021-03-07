@@ -2,11 +2,12 @@
 // Copyright (c) ne1410s. All rights reserved.
 // </copyright>
 
-namespace AV.Core.Source
+namespace AV.Extensions.Source
 {
     using System;
     using System.IO;
     using System.Security.Cryptography;
+    using AV.Common.Source;
     using FullStack.Crypto;
 
     /// <summary>
@@ -34,14 +35,15 @@ namespace AV.Core.Source
         }
 
         /// <inheritdoc/>
-        protected override int ReadNext(byte[] buf) =>
-            this.aes.DecryptBlock(this.FileStream, false, this.srcBuffer, this.macBuffer, buf);
+        public override int Read(byte[] buffer) =>
+            this.aes.DecryptBlock(this.FileStream, false, this.srcBuffer, this.macBuffer, buffer);
 
         /// <inheritdoc/>
-        protected override long NormaliseOffset(long offset)
+        public override long Seek(long offset)
         {
-            var chunkSize = this.ReadBufferLength;
-            return chunkSize * (long)Math.Floor((double)offset / chunkSize);
+            var chunkSize = this.BufferLength;
+            var bufferMultiple = chunkSize * (long)Math.Floor((double)offset / chunkSize);
+            return base.Seek(bufferMultiple);
         }
     }
 }
