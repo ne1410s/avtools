@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="FullStack.Crypto" Version="1.0.0" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -30,7 +31,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AV.Core\AV.Core.csproj" />
-    <ProjectReference Include="..\AV.Source\AV.Source.csproj" />
   </ItemGroup>
 
 </Project>

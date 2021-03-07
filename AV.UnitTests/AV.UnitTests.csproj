@@ -26,7 +26,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AV.Extensions\AV.Extensions.csproj" />
-    <ProjectReference Include="..\AV.Source\AV.Source.csproj" />
   </ItemGroup>
 
   <ItemGroup>
