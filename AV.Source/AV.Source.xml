@@ -26,12 +26,6 @@
         <member name="P:AV.Source.FileSource.ReadBufferLength">
             <inheritdoc/>
         </member>
-        <member name="P:AV.Source.FileSource.OnInitializing">
-            <inheritdoc/>
-        </member>
-        <member name="P:AV.Source.FileSource.OnInitialized">
-            <inheritdoc/>
-        </member>
         <member name="P:AV.Source.FileSource.FileStream">
             <summary>
             Gets the file stream.

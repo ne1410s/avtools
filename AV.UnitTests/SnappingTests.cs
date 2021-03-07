@@ -62,7 +62,10 @@ namespace AV.UnitTests
         [InlineData(@"C:\temp\vid-test\sec\1.avi")]
         public void Encrypt(string path)
         {
-            new FileInfo(path).Encrypt(TestKey);
+            if (File.Exists(path))
+            {
+                new FileInfo(path).Encrypt(TestKey);
+            }
         }
 
         [Theory]

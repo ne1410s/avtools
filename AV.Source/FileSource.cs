@@ -43,12 +43,6 @@ namespace AV.Source
         /// <inheritdoc/>
         public int ReadBufferLength { get; }
 
-        /// <inheritdoc/>
-        public InputStreamInitializing OnInitializing { get; }
-
-        /// <inheritdoc/>
-        public InputStreamInitialized OnInitialized { get; }
-
         /// <summary>
         /// Gets the file stream.
         /// </summary>

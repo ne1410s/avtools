@@ -95,7 +95,7 @@ namespace AV.Extensions
                 videoBlock.PixelWidth,
                 videoBlock.PixelHeight,
                 videoBlock.PictureBufferStride,
-                PixelFormat.Format32bppArgb,
+                PixelFormat.Format32bppRgb,
                 videoBlock.Buffer);
 
             return new ImageFrameInfo

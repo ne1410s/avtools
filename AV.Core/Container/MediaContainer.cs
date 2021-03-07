@@ -334,7 +334,6 @@ namespace AV.Core.Container
             lock (this.readSyncRoot)
             {
                 // Initialize the Input Format Context and Input Stream Context
-                this.customInputStream?.OnInitializing?.Invoke(this.Configuration, this.MediaSource);
                 this.StreamInitialize();
             }
         }
@@ -829,11 +828,6 @@ namespace AV.Core.Container
                     //TODO: Error
                     ////$"We totes need that lib!;
                 }
-
-                this.customInputStream?.OnInitialized?.Invoke(
-                    inputFormat,
-                    this.InputContext,
-                    this.MediaInfo);
             }
             catch (Exception ex)
             {

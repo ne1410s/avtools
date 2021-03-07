@@ -5,29 +5,6 @@
 namespace AV.Core.Common
 {
     using System;
-    using FFmpeg.AutoGen;
-
-    /// <summary>
-    /// A callback that gets called before the media container's input context
-    /// gets initialised.
-    /// </summary>
-    /// <param name="containerConfig">The container configuration.</param>
-    /// <param name="mediaSource">The media source URL.</param>
-    public unsafe delegate void InputStreamInitializing(
-        ContainerConfiguration containerConfig,
-        string mediaSource);
-
-    /// <summary>
-    /// A callback that gets called when the media container's input format
-    /// context has been initialised.
-    /// </summary>
-    /// <param name="inputFormat">The unmanaged input format pointer.</param>
-    /// <param name="formatContext">The unmanaged format context.</param>
-    /// <param name="mediaInfo">The detected media info.</param>
-    public unsafe delegate void InputStreamInitialized(
-        AVInputFormat* inputFormat,
-        AVFormatContext* formatContext,
-        MediaInfo mediaInfo);
 
     /// <summary>
     /// Defines the properties and methods necessary for implementing a
@@ -36,7 +13,7 @@ namespace AV.Core.Common
     public unsafe interface IMediaInputStream : IDisposable
     {
         /// <summary>
-        /// Gets the stream URI - just a pseudo URI to identify the stream.
+        /// Gets a pseudo URI (only to identify the stream).
         /// </summary>
         Uri StreamUri { get; }
 
@@ -50,18 +27,6 @@ namespace AV.Core.Common
         /// Something like 4096 is recommended.
         /// </summary>
         int ReadBufferLength { get; }
-
-        /// <summary>
-        /// Gets the callback that gets called before the media container's
-        /// input context gets initialised.
-        /// </summary>
-        InputStreamInitializing OnInitializing { get; }
-
-        /// <summary>
-        /// Gets the callback that gets called when the media container's input
-        /// format context has been initialised.
-        /// </summary>
-        InputStreamInitialized OnInitialized { get; }
 
         /// <summary>
         /// Reads from the underlying stream and writes up to
