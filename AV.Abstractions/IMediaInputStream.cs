@@ -15,7 +15,7 @@ namespace AV.Abstractions
         /// <summary>
         /// Gets a pseudo URI (only to identify the stream).
         /// </summary>
-        Uri StreamUri { get; }
+        string Uri { get; }
 
         /// <summary>
         /// Gets a value indicating whether this stream is seekable.

@@ -17,8 +17,8 @@ namespace AV.Extensions
     public static class Source
     {
         /// <summary>
-        /// Creates a media source from file, making a guess as to whether the
-        /// file appears 'secure'.
+        /// Creates a media source from file, making a guess as to whether to
+        /// treat the file as 'secure'.
         /// </summary>
         /// <param name="path">The path.</param>
         /// <param name="key">The key.</param>
@@ -37,18 +37,40 @@ namespace AV.Extensions
         }
 
         /// <summary>
-        /// Obtains images from evenly-distributed positions in the contained
-        /// media. The container must have already been initialised and opened
-        /// before calling this method.
+        /// Obtains images from evenly-distributed positions in the source while
+        /// making a guess as to whether to treat the file as 'secure'.
+        /// </summary>
+        /// <param name="path">The path.</param>
+        /// <param name="callback">The callback.</param>
+        /// <param name="count">The count.</param>
+        /// <param name="key">The key.</param>
+        /// <param name="bufferLength">The buffer length.</param>
+        /// <param name="striveForExact">Whether to use multiple reads after
+        /// each seek in order to attempt to obtain the exact correct position.
+        /// The default behaviour is to only do so for small files; where the
+        /// differences are more likely to be noticable.</param>
+        public static void AutoSnap(
+            string path,
+            Action<ImageFrameInfo, int> callback,
+            int count = 24,
+            byte[] key = null,
+            int bufferLength = 32768,
+            bool? striveForExact = null)
+        {
+            using var source = FromFile(path, key, bufferLength);
+            source.AutoSnap(callback, count, striveForExact);
+        }
+
+        /// <summary>
+        /// Obtains images from evenly-distributed positions in the source.
         /// </summary>
         /// <param name="source">The source.</param>
         /// <param name="callback">The callback.</param>
         /// <param name="count">The count.</param>
-        /// <param name="striveForExact">If true, the container shall
-        /// endeavour to obtain the closest frame to the requested position. If
-        /// false, it shall not. If null (the default), then striving is only
-        /// used where the media contains 2000 frames or fewer, where the offset
-        /// may be more noticable.</param>
+        /// <param name="striveForExact">Whether to use multiple reads after
+        /// each seek in order to attempt to obtain the exact correct position.
+        /// The default behaviour is to only do so for small files; where the
+        /// differences are more likely to be noticable.</param>
         public static void AutoSnap(
             this IMediaInputStream source,
             Action<ImageFrameInfo, int> callback,

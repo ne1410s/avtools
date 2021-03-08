@@ -18,17 +18,16 @@ namespace AV.Common.Sources
         /// </summary>
         /// <param name="path">The file path.</param>
         /// <param name="bufferLength">The buffer length.</param>
-        /// <param name="protocol">The protocol.</param>
-        public FileSource(string path, int bufferLength = 32768, string protocol = "file")
+        public FileSource(string path, int bufferLength = 32768)
         {
-            this.StreamUri = new Uri($"{protocol}://{path}");
+            this.Uri = path;
             this.BufferLength = bufferLength;
             this.FileStream = File.OpenRead(path);
             this.Length = this.FileStream.Length;
         }
 
         /// ,<inheritdoc/>
-        public Uri StreamUri { get; }
+        public string Uri { get; }
 
         /// <inheritdoc/>
         public int BufferLength { get; } = 32768;

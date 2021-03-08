@@ -27,7 +27,7 @@ namespace AV.Extensions
         /// <param name="key">The decryption key.</param>
         /// <param name="bufferLength">The buffer length.</param>
         public SecureFileSource(string path, byte[] key, int bufferLength = 32768)
-            : base(path, bufferLength, "securefile")
+            : base(path, bufferLength)
         {
             var fi = new FileInfo(path);
             this.srcBuffer = new byte[bufferLength];

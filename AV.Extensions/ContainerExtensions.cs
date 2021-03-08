@@ -61,8 +61,10 @@ namespace AV.Extensions
             return new ImageFrameInfo
             {
                 FrameNumber = videoBlock.DisplayPictureNumber,
-                Image = bitmap,
+                PresentationTime = videoBlock.PresentationTime,
                 StartTime = frame.StartTime,
+                Image = bitmap,
+                SourceUrl = container.MediaSource,
             };
         }
     }

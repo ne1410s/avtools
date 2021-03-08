@@ -148,10 +148,10 @@ namespace AV.Core.Container
             }
 
             // Validate the stream pseudo Url
-            var mediaSourceUrl = source.StreamUri?.ToString();
+            var mediaSourceUrl = source.Uri?.ToString();
             if (string.IsNullOrWhiteSpace(mediaSourceUrl))
             {
-                throw new ArgumentNullException($"{nameof(source)}.{nameof(source.StreamUri)}");
+                throw new ArgumentNullException($"{nameof(source)}.{nameof(source.Uri)}");
             }
 
             // Initialize the library (if not already done)
