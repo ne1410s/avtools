@@ -6,8 +6,9 @@ namespace AV.Core
 {
     using System;
     using System.Diagnostics;
-    using AV.Core.Common;
-    using FFmpeg.AutoGen;
+    using AV.Core.Internal.Common;
+    using AV.Core.Internal.FFmpeg;
+    using global::FFmpeg.AutoGen;
 
     /// <summary>
     /// Provides access to the underlying FFmpeg library information.
@@ -19,7 +20,7 @@ namespace AV.Core
 
         private static readonly object SyncLock = new ();
         private static string localFFmpegDirectory = Constants.FFmpegSearchPath;
-        private static int localFFmpegLoadModeFlags = FFmpegLoadMode.FullFeatures;
+        private static int localFFmpegLoadModeFlags = Constants.VideoOnlyLibs;
         private static unsafe AVCodec*[] localAllCodecs;
         private static int localFFmpegLogLevel = Debugger.IsAttached ? ffmpeg.AV_LOG_VERBOSE : ffmpeg.AV_LOG_WARNING;
 
@@ -51,25 +52,6 @@ namespace AV.Core
         {
             get;
             private set;
-        }
-
-        /// <summary>
-        /// Gets or sets the bitwise library identifiers to load.
-        /// See the <see cref="FFmpegLoadMode"/> constants.
-        /// If FFmpeg is already loaded, the value cannot be changed.
-        /// </summary>
-        public static int FFmpegLoadModeFlags
-        {
-            get => localFFmpegLoadModeFlags;
-            set
-            {
-                if (FFInterop.IsInitialized)
-                {
-                    return;
-                }
-
-                localFFmpegLoadModeFlags = value;
-            }
         }
 
         /// <summary>
@@ -123,8 +105,7 @@ namespace AV.Core
 
         /// <summary>
         /// Forces the pre-loading of the FFmpeg libraries according to the
-        /// values of the
-        /// <see cref="FFmpegDirectory"/> and <see cref="FFmpegLoadModeFlags"/>
+        /// values of the <see cref="FFmpegDirectory"/>.
         /// Also, sets the <see cref="FFmpegVersionInfo"/> property. Throws an
         /// exception if the libraries cannot be loaded.
         /// </summary>
@@ -132,14 +113,13 @@ namespace AV.Core
         /// already loaded.</returns>
         public static bool LoadFFmpeg()
         {
-            if (!FFInterop.Initialize(FFmpegDirectory, FFmpegLoadModeFlags))
+            if (!FFInterop.Initialize(FFmpegDirectory, Constants.VideoOnlyLibs))
             {
                 return false;
             }
 
             // Set the folders and lib identifiers
             FFmpegDirectory = FFInterop.LibrariesPath;
-            FFmpegLoadModeFlags = FFInterop.LibraryIdentifiers;
             FFmpegVersionInfo = ffmpeg.av_version_info();
             return true;
         }

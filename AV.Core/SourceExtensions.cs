@@ -5,9 +5,8 @@
 namespace AV.Core
 {
     using System;
-    using AV.Core.Common;
-    using AV.Core.Container;
-    using AV.Core.LocalExtensions;
+    using AV.Core.Internal.Container;
+    using AV.Core.Internal.LocalExtensions;
 
     /// <summary>
     /// Extensions for <see cref="IMediaInputStream"/>.

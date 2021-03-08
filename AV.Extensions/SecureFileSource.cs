@@ -7,7 +7,7 @@ namespace AV.Extensions
     using System;
     using System.IO;
     using System.Security.Cryptography;
-    using AV.Common.Sources;
+    using AV.Common;
     using FullStack.Crypto;
 
     /// <summary>

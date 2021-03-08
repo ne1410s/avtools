@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using AV.Core;
 using AV.Extensions;
-using FFmpeg.AutoGen;
 using FullStack.Crypto;
 using Xunit;
 
@@ -14,7 +13,6 @@ namespace AV.UnitTests
         public ExtensionsTests()
         {
             Library.FFmpegDirectory = "ffmpeg";
-            Library.FFmpegLoadModeFlags = FFmpegLoadMode.FullFeatures;
             Library.LoadFFmpeg();
         }
 

@@ -7,9 +7,8 @@ namespace AV.Extensions
     using System;
     using System.IO;
     using System.Text.RegularExpressions;
-    using AV.Common.Sources;
+    using AV.Common;
     using AV.Core;
-    using AV.Core.Common;
 
     /// <summary>
     /// Library and extensions methods for all things AV.
