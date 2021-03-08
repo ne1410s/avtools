@@ -6,7 +6,7 @@ namespace AV.Core.Sources
 {
     using System;
     using System.Runtime.InteropServices;
-    using AV.Abstractions;
+    using AV.Core;
 
     /// <summary>
     /// Wraps <see cref="IMediaInputStream"/>, exposing the interface to the

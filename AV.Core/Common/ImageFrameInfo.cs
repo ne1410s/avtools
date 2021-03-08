@@ -2,10 +2,9 @@
 // Copyright (c) ne1410s. All rights reserved.
 // </copyright>
 
-namespace AV.Extensions
+namespace AV.Core.Common
 {
     using System.Drawing;
-    using AV.Core.Common;
 
     /// <summary>
     /// Image frame info.

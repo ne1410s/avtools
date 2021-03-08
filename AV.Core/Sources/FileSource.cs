@@ -6,7 +6,7 @@ namespace AV.Common.Sources
 {
     using System;
     using System.IO;
-    using AV.Abstractions;
+    using AV.Core;
 
     /// <summary>
     /// A media source backed by file.

@@ -2,11 +2,12 @@
 // Copyright (c) ne1410s. All rights reserved.
 // </copyright>
 
-namespace AV.Extensions
+namespace AV.Core.Extensions
 {
     using System;
     using System.Drawing;
     using System.Drawing.Imaging;
+    using AV.Core.Common;
     using AV.Core.Container;
 
     /// <summary>

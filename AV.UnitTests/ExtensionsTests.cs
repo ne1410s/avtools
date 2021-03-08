@@ -46,7 +46,7 @@ namespace AV.UnitTests
             {
                 var name = new FileInfo(frame.SourceUrl).Name;
                 frame.Image.Save($"c:\\temp\\vid-test-out\\{name}_{frame.FrameNumber}.jpg");
-            });
+            }, key: TestKey);
         }
 
         [Theory]
