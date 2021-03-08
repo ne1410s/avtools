@@ -1,8 +1,8 @@
-﻿// <copyright file="Utilities.Media.cs" company="ne1410s">
+﻿// <copyright file="MediaUtilities.cs" company="ne1410s">
 // Copyright (c) ne1410s. All rights reserved.
 // </copyright>
 
-namespace AV.Core
+namespace AV.Core.Utilities
 {
     using System;
     using System.Runtime.CompilerServices;
@@ -12,7 +12,7 @@ namespace AV.Core
     /// <summary>
     /// Utilities.
     /// </summary>
-    public static partial class Utilities
+    public static class MediaUtilities
     {
         /// <summary>
         /// Computes the picture number.

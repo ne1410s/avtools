@@ -6,6 +6,7 @@ namespace FFmpeg.AutoGen
 {
     using System;
     using AV.Core;
+    using AV.Core.Utilities;
 
     /// <summary>
     /// An AVDictionaryEntry wrapper.
@@ -33,11 +34,11 @@ namespace FFmpeg.AutoGen
         /// <summary>
         /// Gets the key.
         /// </summary>
-        public string Key => this.localPointer != IntPtr.Zero ? Utilities.PtrToStringUTF8(Pointer->key) : null;
+        public string Key => this.localPointer != IntPtr.Zero ? GeneralUtilities.PtrToStringUTF8(Pointer->key) : null;
 
         /// <summary>
         /// Gets the value.
         /// </summary>
-        public string Value => this.localPointer != IntPtr.Zero ? Utilities.PtrToStringUTF8(Pointer->value) : null;
+        public string Value => this.localPointer != IntPtr.Zero ? GeneralUtilities.PtrToStringUTF8(Pointer->value) : null;
     }
 }

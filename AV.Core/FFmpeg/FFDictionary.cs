@@ -6,7 +6,7 @@ namespace FFmpeg.AutoGen
 {
     using System;
     using System.Collections.Generic;
-    using AV.Core;
+    using AV.Core.Utilities;
 
     /// <inheritdoc />
     /// <summary>
@@ -79,7 +79,7 @@ namespace FFmpeg.AutoGen
             var kvpEntry = ffmpeg.av_dict_get(dictionary, string.Empty, null, ffmpeg.AV_DICT_IGNORE_SUFFIX);
             while (kvpEntry != null)
             {
-                result[Utilities.PtrToStringUTF8(kvpEntry->key)] = Utilities.PtrToStringUTF8(kvpEntry->value);
+                result[GeneralUtilities.PtrToStringUTF8(kvpEntry->key)] = GeneralUtilities.PtrToStringUTF8(kvpEntry->value);
                 kvpEntry = ffmpeg.av_dict_get(dictionary, string.Empty, kvpEntry, ffmpeg.AV_DICT_IGNORE_SUFFIX);
             }
 

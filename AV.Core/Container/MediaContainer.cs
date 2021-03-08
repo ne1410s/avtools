@@ -12,6 +12,7 @@ namespace AV.Core.Container
     using AV.Core.Common;
     using AV.Core.Primitives;
     using AV.Core.Sources;
+    using AV.Core.Utilities;
     using FFmpeg.AutoGen;
 
     /// <summary>
@@ -746,7 +747,7 @@ namespace AV.Core.Container
                     }
 
                     // Set some general properties
-                    this.MediaFormatName = Utilities.PtrToStringUTF8(InputContext->iformat->name);
+                    this.MediaFormatName = GeneralUtilities.PtrToStringUTF8(InputContext->iformat->name);
 
                     // If there are any options left in the dictionary, it means
                     // they did not get used (invalid options).

@@ -2,7 +2,7 @@
 // Copyright (c) ne1410s. All rights reserved.
 // </copyright>
 
-namespace AV.Core
+namespace AV.Core.Common
 {
     using System.IO;
     using System.Reflection;

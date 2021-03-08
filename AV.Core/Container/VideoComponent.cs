@@ -9,6 +9,7 @@ namespace AV.Core.Container
     using System.Runtime.CompilerServices;
     using AV.Core.Common;
     using AV.Core.Primitives;
+    using AV.Core.Utilities;
     using FFmpeg.AutoGen;
 
     /// <summary>
@@ -297,8 +298,8 @@ namespace AV.Core.Container
 
                 // Guess picture number and SMTPE
                 var frameRate = ffmpeg.av_guess_frame_rate(this.Container.InputContext, this.Stream, source.Pointer);
-                target.DisplayPictureNumber = Utilities.ComputePictureNumber(this.StartTime, target.StartTime, frameRate);
-                target.SmtpeTimeCode = Utilities.ComputeSmtpeTimeCode(target.DisplayPictureNumber, frameRate);
+                target.DisplayPictureNumber = MediaUtilities.ComputePictureNumber(this.StartTime, target.StartTime, frameRate);
+                target.SmtpeTimeCode = MediaUtilities.ComputeSmtpeTimeCode(target.DisplayPictureNumber, frameRate);
             }
             else
             {

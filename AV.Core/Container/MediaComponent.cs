@@ -9,6 +9,7 @@ namespace AV.Core.Container
     using System.Runtime.CompilerServices;
     using AV.Core.Common;
     using AV.Core.Primitives;
+    using AV.Core.Utilities;
     using FFmpeg.AutoGen;
 
     /// <summary>
@@ -245,7 +246,7 @@ namespace AV.Core.Container
                 ? this.Container.MediaInfo.Duration
                 : Stream->duration.ToTimeSpan(Stream->time_base);
 
-            this.CodecName = Utilities.PtrToStringUTF8(selectedCodec->name);
+            this.CodecName = GeneralUtilities.PtrToStringUTF8(selectedCodec->name);
             this.CodecId = CodecContext->codec_id;
             this.BitRate = CodecContext->bit_rate < 0 ? 0 : CodecContext->bit_rate;
 

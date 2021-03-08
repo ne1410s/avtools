@@ -8,6 +8,7 @@ namespace AV.Core.Common
     using System.Collections.Generic;
     using System.Linq;
     using AV.Core.Container;
+    using AV.Core.Utilities;
     using FFmpeg.AutoGen;
 
     /// <summary>
@@ -27,7 +28,7 @@ namespace AV.Core.Common
             // Reference: https://ffmpeg.org/doxygen/3.2/dump_8c_source.html
             var ic = container.InputContext;
             this.MediaSource = container.MediaSource;
-            this.Format = Utilities.PtrToStringUTF8(ic->iformat->name);
+            this.Format = GeneralUtilities.PtrToStringUTF8(ic->iformat->name);
             this.Metadata = container.Metadata;
             this.StartTime = ic->start_time != ffmpeg.AV_NOPTS_VALUE ? ic->start_time.ToTimeSpan() : TimeSpan.MinValue;
             this.Duration = ic->duration != ffmpeg.AV_NOPTS_VALUE ? ic->duration.ToTimeSpan() : TimeSpan.MinValue;
@@ -240,7 +241,7 @@ namespace AV.Core.Common
                 if ((c->capabilities & ffmpeg.AV_CODEC_CAP_HARDWARE) != 0
                     || (c->capabilities & ffmpeg.AV_CODEC_CAP_HYBRID) != 0)
                 {
-                    result.Add(Utilities.PtrToStringUTF8(c->name));
+                    result.Add(GeneralUtilities.PtrToStringUTF8(c->name));
                 }
             }
 

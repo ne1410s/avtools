@@ -2,11 +2,12 @@
 // Copyright (c) ne1410s. All rights reserved.
 // </copyright>
 
-namespace AV.Core.Extensions
+namespace AV.Core
 {
     using System;
     using AV.Core.Common;
     using AV.Core.Container;
+    using AV.Core.LocalExtensions;
 
     /// <summary>
     /// Extensions for <see cref="IMediaInputStream"/>.

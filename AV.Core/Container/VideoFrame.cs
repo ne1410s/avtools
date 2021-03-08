@@ -6,6 +6,7 @@ namespace AV.Core.Container
 {
     using System;
     using AV.Core.Common;
+    using AV.Core.Utilities;
     using FFmpeg.AutoGen;
 
     /// <summary>
@@ -57,11 +58,11 @@ namespace AV.Core.Container
             // Picture Type, Number and SMTPE TimeCode
             this.PictureType = frame->pict_type;
             this.DisplayPictureNumber = frame->display_picture_number == 0 ?
-                Utilities.ComputePictureNumber(component.StartTime, this.StartTime, frameRate) :
+                MediaUtilities.ComputePictureNumber(component.StartTime, this.StartTime, frameRate) :
                 frame->display_picture_number;
 
             this.CodedPictureNumber = frame->coded_picture_number;
-            this.SmtpeTimeCode = Utilities.ComputeSmtpeTimeCode(this.DisplayPictureNumber, frameRate);
+            this.SmtpeTimeCode = MediaUtilities.ComputeSmtpeTimeCode(this.DisplayPictureNumber, frameRate);
             this.IsHardwareFrame = component.IsUsingHardwareDecoding;
             this.HardwareAcceleratorName = component.HardwareAccelerator?.Name;
         }

@@ -6,6 +6,7 @@ namespace AV.Core.Container
 {
     using System;
     using System.Collections.Generic;
+    using AV.Core.Utilities;
     using FFmpeg.AutoGen;
 
     /// <summary>

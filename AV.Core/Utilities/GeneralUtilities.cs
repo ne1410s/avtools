@@ -1,8 +1,8 @@
-﻿// <copyright file="Utilities.cs" company="ne1410s">
+﻿// <copyright file="GeneralUtilities.cs" company="ne1410s">
 // Copyright (c) ne1410s. All rights reserved.
 // </copyright>
 
-namespace AV.Core
+namespace AV.Core.Utilities
 {
     using System;
     using System.Runtime.CompilerServices;
@@ -11,7 +11,7 @@ namespace AV.Core
     /// <summary>
     /// Provides various helpers and extension methods.
     /// </summary>
-    public static partial class Utilities
+    public static class GeneralUtilities
     {
         /// <summary>
         /// Converts a byte pointer to a UTF8 encoded string.

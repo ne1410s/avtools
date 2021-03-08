@@ -1,8 +1,8 @@
-﻿// <copyright file="Utilities.Time.cs" company="ne1410s">
+﻿// <copyright file="TimeUtilities.cs" company="ne1410s">
 // Copyright (c) ne1410s. All rights reserved.
 // </copyright>
 
-namespace AV.Core
+namespace AV.Core.Utilities
 {
     using System;
     using System.Runtime.CompilerServices;
@@ -11,7 +11,7 @@ namespace AV.Core
     /// <summary>
     /// Utilities.
     /// </summary>
-    public static partial class Utilities
+    public static class TimeUtilities
     {
         /// <summary>
         /// Gets a timespan given a timestamp and a timebase.

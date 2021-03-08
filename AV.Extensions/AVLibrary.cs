@@ -10,12 +10,11 @@ namespace AV.Extensions
     using AV.Common.Sources;
     using AV.Core;
     using AV.Core.Common;
-    using AV.Core.Extensions;
 
     /// <summary>
-    /// Extensions for <see cref="IMediaInputStream"/>.
+    /// Library and extensions methods for all things AV.
     /// </summary>
-    public static class Source
+    public static class AVLibrary
     {
         /// <summary>
         /// Creates a media source from file, making a guess as to whether to

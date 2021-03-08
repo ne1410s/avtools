@@ -6,6 +6,7 @@ namespace AV.Core
 {
     using System;
     using System.Diagnostics;
+    using AV.Core.Common;
     using FFmpeg.AutoGen;
 
     /// <summary>

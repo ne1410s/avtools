@@ -42,7 +42,7 @@ namespace AV.UnitTests
         public void FileSource_AutoSnaps(string path)
         {
             // Arrange
-            Source.AutoSnap(path, (frame, _) =>
+            AVLibrary.AutoSnap(path, (frame, _) =>
             {
                 var name = new FileInfo(frame.SourceUrl).Name;
                 frame.Image.Save($"c:\\temp\\vid-test-out\\{name}_{frame.FrameNumber}.jpg");

@@ -2,7 +2,7 @@
 // Copyright (c) ne1410s. All rights reserved.
 // </copyright>
 
-namespace AV.Core.Extensions
+namespace AV.Core.LocalExtensions
 {
     using System;
     using System.Drawing;
@@ -13,7 +13,7 @@ namespace AV.Core.Extensions
     /// <summary>
     /// Extensions for <see cref="MediaContainer"/>.
     /// </summary>
-    public static class ContainerExtensions
+    internal static class ContainerExtensions
     {
         /// <summary>
         /// Obtains an image from a specified position in the contained media.

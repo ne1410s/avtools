@@ -13,6 +13,7 @@ namespace FFmpeg.AutoGen
     using System.Text;
     using AV.Core;
     using AV.Core.Common;
+    using AV.Core.Utilities;
 
     /// <summary>
     /// Provides a set of utilities to perform logging, text formatting,
@@ -184,7 +185,7 @@ namespace FFmpeg.AutoGen
             var bufferSize = 1024;
             var buffer = stackalloc byte[bufferSize];
             ffmpeg.av_strerror(errorCode, buffer, (ulong)bufferSize);
-            var message = Utilities.PtrToStringUTF8(buffer);
+            var message = GeneralUtilities.PtrToStringUTF8(buffer);
             return message;
         }
 
@@ -231,7 +232,7 @@ namespace FFmpeg.AutoGen
                 var lineBuffer = stackalloc byte[lineSize];
                 var printPrefix = 1;
                 ffmpeg.av_log_format_line(p0, level, format, vl, lineBuffer, lineSize, &printPrefix);
-                var line = Utilities.PtrToStringUTF8(lineBuffer);
+                var line = GeneralUtilities.PtrToStringUTF8(lineBuffer);
                 FFmpegLogBuffer.Add(line);
 
                 var messageType = MediaLogMessageType.Debug;
