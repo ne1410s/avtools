@@ -45,9 +45,9 @@ namespace AV.Core.Internal.Common
         public static AVPixelFormat VideoPixelFormat => AVPixelFormat.AV_PIX_FMT_BGRA;
 
         /// <summary>
-        /// Gets video-only library flags.
+        /// Gets load-all-library flags.
         /// </summary>
-        public static int VideoOnlyLibs { get; } = FFLibrary.LibAVCodec.FlagId |
+        public static int AllLibs { get; } = FFLibrary.LibAVCodec.FlagId |
             FFLibrary.LibAVDevice.FlagId |
             FFLibrary.LibPostProc.FlagId |
             FFLibrary.LibAVFilter.FlagId |

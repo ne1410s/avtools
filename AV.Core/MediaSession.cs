@@ -8,7 +8,9 @@ namespace AV.Core
     using System.Collections.Generic;
     using System.Drawing;
     using System.Drawing.Imaging;
+    using AV.Core.Internal.Common;
     using AV.Core.Internal.Container;
+    using FFmpeg.AutoGen;
 
     /// <summary>
     /// Called when an image frame has been fully-populated.
@@ -28,6 +30,7 @@ namespace AV.Core
         private const int StriveThreshold = 10000;
 
         private readonly MediaContainer container;
+        private readonly StreamInfo videoStream;
 
         private MediaBlock blockReference = null;
 
@@ -41,6 +44,8 @@ namespace AV.Core
             this.container.Initialize();
             this.container.Open();
 
+            this.videoStream = this.container.MediaInfo.BestStreams[AVMediaType.AVMEDIA_TYPE_VIDEO];
+            this.Dimensions = new Size(this.videoStream.PixelWidth, this.videoStream.PixelHeight);
             this.StriveExact = this.FrameCount < StriveThreshold;
         }
 
@@ -61,9 +66,14 @@ namespace AV.Core
         public string Format => this.container.MediaFormatName;
 
         /// <summary>
-        /// Gets the metadata.
+        /// Gets the metadata associated with the parent format.
         /// </summary>
         public IReadOnlyDictionary<string, string> Metadata => this.container.Metadata;
+
+        /// <summary>
+        /// Gets the metadata associated with the video stream.
+        /// </summary>
+        public IReadOnlyDictionary<string, string> StreamMetadata => this.videoStream.Metadata;
 
         /// <summary>
         /// Gets the duration.
@@ -81,20 +91,29 @@ namespace AV.Core
         public string StreamUri => this.container.MediaSource;
 
         /// <summary>
+        /// Gets the original pixel dimensions.
+        /// </summary>
+        public Size Dimensions { get; }
+
+        /// <summary>
         /// Obtains images from evenly-distributed positions.
         /// </summary>
         /// <param name="onReceived">The on received callback.</param>
-        /// <param name="count">The count.</param>
-        public void AutoSnap(FrameReceived onReceived, int count = 24)
+        /// <param name="totalImages">The number of images.</param>
+        /// <param name="forceStrive">Can be used to force strive.</param>
+        public void AutoSnap(
+            FrameReceived onReceived,
+            int totalImages = 24,
+            bool? forceStrive = null)
         {
-            var delta = this.container.MediaInfo.Duration / (count - 1);
+            var delta = this.container.MediaInfo.Duration / (totalImages - 1);
             var start = this.container.MediaInfo.StartTime > TimeSpan.Zero
                 ? this.container.MediaInfo.StartTime
                 : TimeSpan.Zero;
 
-            for (var i = 0; i < count; i++)
+            for (var i = 0; i < totalImages; i++)
             {
-                var data = this.TakeSnap(start.Add(delta * i));
+                var data = this.Snap(start.Add(delta * i), forceStrive);
                 onReceived?.Invoke(data, i + 1);
             }
         }
@@ -104,11 +123,15 @@ namespace AV.Core
         /// by the value of <see cref="StriveExact"/>.
         /// </summary>
         /// <param name="position">The position.</param>
+        /// <param name="forceStrive">Can be used to force strive.</param>
         /// <returns>Image frame information.</returns>
-        public ImageFrameInfo TakeSnap(TimeSpan position)
+        public ImageFrameInfo Snap(
+            TimeSpan position,
+            bool? forceStrive = null)
         {
+            var doStrive = forceStrive ?? this.StriveExact;
             var frame = this.container.Seek(position);
-            while (this.StriveExact && !this.container.IsAtEndOfStream)
+            while (doStrive && !this.container.IsAtEndOfStream)
             {
                 this.container.Read();
                 var receivedFrame = this.container.Components.Video.ReceiveNextFrame();
@@ -124,7 +147,7 @@ namespace AV.Core
 
             this.container.Convert(frame, ref this.blockReference, true, null);
             var videoBlock = (VideoBlock)this.blockReference;
-            var bitmap = new Bitmap(
+            var rawImage = new Bitmap(
                 videoBlock.PixelWidth,
                 videoBlock.PixelHeight,
                 videoBlock.PictureBufferStride,
@@ -136,7 +159,7 @@ namespace AV.Core
                 FrameNumber = videoBlock.DisplayPictureNumber,
                 PresentationTime = videoBlock.PresentationTime,
                 StartTime = frame.StartTime,
-                Image = bitmap,
+                Image = rawImage,
             };
         }
 

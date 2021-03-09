@@ -20,7 +20,7 @@ namespace AV.Core
 
         private static readonly object SyncLock = new ();
         private static string localFFmpegDirectory = Constants.FFmpegSearchPath;
-        private static int localFFmpegLoadModeFlags = Constants.VideoOnlyLibs;
+        private static int localFFmpegLoadModeFlags = Constants.AllLibs;
         private static unsafe AVCodec*[] localAllCodecs;
         private static int localFFmpegLogLevel = Debugger.IsAttached ? ffmpeg.AV_LOG_VERBOSE : ffmpeg.AV_LOG_WARNING;
 
@@ -113,7 +113,7 @@ namespace AV.Core
         /// already loaded.</returns>
         public static bool LoadFFmpeg()
         {
-            if (!FFInterop.Initialize(FFmpegDirectory, Constants.VideoOnlyLibs))
+            if (!FFInterop.Initialize(FFmpegDirectory, Constants.AllLibs))
             {
                 return false;
             }

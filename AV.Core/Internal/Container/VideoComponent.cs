@@ -84,10 +84,10 @@ namespace AV.Core.Internal.Container
         }
 
         /// <summary>
-        /// Gets the video scaler flags used to perform color space conversion
-        /// (if needed).  Point / nearest-neighbor is the default and it is the
-        /// cheapest. This is by design as we don't change the dimensions of the
-        /// image. We only do color conversion.
+        /// Gets or sets the video scaler flags used to perform color space
+        /// conversion (if needed). Point / nearest-neighbor is the default and
+        /// it is the cheapest. This is by design as we don't change the
+        /// dimensions of the image. We only do color conversion.
         /// </summary>
         public static int ScalerFlags { get; internal set; } = ffmpeg.SWS_POINT;
 

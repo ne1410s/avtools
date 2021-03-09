@@ -115,7 +115,7 @@ namespace AV.Core.Internal.Container
             }
 
             // Initialize the library (if not already done)
-            FFInterop.Initialize(null, Constants.VideoOnlyLibs);
+            FFInterop.Initialize(null, Constants.AllLibs);
 
             // Create the options object and setup some initial properties
             this.MediaSource = mediaSource;
@@ -157,7 +157,7 @@ namespace AV.Core.Internal.Container
             }
 
             // Initialize the library (if not already done)
-            FFInterop.Initialize(null, Constants.VideoOnlyLibs);
+            FFInterop.Initialize(null, Constants.AllLibs);
 
             this.MediaSource = mediaSourceUrl;
             this.internalSource = new InternalSource(source);

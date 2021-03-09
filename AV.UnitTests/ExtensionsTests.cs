@@ -43,7 +43,10 @@ namespace AV.UnitTests
             var name = new FileInfo(session.StreamUri).Name;
             session.AutoSnap((frame, _) =>
             {
-                frame.Image.Save($"c:\\temp\\vid-test-out\\{name}_{frame.FrameNumber}.jpg");
+                var thumb = frame.Image.Resize(200);
+                frame.Image.Dispose();
+                thumb.Save($"c:\\temp\\vid-test-out\\{name}_{frame.FrameNumber}.jpg");
+                thumb.Dispose();
             });
         }
 

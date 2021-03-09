@@ -46,39 +46,39 @@ namespace AV.Core.Internal.Container
         public MediaType MediaType { get; }
 
         /// <summary>
-        /// Gets the size of the compressed frame.
+        /// Gets or sets the size of the compressed frame.
         /// </summary>
         public int CompressedSize { get; internal set; }
 
         /// <summary>
-        /// Gets a value indicating whether the start time was guessed from
-        /// siblings or the source frame PTS comes from a NO PTS value.
+        /// Gets or sets a value indicating whether the start time was guessed
+        /// from siblings or the source frame PTS comes from a NO PTS value.
         /// </summary>
         public bool IsStartTimeGuessed { get; internal set; }
 
         /// <summary>
-        /// Gets the time at which this data should be presented (PTS).
+        /// Gets or sets the time at which this data should be presented (PTS).
         /// </summary>
         public TimeSpan StartTime { get; internal set; }
 
         /// <summary>
-        /// Gets the amount of time this data has to be presented.
+        /// Gets or sets the amount of time this data has to be presented.
         /// </summary>
         public TimeSpan Duration { get; internal set; }
 
         /// <summary>
-        /// Gets the end time.
+        /// Gets or sets the end time.
         /// </summary>
         public TimeSpan EndTime { get; internal set; }
 
         /// <summary>
-        /// Gets the unadjusted, original presentation timestamp (PTS) of the
-        /// frame given in the stream's Time Base units.
+        /// Gets or sets the unadjusted, original presentation timestamp (PTS)
+        /// of the frame given in the stream's Time Base units.
         /// </summary>
         public long PresentationTime { get; internal set; }
 
         /// <summary>
-        /// Gets the index of the stream.
+        /// Gets or sets the index of the stream.
         /// </summary>
         public int StreamIndex { get; internal set; }
 

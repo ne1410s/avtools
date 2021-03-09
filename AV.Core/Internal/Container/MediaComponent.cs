@@ -280,14 +280,14 @@ namespace AV.Core.Internal.Container
         public int StreamIndex { get; }
 
         /// <summary>
-        /// Gets the component's stream start timestamp as reported
+        /// Gets or sets the component's stream start timestamp as reported
         /// by the start time of the stream.
         /// Returns TimeSpan.MinValue when unknown.
         /// </summary>
         public TimeSpan StartTime { get; internal set; }
 
         /// <summary>
-        /// Gets the duration of this stream component.
+        /// Gets or sets the duration of this stream component.
         /// If there is no such information it will return TimeSpan.MinValue.
         /// </summary>
         public TimeSpan Duration { get; internal set; }
