@@ -29,9 +29,15 @@ namespace AV.Core
         /// </summary>
         private const int StriveThreshold = 10000;
 
+        /// <summary>
+        /// The default height of thumbnails to export.
+        /// </summary>
+        private const int DefaultThumbHeight = 200;
+
         private readonly MediaContainer container;
         private readonly StreamInfo videoStream;
 
+        private int? thumbHeight;
         private MediaBlock blockReference = null;
 
         /// <summary>
@@ -47,6 +53,7 @@ namespace AV.Core
             this.videoStream = this.container.MediaInfo.BestStreams[AVMediaType.AVMEDIA_TYPE_VIDEO];
             this.Dimensions = new Size(this.videoStream.PixelWidth, this.videoStream.PixelHeight);
             this.StriveExact = this.FrameCount < StriveThreshold;
+            this.ThumbHeight = DefaultThumbHeight;
         }
 
         /// <summary>
@@ -59,6 +66,19 @@ namespace AV.Core
         /// than the <see cref="StriveThreshold"/>.
         /// </summary>
         public bool StriveExact { get; set; }
+
+        /// <summary>
+        /// Gets or sets the thumbnail height.
+        /// </summary>
+        public int? ThumbHeight
+        {
+            get => this.thumbHeight;
+            set
+            {
+                this.thumbHeight = value;
+                this.blockReference = new VideoBlock(height: value ?? 0);
+            }
+        }
 
         /// <summary>
         /// Gets the format name.

@@ -6,6 +6,7 @@ namespace AV.Core.Internal.Container
 {
     using System;
     using System.Collections.Generic;
+    using System.Drawing;
     using System.Runtime.CompilerServices;
     using AV.Core.Internal.Common;
     using AV.Core.Internal.FFmpeg;
@@ -223,14 +224,32 @@ namespace AV.Core.Internal.Container
             var source = (VideoFrame)input;
             var target = (VideoBlock)output;
 
+            // Allow rescale dimensions to be passed
+            var srcWidth = source.Pointer->width;
+            var srcHeight = source.Pointer->height;
+            var srcAspect = srcWidth / (double)srcHeight;
+            var targetSize = new Size
+            {
+                Width = target.PixelWidth != 0
+                    ? target.PixelWidth
+                    : target.PixelHeight != 0
+                        ? (int)Math.Round(target.PixelHeight * srcAspect)
+                        : srcWidth,
+                Height = target.PixelHeight != 0
+                    ? target.PixelHeight
+                    : target.PixelWidth != 0
+                        ? (int)Math.Round(target.PixelWidth / srcAspect)
+                        : srcHeight,
+            };
+
             // Retrieve a suitable scaler or create it on the fly
             var newScaler = ffmpeg.sws_getCachedContext(
                 this.scaler,
-                source.Pointer->width,
-                source.Pointer->height,
+                srcWidth,
+                srcHeight,
                 NormalizePixelFormat(source.Pointer),
-                source.Pointer->width,
-                source.Pointer->height,
+                targetSize.Width,
+                targetSize.Height,
                 Constants.VideoPixelFormat,
                 ScalerFlags,
                 null,
@@ -254,7 +273,7 @@ namespace AV.Core.Internal.Container
             }
 
             // Perform scaling and save the data to our unmanaged buffer pointer
-            if (target.Allocate(source, Constants.VideoPixelFormat)
+            if (target.Allocate(Constants.VideoPixelFormat, targetSize)
                 && target.TryAcquireWriterLock(out var writeLock))
             {
                 using (writeLock)
@@ -269,7 +288,7 @@ namespace AV.Core.Internal.Container
                         source.Pointer->data,
                         source.Pointer->linesize,
                         0,
-                        source.Pointer->height,
+                        srcHeight,
                         targetScan,
                         targetStride);
 

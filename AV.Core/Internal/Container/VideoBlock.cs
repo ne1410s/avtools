@@ -4,6 +4,7 @@
 
 namespace AV.Core.Internal.Container
 {
+    using System.Drawing;
     using AV.Core.Internal.Common;
     using global::FFmpeg.AutoGen;
 
@@ -16,10 +17,13 @@ namespace AV.Core.Internal.Container
         /// <summary>
         /// Initialises a new instance of the <see cref="VideoBlock"/> class.
         /// </summary>
-        internal VideoBlock()
+        /// <param name="width">The width.</param>
+        /// <param name="height">The height.</param>
+        internal VideoBlock(int width = 0, int height = 0)
             : base(MediaType.Video)
         {
-            // placeholder
+            this.PixelWidth = width;
+            this.PixelHeight = height;
         }
 
         /// <summary>
@@ -87,25 +91,25 @@ namespace AV.Core.Internal.Container
         /// Allocates a block of memory suitable for a picture buffer
         /// and sets the corresponding properties.
         /// </summary>
-        /// <param name="source">The source.</param>
         /// <param name="pixelFormat">The pixel format.</param>
+        /// <param name="targetSize">The target size.</param>
         /// <returns>True if the allocation was successful.</returns>
-        internal unsafe bool Allocate(VideoFrame source, AVPixelFormat pixelFormat)
+        internal unsafe bool Allocate(AVPixelFormat pixelFormat, Size targetSize)
         {
             // Ensure proper allocation of the buffer
             // If there is a size mismatch between the wanted buffer length and
             // the existing one, then let's reallocate the buffer and set the
             // new size (dispose of the existing one if any)
-            var targetLength = ffmpeg.av_image_get_buffer_size(pixelFormat, source.Pointer->width, source.Pointer->height, 1);
+            var targetLength = ffmpeg.av_image_get_buffer_size(pixelFormat, targetSize.Width, targetSize.Height, 1);
             if (!this.Allocate(targetLength))
             {
                 return false;
             }
 
             // Update related properties
-            this.PictureBufferStride = ffmpeg.av_image_get_linesize(pixelFormat, source.Pointer->width, 0);
-            this.PixelWidth = source.Pointer->width;
-            this.PixelHeight = source.Pointer->height;
+            this.PictureBufferStride = ffmpeg.av_image_get_linesize(pixelFormat, targetSize.Width, 0);
+            this.PixelWidth = targetSize.Width;
+            this.PixelHeight = targetSize.Height;
 
             return true;
         }
