@@ -20,10 +20,5 @@ namespace AV.Core
         /// Gets the image.
         /// </summary>
         public Bitmap Image { get; init; }
-
-        /// <summary>
-        /// Gets the source url.
-        /// </summary>
-        public string SourceUrl { get; init; }
     }
 }

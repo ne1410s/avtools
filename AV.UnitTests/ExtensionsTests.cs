@@ -39,12 +39,12 @@ namespace AV.UnitTests
         [InlineData(@"C:\temp\vid-test\sec\fac1842340659370e81d7e510373636a962580b44f9299ac02edfcfa193a31e5.avi")]
         public void FileSource_AutoSnaps(string path)
         {
-            // Arrange
-            AVLibrary.AutoSnap(path, (frame, _) =>
+            using var session = AVExtensions.OpenSession(path, TestKey);
+            var name = new FileInfo(session.StreamUri).Name;
+            session.AutoSnap((frame, _) =>
             {
-                var name = new FileInfo(frame.SourceUrl).Name;
                 frame.Image.Save($"c:\\temp\\vid-test-out\\{name}_{frame.FrameNumber}.jpg");
-            }, key: TestKey);
+            });
         }
 
         [Theory]
