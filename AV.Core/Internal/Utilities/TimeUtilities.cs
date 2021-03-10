@@ -5,6 +5,7 @@
 namespace AV.Core.Internal.Utilities
 {
     using System;
+    using System.Linq;
     using System.Runtime.CompilerServices;
     using global::FFmpeg.AutoGen;
 
@@ -160,5 +161,36 @@ namespace AV.Core.Internal.Utilities
         {
             return $"{DateTime.UtcNow.Subtract(dt).TotalMilliseconds,6:0}";
         }
+
+        /// <summary>
+        /// Gets a timespan confined within a range.
+        /// </summary>
+        /// <param name="source">The source value.</param>
+        /// <param name="start">The earliest value in the range.</param>
+        /// <param name="end">The latest value in the range.</param>
+        /// <returns>The range-confined value.</returns>
+        internal static TimeSpan Confine(this TimeSpan source, TimeSpan start, TimeSpan end)
+        {
+            if (start > end)
+            {
+                throw new ArgumentException("Start must not be after end");
+            }
+
+            return source < start ? start : source > end ? end : source;
+        }
+
+        /// <summary>
+        /// Gets the time with the lowest value from an array.
+        /// </summary>
+        /// <param name="times">The times.</param>
+        /// <returns>The lowest time.</returns>
+        internal static TimeSpan Min(params TimeSpan[] times) => times.Min();
+
+        /// <summary>
+        /// Gets the time with the highest value from an array.
+        /// </summary>
+        /// <param name="times">The times.</param>
+        /// <returns>The highest time.</returns>
+        internal static TimeSpan Max(params TimeSpan[] times) => times.Max();
     }
 }

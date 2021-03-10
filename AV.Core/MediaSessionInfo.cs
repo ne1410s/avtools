@@ -8,6 +8,7 @@ namespace AV.Core
     using System.Collections.Generic;
     using System.Drawing;
     using AV.Core.Internal.Container;
+    using AV.Core.Internal.Utilities;
     using FFmpeg.AutoGen;
 
     /// <summary>
@@ -34,6 +35,8 @@ namespace AV.Core
             this.Metadata = container.Metadata;
             this.StreamMetadata = videoStream.Metadata;
             this.StreamUri = container.MediaSource;
+            this.StartTime = TimeUtilities.Max(TimeSpan.Zero, videoComponent.StartTime);
+            this.EndTime = videoComponent.EndTime;
         }
 
         /// <summary>
@@ -45,6 +48,16 @@ namespace AV.Core
         /// Gets the duration.
         /// </summary>
         public TimeSpan Duration { get; }
+
+        /// <summary>
+        /// Gets the start time.
+        /// </summary>
+        public TimeSpan StartTime { get; }
+
+        /// <summary>
+        /// Gets the end time.
+        /// </summary>
+        public TimeSpan EndTime { get; }
 
         /// <summary>
         /// Gets the format name.

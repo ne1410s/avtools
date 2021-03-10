@@ -35,7 +35,7 @@ namespace AV.UnitTests
         {
             using var session = AVExtensions.OpenSession(path, TestKey);
             var name = new FileInfo(session.SessionInfo.StreamUri).Name;
-            session.AutoSnap((frame, _) =>
+            session.SnapMany((frame, _) =>
             {
                 var thumb = frame.Image.Resize(200);
                 frame.Image.Dispose();

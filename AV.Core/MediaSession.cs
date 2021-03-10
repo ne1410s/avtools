@@ -7,8 +7,10 @@ namespace AV.Core
     using System;
     using System.Drawing;
     using System.Drawing.Imaging;
+    using System.Linq;
     using AV.Core.Internal;
     using AV.Core.Internal.Container;
+    using AV.Core.Internal.Utilities;
 
     /// <summary>
     /// Called when an image frame has been fully-populated.
@@ -36,7 +38,7 @@ namespace AV.Core
         /// </summary>
         /// <param name="source">The source.</param>
         /// <param name="libFolder">Path to ffmpeg libraries.</param>
-        public MediaSession( IMediaInputStream source, string libFolder = "ffmpeg")
+        public MediaSession(IMediaInputStream source, string libFolder = "ffmpeg")
         {
             Library.FFmpegDirectory = libFolder;
             Library.LoadFFmpeg();
@@ -45,6 +47,7 @@ namespace AV.Core
             this.container.Initialize();
             this.container.Open();
 
+            this.SessionInfo = new MediaSessionInfo(this.container);
             this.StriveExact = this.SessionInfo.FrameCount < StriveThreshold;
         }
 
@@ -65,29 +68,6 @@ namespace AV.Core
         public MediaSessionInfo SessionInfo { get; }
 
         /// <summary>
-        /// Obtains images from evenly-distributed positions.
-        /// </summary>
-        /// <param name="onReceived">The on received callback.</param>
-        /// <param name="totalImages">The number of images.</param>
-        /// <param name="forceStrive">Can be used to force strive.</param>
-        public void AutoSnap(
-            FrameReceived onReceived,
-            int totalImages = 24,
-            bool? forceStrive = null)
-        {
-            var delta = this.container.MediaInfo.Duration / (totalImages - 1);
-            var start = this.container.MediaInfo.StartTime > TimeSpan.Zero
-                ? this.container.MediaInfo.StartTime
-                : TimeSpan.Zero;
-
-            for (var i = 0; i < totalImages; i++)
-            {
-                var data = this.Snap(start.Add(delta * i), forceStrive);
-                onReceived?.Invoke(data, i + 1);
-            }
-        }
-
-        /// <summary>
         /// Obtains an image from a specified position. The accuracy is affected
         /// by the value of <see cref="StriveExact"/>.
         /// </summary>
@@ -98,6 +78,7 @@ namespace AV.Core
             TimeSpan position,
             bool? forceStrive = null)
         {
+            position = position.Confine(this.SessionInfo.StartTime, this.SessionInfo.EndTime);
             var doStrive = forceStrive ?? this.StriveExact;
             var frame = this.container.Seek(position);
             while (doStrive && !this.container.IsAtEndOfStream)
@@ -130,6 +111,41 @@ namespace AV.Core
                 StartTime = frame.StartTime,
                 Image = rawImage,
             };
+        }
+
+        /// <summary>
+        /// Obtains images from each of the supplied positions.
+        /// </summary>
+        /// <param name="onReceived">The on received callback.</param>
+        /// <param name="forceStrive">Can be used to force strive.</param>
+        /// <param name="positions">The array of positions.</param>
+        public void SnapMany(
+            FrameReceived onReceived,
+            bool? forceStrive = null,
+            params TimeSpan[] positions)
+        {
+            for (var i = 0; i < positions.Length; i++)
+            {
+                var data = this.Snap(positions[i], forceStrive);
+                onReceived?.Invoke(data, i + 1);
+            }
+        }
+
+        /// <summary>
+        /// Obtains images from evenly-distributed positions.
+        /// </summary>
+        /// <param name="onReceived">The on received callback.</param>
+        /// <param name="totalImages">The number of images.</param>
+        /// <param name="forceStrive">Can be used to force strive.</param>
+        public void SnapMany(
+            FrameReceived onReceived,
+            int totalImages = 24,
+            bool? forceStrive = null)
+        {
+            var delta = this.SessionInfo.Duration / (totalImages - 1);
+            var positions = Enumerable.Range(0, totalImages)
+                .Select(idx => this.SessionInfo.StartTime.Add(delta * idx));
+            this.SnapMany(onReceived, forceStrive, positions.ToArray());
         }
 
         /// <inheritdoc/>
