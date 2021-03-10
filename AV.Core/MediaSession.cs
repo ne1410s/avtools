@@ -5,12 +5,10 @@
 namespace AV.Core
 {
     using System;
-    using System.Collections.Generic;
     using System.Drawing;
     using System.Drawing.Imaging;
-    using AV.Core.Internal.Common;
+    using AV.Core.Internal;
     using AV.Core.Internal.Container;
-    using FFmpeg.AutoGen;
 
     /// <summary>
     /// Called when an image frame has been fully-populated.
@@ -30,7 +28,6 @@ namespace AV.Core
         private const int StriveThreshold = 10000;
 
         private readonly MediaContainer container;
-        private readonly StreamInfo videoStream;
 
         private MediaBlock blockReference = null;
 
@@ -38,15 +35,17 @@ namespace AV.Core
         /// Initialises a new instance of the <see cref="MediaSession"/> class.
         /// </summary>
         /// <param name="source">The source.</param>
-        public MediaSession(IMediaInputStream source)
+        /// <param name="libFolder">Path to ffmpeg libraries.</param>
+        public MediaSession( IMediaInputStream source, string libFolder = "ffmpeg")
         {
+            Library.FFmpegDirectory = libFolder;
+            Library.LoadFFmpeg();
+
             this.container = new MediaContainer(source);
             this.container.Initialize();
             this.container.Open();
 
-            this.videoStream = this.container.MediaInfo.BestStreams[AVMediaType.AVMEDIA_TYPE_VIDEO];
-            this.Dimensions = new Size(this.videoStream.PixelWidth, this.videoStream.PixelHeight);
-            this.StriveExact = this.FrameCount < StriveThreshold;
+            this.StriveExact = this.SessionInfo.FrameCount < StriveThreshold;
         }
 
         /// <summary>
@@ -61,39 +60,9 @@ namespace AV.Core
         public bool StriveExact { get; set; }
 
         /// <summary>
-        /// Gets the format name.
+        /// Gets information regarding the loaded media.
         /// </summary>
-        public string Format => this.container.MediaFormatName;
-
-        /// <summary>
-        /// Gets the metadata associated with the parent format.
-        /// </summary>
-        public IReadOnlyDictionary<string, string> Metadata => this.container.Metadata;
-
-        /// <summary>
-        /// Gets the metadata associated with the video stream.
-        /// </summary>
-        public IReadOnlyDictionary<string, string> StreamMetadata => this.videoStream.Metadata;
-
-        /// <summary>
-        /// Gets the duration.
-        /// </summary>
-        public TimeSpan Duration => this.container.Components.Video.Duration;
-
-        /// <summary>
-        /// Gets the frame count.
-        /// </summary>
-        public long FrameCount => this.container.Components.Video.FrameCount;
-
-        /// <summary>
-        /// Gets the stream uri.
-        /// </summary>
-        public string StreamUri => this.container.MediaSource;
-
-        /// <summary>
-        /// Gets the original pixel dimensions.
-        /// </summary>
-        public Size Dimensions { get; }
+        public MediaSessionInfo SessionInfo { get; }
 
         /// <summary>
         /// Obtains images from evenly-distributed positions.

@@ -10,12 +10,6 @@ namespace AV.UnitTests
     {
         private static readonly byte[] TestKey = new byte[] { 3, 44, 201, 0, 6 };
     
-        public ExtensionsTests()
-        {
-            Library.FFmpegDirectory = "ffmpeg";
-            Library.LoadFFmpeg();
-        }
-
         [Theory]
         [InlineData(@"C:\temp\vid-test\1.3gp")]
         [InlineData(@"C:\temp\vid-test\1.avi")]
@@ -40,7 +34,7 @@ namespace AV.UnitTests
         public void FileSource_AutoSnaps(string path)
         {
             using var session = AVExtensions.OpenSession(path, TestKey);
-            var name = new FileInfo(session.StreamUri).Name;
+            var name = new FileInfo(session.SessionInfo.StreamUri).Name;
             session.AutoSnap((frame, _) =>
             {
                 var thumb = frame.Image.Resize(200);

@@ -2,7 +2,7 @@
 // Copyright (c) ne1410s. All rights reserved.
 // </copyright>
 
-namespace AV.Core
+namespace AV.Core.Internal
 {
     using System;
     using System.Diagnostics;
@@ -13,7 +13,7 @@ namespace AV.Core
     /// <summary>
     /// Provides access to the underlying FFmpeg library information.
     /// </summary>
-    public static partial class Library
+    internal static partial class Library
     {
         private static readonly string NotInitializedErrorMessage =
             $"{nameof(FFmpeg)} library not initialized. Set the {nameof(FFmpegDirectory)} and call {nameof(LoadFFmpeg)}";

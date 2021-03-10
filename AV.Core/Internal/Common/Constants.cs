@@ -35,7 +35,8 @@ namespace AV.Core.Internal.Common
         }
 
         /// <summary>
-        /// Gets the assembly location.
+        /// Gets the assembly location. The default is an empty string, so this
+        /// will look directly in the executing assembly directory unless set.
         /// </summary>
         public static string FFmpegSearchPath { get; }
 
