@@ -168,6 +168,7 @@ namespace AV.Core
         /// <param name="header">The header height.</param>
         /// <param name="footer">The footer height.</param>
         /// <param name="timestamp">Whether to use a timestamp on each.</param>
+        /// <param name="framestamp">Whether to use a framestamp.</param>
         /// <param name="border">Whether to use a border on each image.</param>
         /// <param name="forceStrive">Can be used to force strive.</param>
         /// <param name="positions">The array of positions.</param>
@@ -180,6 +181,7 @@ namespace AV.Core
             int header = 100,
             int footer = 20,
             bool timestamp = true,
+            bool framestamp = true,
             bool border = true,
             bool? forceStrive = null,
             params TimeSpan[] positions)
@@ -190,12 +192,21 @@ namespace AV.Core
             var canvasHeight = (rows * imageHeight) + ((rows - 1) * marginY) + header + footer;
             var retVal = new Bitmap(canvasWidth, canvasHeight);
 
+            var yellowBrush = new SolidBrush(Color.Yellow);
             var whiteBrush = new SolidBrush(Color.White);
             var blackBrush = new SolidBrush(Color.Black);
             var blackPen = new Pen(blackBrush);
-            var yellowBrush = new SolidBrush(Color.Yellow);
-            var font = new Font("Calibri", 8, FontStyle.Bold);
-            var timestampSize = new Size(57, 12);
+            var font = new Font("Consolas", 12, FontStyle.Bold);
+            var rightAlign = new StringFormat { Alignment = StringAlignment.Far };
+            var boxHeight = 18;
+            var charWidth = 10;
+            var fsFormat = $"D{this.SessionInfo.FrameCount.ToString().Length}";
+            var tsFormat = this.SessionInfo.Duration.TotalHours >= 1
+                ? @"h\:mm\:ss\.f"
+                : this.SessionInfo.Duration.TotalMinutes >= 1
+                    ? @"mm\:ss\.f"
+                    : @"ss\.f";
+
             using (var g = Graphics.FromImage(retVal))
             {
                 g.FillRectangle(whiteBrush, 0, 0, canvasWidth, canvasHeight);
@@ -205,17 +216,29 @@ namespace AV.Core
                         var x = (imageWidth + marginX) * ((n - 1) % columns);
                         var y = header + ((imageHeight + marginY) * (int)Math.Floor((n - 1) / 4d));
                         g.DrawImage(frame.Image, x, y);
+
                         if (border)
                         {
                             g.DrawRectangle(blackPen, x, y, imageWidth, imageHeight);
                         }
 
+                        if (framestamp)
+                        {
+                            var tX1 = x + imageWidth;
+                            var fs = frame.FrameNumber.ToString(fsFormat);
+                            var tW = charWidth * fs.Length;
+                            g.FillRectangle(blackBrush, tX1 - tW, y, tW, boxHeight);
+                            g.DrawString(fs, font, whiteBrush, tX1, y, rightAlign);
+                        }
+
                         if (timestamp)
                         {
-                            var tX = x + imageWidth - timestampSize.Width;
-                            var tY = y + imageHeight - timestampSize.Height;
-                            g.FillRectangle(blackBrush, tX, tY, timestampSize.Width, timestampSize.Height);
-                            g.DrawString(frame.StartTime.ToString(@"h\:mm\:ss\.fff"), font, yellowBrush, tX, tY);
+                            var tX1 = x + imageWidth;
+                            var tY0 = y + imageHeight - boxHeight;
+                            var ts = frame.StartTime.ToString(tsFormat);
+                            var tW = charWidth * ts.Length;
+                            g.FillRectangle(blackBrush, tX1 - tW, tY0, tW, boxHeight);
+                            g.DrawString(ts, font, yellowBrush, tX1, tY0 - 1, rightAlign);
                         }
                     },
                     imageHeight,
@@ -238,6 +261,7 @@ namespace AV.Core
         /// <param name="header">The header height.</param>
         /// <param name="footer">The footer height.</param>
         /// <param name="timestamp">Whether to use a timestamp on each.</param>
+        /// <param name="framestamp">Whether to use a framestamp.</param>
         /// <param name="border">Whether to use a border on each image.</param>
         /// <param name="forceStrive">Can be used to force strive.</param>
         /// <returns>A collated image.</returns>
@@ -250,11 +274,12 @@ namespace AV.Core
             int header = 100,
             int footer = 20,
             bool timestamp = true,
+            bool framestamp = true,
             bool border = true,
             bool? forceStrive = null)
         {
             var positions = this.GetDistributed(totalImages);
-            return this.Collate(columns, imageHeight, marginX, marginY, header, footer, timestamp, border, forceStrive, positions);
+            return this.Collate(columns, imageHeight, marginX, marginY, header, footer, timestamp, framestamp, border, forceStrive, positions);
         }
 
         /// <inheritdoc/>
