@@ -72,10 +72,12 @@ namespace AV.Core
         /// by the value of <see cref="StriveExact"/>.
         /// </summary>
         /// <param name="position">The position.</param>
+        /// <param name="resizeHeight">Optionally resizes image height.</param>
         /// <param name="forceStrive">Can be used to force strive.</param>
         /// <returns>Image frame information.</returns>
         public ImageFrameInfo Snap(
             TimeSpan position,
+            int? resizeHeight = null,
             bool? forceStrive = null)
         {
             position = position.Confine(this.SessionInfo.StartTime, this.SessionInfo.EndTime);
@@ -104,6 +106,11 @@ namespace AV.Core
                 PixelFormat.Format32bppRgb,
                 videoBlock.Buffer);
 
+            if (resizeHeight != null && resizeHeight != this.SessionInfo.Dimensions.Height)
+            {
+                rawImage = rawImage.Resize(resizeHeight.Value);
+            }
+
             return new ImageFrameInfo
             {
                 FrameNumber = videoBlock.DisplayPictureNumber,
@@ -117,16 +124,18 @@ namespace AV.Core
         /// Obtains images from each of the supplied positions.
         /// </summary>
         /// <param name="onReceived">The on received callback.</param>
+        /// <param name="resizeHeight">Optionally resizes image height.</param>
         /// <param name="forceStrive">Can be used to force strive.</param>
         /// <param name="positions">The array of positions.</param>
         public void SnapMany(
             FrameReceived onReceived,
+            int? resizeHeight = null,
             bool? forceStrive = null,
             params TimeSpan[] positions)
         {
             for (var i = 0; i < positions.Length; i++)
             {
-                var data = this.Snap(positions[i], forceStrive);
+                var data = this.Snap(positions[i], resizeHeight, forceStrive);
                 onReceived?.Invoke(data, i + 1);
             }
         }
@@ -136,16 +145,116 @@ namespace AV.Core
         /// </summary>
         /// <param name="onReceived">The on received callback.</param>
         /// <param name="totalImages">The number of images.</param>
+        /// <param name="resizeHeight">Optionally resizes image height.</param>
         /// <param name="forceStrive">Can be used to force strive.</param>
         public void SnapMany(
             FrameReceived onReceived,
             int totalImages = 24,
+            int? resizeHeight = null,
             bool? forceStrive = null)
         {
-            var delta = this.SessionInfo.Duration / (totalImages - 1);
-            var positions = Enumerable.Range(0, totalImages)
-                .Select(idx => this.SessionInfo.StartTime.Add(delta * idx));
-            this.SnapMany(onReceived, forceStrive, positions.ToArray());
+            var positions = this.GetDistributed(totalImages);
+            this.SnapMany(onReceived, resizeHeight, forceStrive, positions);
+        }
+
+        /// <summary>
+        /// Collates an image comprising those obtained from evenly-distributed
+        /// positions.
+        /// </summary>
+        /// <param name="columns">The number of columns to use.</param>
+        /// <param name="imageHeight">The image height.</param>
+        /// <param name="marginX">The margin between rows.</param>
+        /// <param name="marginY">The margin between columns.</param>
+        /// <param name="header">The header height.</param>
+        /// <param name="footer">The footer height.</param>
+        /// <param name="timestamp">Whether to use a timestamp on each.</param>
+        /// <param name="border">Whether to use a border on each image.</param>
+        /// <param name="forceStrive">Can be used to force strive.</param>
+        /// <param name="positions">The array of positions.</param>
+        /// <returns>A collated image.</returns>
+        public Bitmap Collate(
+            int columns = 4,
+            int imageHeight = 200,
+            int marginX = 10,
+            int marginY = 10,
+            int header = 100,
+            int footer = 20,
+            bool timestamp = true,
+            bool border = true,
+            bool? forceStrive = null,
+            params TimeSpan[] positions)
+        {
+            var rows = (int)Math.Ceiling(positions.Length / 4d);
+            var imageWidth = (int)Math.Round(imageHeight * this.SessionInfo.AspectRatio);
+            var canvasWidth = (columns * imageWidth) + ((columns - 1) * marginX);
+            var canvasHeight = (rows * imageHeight) + ((rows - 1) * marginY) + header + footer;
+            var retVal = new Bitmap(canvasWidth, canvasHeight);
+
+            var whiteBrush = new SolidBrush(Color.White);
+            var blackBrush = new SolidBrush(Color.Black);
+            var blackPen = new Pen(blackBrush);
+            var yellowBrush = new SolidBrush(Color.Yellow);
+            var font = new Font("Calibri", 8, FontStyle.Bold);
+            var timestampSize = new Size(57, 12);
+            using (var g = Graphics.FromImage(retVal))
+            {
+                g.FillRectangle(whiteBrush, 0, 0, canvasWidth, canvasHeight);
+                this.SnapMany(
+                    (frame, n) =>
+                    {
+                        var x = (imageWidth + marginX) * ((n - 1) % columns);
+                        var y = header + ((imageHeight + marginY) * (int)Math.Floor((n - 1) / 4d));
+                        g.DrawImage(frame.Image, x, y);
+                        if (border)
+                        {
+                            g.DrawRectangle(blackPen, x, y, imageWidth, imageHeight);
+                        }
+
+                        if (timestamp)
+                        {
+                            var tX = x + imageWidth - timestampSize.Width;
+                            var tY = y + imageHeight - timestampSize.Height;
+                            g.FillRectangle(blackBrush, tX, tY, timestampSize.Width, timestampSize.Height);
+                            g.DrawString(frame.StartTime.ToString(@"h\:mm\:ss\.fff"), font, yellowBrush, tX, tY);
+                        }
+                    },
+                    imageHeight,
+                    forceStrive,
+                    positions);
+            }
+
+            return retVal;
+        }
+
+        /// <summary>
+        /// Collates an image comprising those obtained from evenly-distributed
+        /// positions.
+        /// </summary>
+        /// <param name="totalImages">The number of images.</param>
+        /// <param name="columns">The number of columns to use.</param>
+        /// <param name="imageHeight">The image height.</param>
+        /// <param name="marginX">The margin between rows.</param>
+        /// <param name="marginY">The margin between columns.</param>
+        /// <param name="header">The header height.</param>
+        /// <param name="footer">The footer height.</param>
+        /// <param name="timestamp">Whether to use a timestamp on each.</param>
+        /// <param name="border">Whether to use a border on each image.</param>
+        /// <param name="forceStrive">Can be used to force strive.</param>
+        /// <returns>A collated image.</returns>
+        public Bitmap Collate(
+            int totalImages = 24,
+            int columns = 4,
+            int imageHeight = 200,
+            int marginX = 10,
+            int marginY = 10,
+            int header = 100,
+            int footer = 20,
+            bool timestamp = true,
+            bool border = true,
+            bool? forceStrive = null)
+        {
+            var positions = this.GetDistributed(totalImages);
+            return this.Collate(columns, imageHeight, marginX, marginY, header, footer, timestamp, border, forceStrive, positions);
         }
 
         /// <inheritdoc/>
@@ -153,6 +262,19 @@ namespace AV.Core
         {
             this.blockReference?.Dispose();
             this.container?.Dispose();
+        }
+
+        /// <summary>
+        /// Gets an evenly-distributed array of times.
+        /// </summary>
+        /// <param name="total">The number.</param>
+        /// <returns>An array of positions.</returns>
+        private TimeSpan[] GetDistributed(int total)
+        {
+            var delta = this.SessionInfo.Duration / (total - 1);
+            return Enumerable.Range(0, total)
+                .Select(idx => this.SessionInfo.StartTime.Add(delta * idx))
+                .ToArray();
         }
     }
 }

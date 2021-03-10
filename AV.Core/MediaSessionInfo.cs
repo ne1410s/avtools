@@ -27,6 +27,7 @@ namespace AV.Core
             var videoComponent = container.Components.Video;
 
             this.Dimensions = new Size(videoStream.PixelWidth, videoStream.PixelHeight);
+            this.AspectRatio = videoStream.PixelWidth / (double)videoStream.PixelHeight;
             this.Duration = videoComponent.Duration;
             this.Format = container.MediaFormatName;
             this.FrameCount = videoComponent.FrameCount;
@@ -38,6 +39,11 @@ namespace AV.Core
             this.StartTime = TimeUtilities.Max(TimeSpan.Zero, videoComponent.StartTime);
             this.EndTime = videoComponent.EndTime;
         }
+
+        /// <summary>
+        /// Gets the aspect ratio.
+        /// </summary>
+        public double AspectRatio { get; }
 
         /// <summary>
         /// Gets the original pixel dimensions.
