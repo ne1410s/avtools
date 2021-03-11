@@ -2,6 +2,17 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <Authors>Paul Jones</Authors>
+    <Company>ne1410s</Company>
+    <Product>AV Extensions</Product>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <Description>Library of AV tools</Description>
+    <Copyright>2021 ne1410s</Copyright>
+    <PackageProjectUrl>https://github.com/ne1410s/avtools</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/ne1410s/avtools</RepositoryUrl>
+    <RepositoryType>GitHub</RepositoryType>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
