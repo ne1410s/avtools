@@ -1,4 +1,4 @@
-﻿// <copyright file="BitmapExtensions.cs" company="ne1410s">
+﻿// <copyright file="ImageExtensions.cs" company="ne1410s">
 // Copyright (c) ne1410s. All rights reserved.
 // </copyright>
 
@@ -12,7 +12,7 @@ namespace AV.Core
     /// <summary>
     /// Extensions for <see cref="Bitmap"/>.
     /// </summary>
-    public static class BitmapExtensions
+    public static class ImageExtensions
     {
         /// <summary>
         /// Creates a new bitmap from an original, maintaining aspect ratio.
@@ -20,7 +20,7 @@ namespace AV.Core
         /// <param name="source">The source image.</param>
         /// <param name="targetHeight">The target height.</param>
         /// <returns>The resized image.</returns>
-        public static Bitmap Resize(this Bitmap source, int targetHeight)
+        public static Bitmap Resize(this Image source, int targetHeight)
         {
             var aspect = source.Width / (double)source.Height;
             var targetWidth = (int)Math.Round(targetHeight * aspect);
